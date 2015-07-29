@@ -1,0 +1,2 @@
+# penseur
+Lightweight RethinkDB wrapper
