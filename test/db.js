@@ -47,7 +47,7 @@ describe('Db', function () {
 
             var db = new Penseur.Db('penseurtest');
 
-            db.establish(['test'], function (err) {
+            db.connect(function (err) {
 
                 expect(err).to.not.exist();
                 done();
@@ -56,9 +56,9 @@ describe('Db', function () {
 
         it('fails connecting to missing server', function (done) {
 
-            var db = new Penseur.Db('penseurtest', { host: 'no.such.home.example.com' });
+            var db = new Penseur.Db('penseurtest', { host: 'example.com', timeout: 1 });
 
-            db.establish(['test'], function (err) {
+            db.connect(function (err) {
 
                 expect(err).to.exist();
                 done();
@@ -87,6 +87,17 @@ describe('Db', function () {
         it('fails creating a database', function (done) {
 
             var db = new Penseur.Db('penseur-test');
+
+            db.establish(['test'], function (err) {
+
+                expect(err).to.exist();
+                done();
+            });
+        });
+
+        it('fails connecting to missing server', function (done) {
+
+            var db = new Penseur.Db('penseurtest', { host: 'example.com', timeout: 1 });
 
             db.establish(['test'], function (err) {
 
