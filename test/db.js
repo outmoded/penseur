@@ -35,7 +35,7 @@ describe('Db', function () {
 
                     expect(err).to.not.exist();
                     expect(item.value).to.equal('x');
-                    done();
+                    db.close(done);
                 });
             });
         });
@@ -50,7 +50,7 @@ describe('Db', function () {
             db.connect(function (err) {
 
                 expect(err).to.not.exist();
-                done();
+                db.close(done);
             });
         });
 
@@ -61,8 +61,24 @@ describe('Db', function () {
             db.connect(function (err) {
 
                 expect(err).to.exist();
-                done();
+                db.close(done);
             });
+        });
+    });
+
+    describe('close()', function () {
+
+        it('ignores unconnected state', function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            db.close(done);
+        });
+
+        it('allows no callback', function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            db.close();
+            done();
         });
     });
 
@@ -77,7 +93,7 @@ describe('Db', function () {
                 expect(err).to.not.exist();
                 expect(typeof db.connect).to.equal('function');
                 expect(db.tables.connect).to.exist();
-                done();
+                db.close(done);
             });
         });
     });
@@ -91,7 +107,7 @@ describe('Db', function () {
             db.establish(['test'], function (err) {
 
                 expect(err).to.exist();
-                done();
+                db.close(done);
             });
         });
 
@@ -102,7 +118,7 @@ describe('Db', function () {
             db.establish(['test'], function (err) {
 
                 expect(err).to.exist();
-                done();
+                db.close(done);
             });
         });
     });
