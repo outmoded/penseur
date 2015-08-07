@@ -95,6 +95,26 @@ describe('Table', { parallel: false }, function () {
                 });
             });
         });
+
+        it('returns the requested objects found (none)', function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            db.establish(['test'], function (err) {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], function (err, keys) {
+
+                    expect(err).to.not.exist();
+
+                    db.test.get([4, 5, 6], function (err, result) {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.deep.equal([]);
+                        done();
+                    });
+                });
+            });
+        });
     });
 
     describe('query()', function () {
