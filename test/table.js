@@ -35,6 +35,66 @@ describe('Table', { parallel: false }, function () {
                 });
             });
         });
+
+        it('returns the requested objects', function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            db.establish(['test'], function (err) {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], function (err, keys) {
+
+                    expect(err).to.not.exist();
+
+                    db.test.get([1, 3], function (err, result) {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.deep.include([{ id: 3, a: 1 }, { id: 1, a: 1 }]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('returns the requested objects found (partial)', function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            db.establish(['test'], function (err) {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], function (err, keys) {
+
+                    expect(err).to.not.exist();
+
+                    db.test.get([1, 3, 4], function (err, result) {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.have.length(2);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('returns the requested objects found (duplicates)', function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            db.establish(['test'], function (err) {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], function (err, keys) {
+
+                    expect(err).to.not.exist();
+
+                    db.test.get([1, 3, 3], function (err, result) {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.have.length(3);
+                        done();
+                    });
+                });
+            });
+        });
     });
 
     describe('query()', function () {
