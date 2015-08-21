@@ -1,6 +1,7 @@
 // Load modules
 
 var Code = require('code');
+var Hoek = require('hoek');
 var Lab = require('lab');
 var Penseur = require('..');
 
@@ -589,6 +590,270 @@ describe('Table', { parallel: false }, function () {
                             done();
                         });
                     });
+                });
+            });
+        });
+    });
+
+    describe('changes()', function () {
+
+        it('reports on a record update (*)', function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            db.establish(['test'], function (err) {
+
+                expect(err).to.not.exist();
+
+                var changes = [];
+                var each = function (err, item) {
+
+                    changes.push(item.after.id);
+                };
+
+                db.test.changes('*', each, function (err, cursor) {
+
+                    expect(err).to.not.exist();
+
+                    db.test.insert({ id: 1, a: 1 }, function (err, keys) {
+
+                        expect(err).to.not.exist();
+
+                        db.test.update(1, { a: 2 }, function (err) {
+
+                            expect(err).to.not.exist();
+
+                            expect(changes).to.deep.equal([1, 1]);
+                            cursor.close();
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('reports on a record update (id)', function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            db.establish(['test'], function (err) {
+
+                expect(err).to.not.exist();
+
+                var changes = [];
+                var each = function (err, item) {
+
+                    changes.push(item.after.id);
+                };
+
+                db.test.insert([{ id: 1, a: 1 }], function (err, keys1) {
+
+                    expect(err).to.not.exist();
+
+                    db.test.changes(1, each, function (err, cursor) {
+
+                        expect(err).to.not.exist();
+
+                        db.test.update(1, { a: 2 }, function (err, keys2) {
+
+                            expect(err).to.not.exist();
+
+                            db.test.insert({ id: 2, a: 2 }, function (err) {
+
+                                expect(err).to.not.exist();
+
+                                expect(changes).to.deep.equal([1]);
+                                cursor.close();
+                                done();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
+        it('reports on a record update (ids)', function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            db.establish(['test'], function (err) {
+
+                expect(err).to.not.exist();
+
+                var changes = [];
+                var each = function (err, item) {
+
+                    changes.push(item.after.id);
+                };
+
+                db.test.insert([{ id: 1, a: 1 }], function (err, keys1) {
+
+                    expect(err).to.not.exist();
+
+                    db.test.changes([1, 2], each, function (err, cursor) {
+
+                        expect(err).to.not.exist();
+
+                        db.test.update(1, { a: 2 }, function (err, keys2) {
+
+                            expect(err).to.not.exist();
+
+                            db.test.insert({ id: 2, a: 2 }, function (err) {
+
+                                expect(err).to.not.exist();
+
+                                expect(changes).to.deep.equal([1, 2]);
+                                cursor.close();
+                                done();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
+        it('reports on a record update (query)', function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            db.establish(['test'], function (err) {
+
+                expect(err).to.not.exist();
+
+                var changes = [];
+                var each = function (err, item) {
+
+                    changes.push(item.after.id);
+                };
+
+                db.test.insert([{ id: 1, a: 1 }], function (err, keys1) {
+
+                    expect(err).to.not.exist();
+
+                    db.test.changes({ a: 2 }, each, function (err, cursor) {
+
+                        expect(err).to.not.exist();
+
+                        db.test.update(1, { a: 2 }, function (err, keys2) {
+
+                            expect(err).to.not.exist();
+
+                            db.test.insert({ id: 2, a: 2 }, function (err) {
+
+                                expect(err).to.not.exist();
+
+                                expect(changes).to.deep.equal([1, 2]);
+                                cursor.close();
+                                done();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
+        it('reports on a record update (delete)', function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            db.establish(['test'], function (err) {
+
+                expect(err).to.not.exist();
+
+                var changes = [];
+                var each = function (err, item) {
+
+                    changes.push(item.before.id + ':' + (item.after === null));
+                };
+
+                db.test.insert([{ id: 1, a: 1 }], function (err, keys1) {
+
+                    expect(err).to.not.exist();
+
+                    db.test.changes(1, each, function (err, cursor) {
+
+                        expect(err).to.not.exist();
+
+                        db.test.remove(1, function (err) {
+
+                            expect(err).to.not.exist();
+                            expect(changes).to.deep.equal(['1:true']);
+                            cursor.close();
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('reports on a record update (id missing)', function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            db.establish(['test'], function (err) {
+
+                expect(err).to.not.exist();
+
+                var changes = [];
+                var each = function (err, item) {
+
+                    changes.push(item.after.id);
+                };
+
+                db.test.changes(1, each, function (err, cursor) {
+
+                    expect(err).to.not.exist();
+
+                    db.test.insert({ id: 1, a: 1 }, function (err, keys) {
+
+                        expect(err).to.not.exist();
+                        expect(changes).to.deep.equal([1]);
+                        cursor.close();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('errors on bad cursor', function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            db.establish(['test'], function (err) {
+
+                expect(err).to.not.exist();
+
+                var changes = [];
+                var each = function (err, item) {
+
+                    if (err) {
+                        expect(err.message).to.equal('Database error');
+                        done();
+                    }
+                };
+
+                db.test.changes('*', each, function (err, cursor) {
+
+                    expect(err).to.not.exist();
+
+                    var orig = cursor._cursor._next;
+                    cursor._cursor._next = function (next) {
+
+                        cursor._cursor._next = orig;
+                        return next(new Error('kaboom'));
+                    };
+
+                    db.test.insert({ id: 1, a: 1 }, function (err, keys) {
+
+                        expect(err).to.not.exist();
+                    });
+                });
+            });
+        });
+
+        it('errors on invalid table', function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            db.table('invalid');
+            db.connect(function (err) {
+
+                db.invalid.changes('*', function (err, item) {
+
+                    expect(err).to.exist();
+                    done();
                 });
             });
         });
