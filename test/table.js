@@ -110,7 +110,7 @@ describe('Table', { parallel: false }, function () {
                     db.test.get([4, 5, 6], function (err, result) {
 
                         expect(err).to.not.exist();
-                        expect(result).to.deep.equal([]);
+                        expect(result).to.deep.equal(null);
                         done();
                     });
                 });
