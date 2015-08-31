@@ -3,6 +3,7 @@
 var Code = require('code');
 var Lab = require('lab');
 var Penseur = require('..');
+var RethinkDB = require('rethinkdb');
 
 
 // Declare internals
@@ -56,7 +57,7 @@ describe('Db', function () {
 
         it('fails connecting to missing server', function (done) {
 
-            var db = new Penseur.Db('penseurtest', { host: 'example.com', timeout: 1 });
+            var db = new Penseur.Db('penseurtest', { host: 'example.com', timeout: 0.001 });
 
             db.connect(function (err) {
 
@@ -100,6 +101,24 @@ describe('Db', function () {
 
     describe('establish()', function () {
 
+        it('creates new database', function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            db.connect(function (err) {
+
+                expect(err).to.not.exist();
+
+                RethinkDB.dbDrop(db._name).run(db._connection, function (err, dropped) {
+
+                    db.establish(['test'], function (err) {
+
+                        expect(err).to.not.exist();
+                        db.close(done);
+                    });
+                });
+            });
+        });
+
         it('fails creating a database', function (done) {
 
             var db = new Penseur.Db('penseur-test');
@@ -113,7 +132,92 @@ describe('Db', function () {
 
         it('fails connecting to missing server', function (done) {
 
-            var db = new Penseur.Db('penseurtest', { host: 'example.com', timeout: 1 });
+            var db = new Penseur.Db('penseurtest', { host: 'example.com', timeout: 0.001 });
+
+            db.establish(['test'], function (err) {
+
+                expect(err).to.exist();
+                db.close(done);
+            });
+        });
+
+        it('errors on database dbList() error', { parallel: false }, function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            var orig = RethinkDB.dbList;
+            RethinkDB.dbList = function () {
+
+                RethinkDB.dbList = orig;
+
+                return {
+                    run: function (connection, next) {
+
+                        return next(new Error('Bad database'));
+                    }
+                };
+            };
+
+            db.establish(['test'], function (err) {
+
+                expect(err).to.exist();
+                db.close(done);
+            });
+        });
+
+        it('errors on database dbCreate() error', { parallel: false }, function (done) {
+
+            var db = new Penseur.Db('penseur-test');
+            db.connect(function (err) {
+
+                expect(err).to.not.exist();
+
+                RethinkDB.dbDrop(db._name).run(db._connection, function (err, dropped) {
+
+                    var orig = RethinkDB.dbCreate;
+                    RethinkDB.dbCreate = function () {
+
+                        RethinkDB.dbCreate = orig;
+
+                        return {
+                            run: function (connection, next) {
+
+                                return next(new Error('Bad database'));
+                            }
+                        };
+                    };
+
+                    db.establish(['test'], function (err) {
+
+                        expect(err).to.exist();
+                        db.close(done);
+                    });
+                });
+            });
+        });
+    });
+
+    describe('_createTable', function () {
+
+        it('errors on database dbList() error', { parallel: false }, function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            var orig = RethinkDB.db;
+            RethinkDB.db = function () {
+
+                RethinkDB.db = orig;
+
+                return {
+                    tableList: function () {
+
+                        return {
+                            run: function (connection, next) {
+
+                                return next(new Error('Bad database'));
+                            }
+                        };
+                    }
+                };
+            };
 
             db.establish(['test'], function (err) {
 

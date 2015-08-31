@@ -623,8 +623,41 @@ describe('Table', { parallel: false }, function () {
                             expect(err).to.not.exist();
 
                             expect(changes).to.deep.equal([1, 1]);
+                            db.close(done);
+                        });
+                    });
+                });
+            });
+        });
+
+        it('manually closes a cursor', function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            db.establish(['test'], function (err) {
+
+                expect(err).to.not.exist();
+
+                var changes = [];
+                var each = function (err, item) {
+
+                    changes.push(item.after.id);
+                };
+
+                db.test.changes('*', each, function (err, cursor) {
+
+                    expect(err).to.not.exist();
+
+                    db.test.insert({ id: 1, a: 1 }, function (err, keys) {
+
+                        expect(err).to.not.exist();
+
+                        db.test.update(1, { a: 2 }, function (err) {
+
+                            expect(err).to.not.exist();
+
+                            expect(changes).to.deep.equal([1, 1]);
                             cursor.close();
-                            done();
+                            db.close(done);
                         });
                     });
                 });
@@ -661,8 +694,7 @@ describe('Table', { parallel: false }, function () {
                                 expect(err).to.not.exist();
 
                                 expect(changes).to.deep.equal([1]);
-                                cursor.close();
-                                done();
+                                db.close(done);
                             });
                         });
                     });
@@ -700,8 +732,7 @@ describe('Table', { parallel: false }, function () {
                                 expect(err).to.not.exist();
 
                                 expect(changes).to.deep.equal([1, 2]);
-                                cursor.close();
-                                done();
+                                db.close(done);
                             });
                         });
                     });
@@ -739,8 +770,7 @@ describe('Table', { parallel: false }, function () {
                                 expect(err).to.not.exist();
 
                                 expect(changes).to.deep.equal([1, 2]);
-                                cursor.close();
-                                done();
+                                db.close(done);
                             });
                         });
                     });
@@ -773,8 +803,7 @@ describe('Table', { parallel: false }, function () {
 
                             expect(err).to.not.exist();
                             expect(changes).to.deep.equal(['1:true']);
-                            cursor.close();
-                            done();
+                            db.close(done);
                         });
                     });
                 });
@@ -802,8 +831,7 @@ describe('Table', { parallel: false }, function () {
 
                         expect(err).to.not.exist();
                         expect(changes).to.deep.equal([1]);
-                        cursor.close();
-                        done();
+                        db.close(done);
                     });
                 });
             });
