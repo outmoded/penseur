@@ -9,7 +9,7 @@
     "rethinkdb"
   ],
   "engines": {
-    "node": ">=0.10.40"
+    "node": "4.x.x"
   },
   "dependencies": {
     "boom": "2.x.x",
