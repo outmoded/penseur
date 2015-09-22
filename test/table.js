@@ -264,6 +264,21 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
+        it('returns the generate key (existing)', function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            db.establish(['test'], function (err) {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: 11, a: 1 }, function (err, keys) {
+
+                    expect(err).to.not.exist();
+                    expect(keys).to.equal(11);
+                    done();
+                });
+            });
+        });
+
         it('returns the generate keys', function (done) {
 
             var db = new Penseur.Db('penseurtest');
@@ -274,6 +289,57 @@ describe('Table', { parallel: false }, function () {
 
                     expect(err).to.not.exist();
                     expect(keys).to.have.length(2);
+                    done();
+                });
+            });
+        });
+
+        it('returns the generate keys when keys are present', function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            db.establish(['test'], function (err) {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { a: 2 }], function (err, keys) {
+
+                    expect(err).to.not.exist();
+                    expect(keys).to.have.length(2);
+                    expect(keys[0]).to.equal(1);
+                    done();
+                });
+            });
+        });
+
+        it('returns the generate keys when keys are present (last)', function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            db.establish(['test'], function (err) {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ a: 1 }, { id: 1, a: 2 }], function (err, keys) {
+
+                    expect(err).to.not.exist();
+                    expect(keys).to.have.length(2);
+                    expect(keys[1]).to.equal(1);
+                    done();
+                });
+            });
+        });
+
+        it('returns the generate keys when keys are present (mixed)', function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            db.establish(['test'], function (err) {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ a: 1 }, { id: 1, a: 2 }, { id: 2, a: 3 }, { a: 4 }, { a: 5 }, { id: 3, a: 6 }, { id: 4, a: 7 }], function (err, keys) {
+
+                    expect(err).to.not.exist();
+                    expect(keys).to.have.length(7);
+                    expect(keys[1]).to.equal(1);
+                    expect(keys[2]).to.equal(2);
+                    expect(keys[5]).to.equal(3);
+                    expect(keys[6]).to.equal(4);
                     done();
                 });
             });
