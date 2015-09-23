@@ -226,4 +226,41 @@ describe('Db', function () {
             });
         });
     });
+
+    describe('disable()', function () {
+
+        it('simulates an error', function (done) {
+
+            var db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015, test: true });
+
+            db.establish(['test'], function (err) {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: 1, value: 'x' }, function (err, result) {
+
+                    expect(err).to.not.exist();
+
+                    db.test.get(1, function (err, item1) {
+
+                        expect(err).to.not.exist();
+                        expect(item1.value).to.equal('x');
+
+                        db.disable('test', 'get');
+                        db.test.get(1, function (err, item2) {
+
+                            expect(err).to.exist();
+
+                            db.enable('test', 'get');
+                            db.test.get(1, function (err, item3) {
+
+                                expect(err).to.not.exist();
+                                expect(item3.value).to.equal('x');
+                                db.close(done);
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
 });
