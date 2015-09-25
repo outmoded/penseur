@@ -97,6 +97,19 @@ describe('Db', function () {
                 db.close(done);
             });
         });
+
+        it('skips decorating object when table already set up', function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+
+            db.table('abc');
+            db.establish(['abc'], function (err) {
+
+                expect(err).to.not.exist();
+                expect(db.tables.abc).to.exist();
+                db.close(done);
+            });
+        });
     });
 
     describe('establish()', function () {
