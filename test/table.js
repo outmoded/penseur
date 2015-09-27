@@ -216,7 +216,7 @@ describe('Table', { parallel: false }, function () {
 
                     expect(err).to.not.exist();
 
-                    db.test.count({ a: 1 }, 'filter', function (err, result) {
+                    db.test.count({ a: 1 }, function (err, result) {
 
                         expect(err).to.not.exist();
                         expect(result).to.equal(2);
@@ -236,7 +236,7 @@ describe('Table', { parallel: false }, function () {
 
                     expect(err).to.not.exist();
 
-                    db.test.count(['a'], 'fields', function (err, result) {
+                    db.test.count(db.fields(['a']), function (err, result) {
 
                         expect(err).to.not.exist();
                         expect(result).to.equal(3);
@@ -559,7 +559,7 @@ describe('Table', { parallel: false }, function () {
 
                         expect(err).to.not.exist();
 
-                        db.test.count({ a: 1 }, 'filter', function (err, count) {
+                        db.test.count({ a: 1 }, function (err, count) {
 
                             expect(err).to.not.exist();
                             expect(count).to.equal(0);
@@ -584,7 +584,7 @@ describe('Table', { parallel: false }, function () {
 
                         expect(err).to.not.exist();
 
-                        db.test.count({ a: 1 }, 'filter', function (err, count) {
+                        db.test.count({ a: 1 }, function (err, count) {
 
                             expect(err).to.not.exist();
                             expect(count).to.equal(0);
