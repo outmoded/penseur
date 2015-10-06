@@ -952,4 +952,40 @@ describe('Table', { parallel: false }, function () {
             });
         });
     });
+
+    describe('sync()', function () {
+
+        it('returns when write is complete', function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            db.establish(['test'], function (err) {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], function (err, keys) {
+
+                    expect(err).to.not.exist();
+
+                    db.test.sync(function (err) {
+
+                        expect(err).to.not.exist();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('fails on database error', function (done) {
+
+            var db = new Penseur.Db('penseurtest');
+            db.table('invalid');
+            db.connect(function (err) {
+
+                db.invalid.sync(function (err) {
+
+                    expect(err).to.exist();
+                    done();
+                });
+            });
+        });
+    });
 });
