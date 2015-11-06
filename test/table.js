@@ -1,35 +1,36 @@
+'use strict';
+
 // Load modules
 
-var Code = require('code');
-var Hoek = require('hoek');
-var Lab = require('lab');
-var Penseur = require('..');
+const Code = require('code');
+const Lab = require('lab');
+const Penseur = require('..');
 
 
 // Declare internals
 
-var internals = {};
+const internals = {};
 
 
 // Test shortcuts
 
-var lab = exports.lab = Lab.script();
-var describe = lab.describe;
-var it = lab.it;
-var expect = Code.expect;
+const lab = exports.lab = Lab.script();
+const describe = lab.describe;
+const it = lab.it;
+const expect = Code.expect;
 
 
-describe('Table', { parallel: false }, function () {
+describe('Table', { parallel: false }, () => {
 
-    describe('get()', function () {
+    describe('get()', () => {
 
-        it('fails on database error', function (done) {
+        it('fails on database error', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
+            const db = new Penseur.Db('penseurtest');
             db.table('invalid');
-            db.connect(function (err) {
+            db.connect((err) => {
 
-                db.invalid.get(1, function (err, item) {
+                db.invalid.get(1, (err, item) => {
 
                     expect(err).to.exist();
                     done();
@@ -37,17 +38,17 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('returns the requested objects', function (done) {
+        it('returns the requested objects', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], function (err, keys) {
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.get([1, 3], function (err, result) {
+                    db.test.get([1, 3], (err, result) => {
 
                         expect(err).to.not.exist();
                         expect(result).to.deep.include([{ id: 3, a: 1 }, { id: 1, a: 1 }]);
@@ -57,17 +58,17 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('returns the requested objects found (partial)', function (done) {
+        it('returns the requested objects found (partial)', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], function (err, keys) {
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.get([1, 3, 4], function (err, result) {
+                    db.test.get([1, 3, 4], (err, result) => {
 
                         expect(err).to.not.exist();
                         expect(result).to.have.length(2);
@@ -77,17 +78,17 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('returns the requested objects found (duplicates)', function (done) {
+        it('returns the requested objects found (duplicates)', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], function (err, keys) {
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.get([1, 3, 3], function (err, result) {
+                    db.test.get([1, 3, 3], (err, result) => {
 
                         expect(err).to.not.exist();
                         expect(result).to.have.length(3);
@@ -97,17 +98,17 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('returns the requested objects found (none)', function (done) {
+        it('returns the requested objects found (none)', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], function (err, keys) {
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.get([4, 5, 6], function (err, result) {
+                    db.test.get([4, 5, 6], (err, result) => {
 
                         expect(err).to.not.exist();
                         expect(result).to.deep.equal(null);
@@ -118,19 +119,19 @@ describe('Table', { parallel: false }, function () {
         });
     });
 
-    describe('query()', function () {
+    describe('query()', () => {
 
-        it('returns the requested objects', function (done) {
+        it('returns the requested objects', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], function (err, keys) {
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.query({ a: 1 }, function (err, result) {
+                    db.test.query({ a: 1 }, (err, result) => {
 
                         expect(err).to.not.exist();
                         expect(result).to.deep.include([{ id: 3, a: 1 }, { id: 1, a: 1 }]);
@@ -141,19 +142,19 @@ describe('Table', { parallel: false }, function () {
         });
     });
 
-    describe('single()', function () {
+    describe('single()', () => {
 
-        it('returns the requested object', function (done) {
+        it('returns the requested object', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], function (err, keys) {
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.single({ a: 2 }, function (err, result) {
+                    db.test.single({ a: 2 }, (err, result) => {
 
                         expect(err).to.not.exist();
                         expect(result).to.deep.equal({ id: 2, a: 2 });
@@ -163,17 +164,17 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('returns nothing', function (done) {
+        it('returns nothing', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], function (err, keys) {
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.single({ a: 3 }, function (err, result) {
+                    db.test.single({ a: 3 }, (err, result) => {
 
                         expect(err).to.not.exist();
                         expect(result).to.equal(null);
@@ -183,17 +184,17 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('errors on multiple matches', function (done) {
+        it('errors on multiple matches', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], function (err, keys) {
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.single({ a: 1 }, function (err, result) {
+                    db.test.single({ a: 1 }, (err, result) => {
 
                         expect(err).to.exist();
                         expect(err.message).to.equal('Database error');
@@ -204,19 +205,19 @@ describe('Table', { parallel: false }, function () {
         });
     });
 
-    describe('count()', function () {
+    describe('count()', () => {
 
-        it('returns the number requested object', function (done) {
+        it('returns the number requested object', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], function (err, keys) {
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.count({ a: 1 }, function (err, result) {
+                    db.test.count({ a: 1 }, (err, result) => {
 
                         expect(err).to.not.exist();
                         expect(result).to.equal(2);
@@ -226,17 +227,17 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('returns the number of object with given field', function (done) {
+        it('returns the number of object with given field', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], function (err, keys) {
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.count(db.fields(['a']), function (err, result) {
+                    db.test.count(db.fields(['a']), (err, result) => {
 
                         expect(err).to.not.exist();
                         expect(result).to.equal(3);
@@ -247,15 +248,15 @@ describe('Table', { parallel: false }, function () {
         });
     });
 
-    describe('insert()', function () {
+    describe('insert()', () => {
 
-        it('returns the generate key', function (done) {
+        it('returns the generate key', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ a: 1 }, function (err, keys) {
+                db.test.insert({ a: 1 }, (err, keys) => {
 
                     expect(err).to.not.exist();
                     expect(keys).to.match(/\w+/);
@@ -264,13 +265,13 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('returns the generate key (existing)', function (done) {
+        it('returns the generate key (existing)', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: 11, a: 1 }, function (err, keys) {
+                db.test.insert({ id: 11, a: 1 }, (err, keys) => {
 
                     expect(err).to.not.exist();
                     expect(keys).to.equal(11);
@@ -279,13 +280,13 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('returns the generate keys', function (done) {
+        it('returns the generate keys', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ a: 1 }, { a: 2 }], function (err, keys) {
+                db.test.insert([{ a: 1 }, { a: 2 }], (err, keys) => {
 
                     expect(err).to.not.exist();
                     expect(keys).to.have.length(2);
@@ -294,13 +295,13 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('returns the generate keys when keys are present', function (done) {
+        it('returns the generate keys when keys are present', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { a: 2 }], function (err, keys) {
+                db.test.insert([{ id: 1, a: 1 }, { a: 2 }], (err, keys) => {
 
                     expect(err).to.not.exist();
                     expect(keys).to.have.length(2);
@@ -310,13 +311,13 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('returns the generate keys when keys are present (last)', function (done) {
+        it('returns the generate keys when keys are present (last)', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ a: 1 }, { id: 1, a: 2 }], function (err, keys) {
+                db.test.insert([{ a: 1 }, { id: 1, a: 2 }], (err, keys) => {
 
                     expect(err).to.not.exist();
                     expect(keys).to.have.length(2);
@@ -326,13 +327,13 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('returns the generate keys when keys are present (mixed)', function (done) {
+        it('returns the generate keys when keys are present (mixed)', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ a: 1 }, { id: 1, a: 2 }, { id: 2, a: 3 }, { a: 4 }, { a: 5 }, { id: 3, a: 6 }, { id: 4, a: 7 }], function (err, keys) {
+                db.test.insert([{ a: 1 }, { id: 1, a: 2 }, { id: 2, a: 3 }, { a: 4 }, { a: 5 }, { id: 3, a: 6 }, { id: 4, a: 7 }], (err, keys) => {
 
                     expect(err).to.not.exist();
                     expect(keys).to.have.length(7);
@@ -346,23 +347,23 @@ describe('Table', { parallel: false }, function () {
         });
     });
 
-    describe('update()', function () {
+    describe('update()', () => {
 
-        it('updates a record', function (done) {
+        it('updates a record', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: 1, a: 1 }, function (err, keys) {
+                db.test.insert({ id: 1, a: 1 }, (err, keys) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.update(1, { a: 2 }, function (err) {
+                    db.test.update(1, { a: 2 }, (err) => {
 
                         expect(err).to.not.exist();
 
-                        db.test.get(1, function (err, item) {
+                        db.test.get(1, (err, item) => {
 
                             expect(err).to.not.exist();
                             expect(item.a).to.equal(2);
@@ -373,14 +374,14 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('errors on unknown key', function (done) {
+        it('errors on unknown key', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
 
-                db.test.update(2, { a: 2 }, function (err) {
+                db.test.update(2, { a: 2 }, (err) => {
 
                     expect(err).to.exist();
                     done();
@@ -389,23 +390,23 @@ describe('Table', { parallel: false }, function () {
         });
     });
 
-    describe('increment()', function () {
+    describe('increment()', () => {
 
-        it('updates a record', function (done) {
+        it('updates a record', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: 1, a: 1 }, function (err, keys) {
+                db.test.insert({ id: 1, a: 1 }, (err, keys) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.increment(1, 'a', 5, function (err) {
+                    db.test.increment(1, 'a', 5, (err) => {
 
                         expect(err).to.not.exist();
 
-                        db.test.get(1, function (err, item) {
+                        db.test.get(1, (err, item) => {
 
                             expect(err).to.not.exist();
                             expect(item.a).to.equal(6);
@@ -416,14 +417,14 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('errors on unknown key', function (done) {
+        it('errors on unknown key', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
 
-                db.test.increment(1, 'a', 5, function (err) {
+                db.test.increment(1, 'a', 5, (err) => {
 
                     expect(err).to.exist();
                     done();
@@ -432,23 +433,23 @@ describe('Table', { parallel: false }, function () {
         });
     });
 
-    describe('append()', function () {
+    describe('append()', () => {
 
-        it('updates a record', function (done) {
+        it('updates a record', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: 1, a: [1] }, function (err, keys) {
+                db.test.insert({ id: 1, a: [1] }, (err, keys) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.append(1, 'a', 5, function (err) {
+                    db.test.append(1, 'a', 5, (err) => {
 
                         expect(err).to.not.exist();
 
-                        db.test.get(1, function (err, item) {
+                        db.test.get(1, (err, item) => {
 
                             expect(err).to.not.exist();
                             expect(item.a).to.deep.equal([1, 5]);
@@ -459,14 +460,14 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('errors on unknown key', function (done) {
+        it('errors on unknown key', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
 
-                db.test.append(1, 'a', 5, function (err) {
+                db.test.append(1, 'a', 5, (err) => {
 
                     expect(err).to.exist();
                     done();
@@ -475,23 +476,23 @@ describe('Table', { parallel: false }, function () {
         });
     });
 
-    describe('unset()', function () {
+    describe('unset()', () => {
 
-        it('updates a record', function (done) {
+        it('updates a record', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: 1, a: 1 }, function (err, keys) {
+                db.test.insert({ id: 1, a: 1 }, (err, keys) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.unset(1, 'a', function (err) {
+                    db.test.unset(1, 'a', (err) => {
 
                         expect(err).to.not.exist();
 
-                        db.test.get(1, function (err, item) {
+                        db.test.get(1, (err, item) => {
 
                             expect(err).to.not.exist();
                             expect(item.a).to.not.exist();
@@ -502,14 +503,14 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('errors on unknown key', function (done) {
+        it('errors on unknown key', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
 
-                db.test.unset(1, 'a', function (err) {
+                db.test.unset(1, 'a', (err) => {
 
                     expect(err).to.exist();
                     done();
@@ -518,23 +519,23 @@ describe('Table', { parallel: false }, function () {
         });
     });
 
-    describe('remove()', function () {
+    describe('remove()', () => {
 
-        it('removes a record', function (done) {
+        it('removes a record', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: 1, a: 1 }, function (err, keys) {
+                db.test.insert({ id: 1, a: 1 }, (err, keys) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.remove(1, function (err) {
+                    db.test.remove(1, (err) => {
 
                         expect(err).to.not.exist();
 
-                        db.test.get(1, function (err, item) {
+                        db.test.get(1, (err, item) => {
 
                             expect(err).to.not.exist();
                             expect(item).to.not.exist();
@@ -545,21 +546,21 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('removes multiple records', function (done) {
+        it('removes multiple records', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }], function (err, keys) {
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }], (err, keys) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.remove([1, 2], function (err) {
+                    db.test.remove([1, 2], (err) => {
 
                         expect(err).to.not.exist();
 
-                        db.test.count({ a: 1 }, function (err, count) {
+                        db.test.count({ a: 1 }, (err, count) => {
 
                             expect(err).to.not.exist();
                             expect(count).to.equal(0);
@@ -570,21 +571,21 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('removes records using criteria', function (done) {
+        it('removes records using criteria', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }], function (err, keys) {
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }], (err, keys) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.remove({ a: 1 }, function (err) {
+                    db.test.remove({ a: 1 }, (err) => {
 
                         expect(err).to.not.exist();
 
-                        db.test.count({ a: 1 }, function (err, count) {
+                        db.test.count({ a: 1 }, (err, count) => {
 
                             expect(err).to.not.exist();
                             expect(count).to.equal(0);
@@ -595,14 +596,14 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('errors on unknown key', function (done) {
+        it('errors on unknown key', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
 
-                db.test.remove(1, function (err) {
+                db.test.remove(1, (err) => {
 
                     expect(err).to.exist();
                     done();
@@ -610,14 +611,14 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('ignored error on unknown keys', function (done) {
+        it('ignored error on unknown keys', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
 
-                db.test.remove([1], function (err) {
+                db.test.remove([1], (err) => {
 
                     expect(err).to.not.exist();
                     done();
@@ -626,22 +627,22 @@ describe('Table', { parallel: false }, function () {
         });
     });
 
-    describe('_run()', function () {
+    describe('_run()', () => {
 
-        it('errors on invalid cursor', { parallel: false }, function (done) {
+        it('errors on invalid cursor', { parallel: false }, (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }], function (err, keys) {
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }], (err, keys) => {
 
                     expect(err).to.not.exist();
 
-                    db.test._table.filter({ a: 1 }).run(db._connection, function (err, cursor) {
+                    db.test._table.filter({ a: 1 }).run(db._connection, (err, cursor) => {
 
-                        var proto = Object.getPrototypeOf(cursor);
-                        var orig = proto.toArray;
+                        const proto = Object.getPrototypeOf(cursor);
+                        const orig = proto.toArray;
                         proto.toArray = function (callback) {
 
                             proto.toArray = orig;
@@ -650,7 +651,7 @@ describe('Table', { parallel: false }, function () {
 
                         cursor.close();
 
-                        db.test.query({ a: 1 }, function (err, result) {
+                        db.test.query({ a: 1 }, (err, result) => {
 
                             expect(err).to.exist();
                             done();
@@ -661,30 +662,27 @@ describe('Table', { parallel: false }, function () {
         });
     });
 
-    describe('changes()', function () {
+    describe('changes()', () => {
 
-        it('reports on a record update (*)', function (done) {
+        it('reports on a record update (*)', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
 
-                var changes = [];
-                var each = function (err, item) {
+                const changes = [];
+                const each = (err, item) => changes.push(item.after.id);
 
-                    changes.push(item.after.id);
-                };
-
-                db.test.changes('*', each, function (err, cursor) {
+                db.test.changes('*', each, (err, cursor) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.insert({ id: 1, a: 1 }, function (err, keys) {
+                    db.test.insert({ id: 1, a: 1 }, (err, keys) => {
 
                         expect(err).to.not.exist();
 
-                        db.test.update(1, { a: 2 }, function (err) {
+                        db.test.update(1, { a: 2 }, (err) => {
 
                             expect(err).to.not.exist();
 
@@ -696,28 +694,25 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('manually closes a cursor', function (done) {
+        it('manually closes a cursor', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
 
-                var changes = [];
-                var each = function (err, item) {
+                const changes = [];
+                const each = (err, item) => changes.push(item.after.id);
 
-                    changes.push(item.after.id);
-                };
-
-                db.test.changes('*', each, function (err, cursor) {
+                db.test.changes('*', each, (err, cursor) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.insert({ id: 1, a: 1 }, function (err, keys) {
+                    db.test.insert({ id: 1, a: 1 }, (err, keys) => {
 
                         expect(err).to.not.exist();
 
-                        db.test.update(1, { a: 2 }, function (err) {
+                        db.test.update(1, { a: 2 }, (err) => {
 
                             expect(err).to.not.exist();
 
@@ -730,32 +725,29 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('reports on a record update (id)', function (done) {
+        it('reports on a record update (id)', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
 
-                var changes = [];
-                var each = function (err, item) {
+                const changes = [];
+                const each = (err, item) => changes.push(item.after.id);
 
-                    changes.push(item.after.id);
-                };
-
-                db.test.insert([{ id: 1, a: 1 }], function (err, keys1) {
+                db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.changes(1, each, function (err, cursor) {
+                    db.test.changes(1, each, (err, cursor) => {
 
                         expect(err).to.not.exist();
 
-                        db.test.update(1, { a: 2 }, function (err, keys2) {
+                        db.test.update(1, { a: 2 }, (err, keys2) => {
 
                             expect(err).to.not.exist();
 
-                            db.test.insert({ id: 2, a: 2 }, function (err) {
+                            db.test.insert({ id: 2, a: 2 }, (err) => {
 
                                 expect(err).to.not.exist();
 
@@ -768,32 +760,29 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('reports on a record update (ids)', function (done) {
+        it('reports on a record update (ids)', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
 
-                var changes = [];
-                var each = function (err, item) {
+                const changes = [];
+                const each = (err, item) => changes.push(item.after.id);
 
-                    changes.push(item.after.id);
-                };
-
-                db.test.insert([{ id: 1, a: 1 }], function (err, keys1) {
+                db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.changes([1, 2], each, function (err, cursor) {
+                    db.test.changes([1, 2], each, (err, cursor) => {
 
                         expect(err).to.not.exist();
 
-                        db.test.update(1, { a: 2 }, function (err, keys2) {
+                        db.test.update(1, { a: 2 }, (err, keys2) => {
 
                             expect(err).to.not.exist();
 
-                            db.test.insert({ id: 2, a: 2 }, function (err) {
+                            db.test.insert({ id: 2, a: 2 }, (err) => {
 
                                 expect(err).to.not.exist();
 
@@ -806,32 +795,29 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('reports on a record update (query)', function (done) {
+        it('reports on a record update (query)', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
 
-                var changes = [];
-                var each = function (err, item) {
+                const changes = [];
+                const each = (err, item) => changes.push(item.after.id);
 
-                    changes.push(item.after.id);
-                };
-
-                db.test.insert([{ id: 1, a: 1 }], function (err, keys1) {
+                db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.changes({ a: 2 }, each, function (err, cursor) {
+                    db.test.changes({ a: 2 }, each, (err, cursor) => {
 
                         expect(err).to.not.exist();
 
-                        db.test.update(1, { a: 2 }, function (err, keys2) {
+                        db.test.update(1, { a: 2 }, (err, keys2) => {
 
                             expect(err).to.not.exist();
 
-                            db.test.insert({ id: 2, a: 2 }, function (err) {
+                            db.test.insert({ id: 2, a: 2 }, (err) => {
 
                                 expect(err).to.not.exist();
 
@@ -844,28 +830,25 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('reports on a record update (delete)', function (done) {
+        it('reports on a record update (delete)', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
 
-                var changes = [];
-                var each = function (err, item) {
+                const changes = [];
+                const each = (err, item) => changes.push(item.before.id + ':' + (item.after === null));
 
-                    changes.push(item.before.id + ':' + (item.after === null));
-                };
-
-                db.test.insert([{ id: 1, a: 1 }], function (err, keys1) {
+                db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.changes(1, each, function (err, cursor) {
+                    db.test.changes(1, each, (err, cursor) => {
 
                         expect(err).to.not.exist();
 
-                        db.test.remove(1, function (err) {
+                        db.test.remove(1, (err) => {
 
                             expect(err).to.not.exist();
                             expect(changes).to.deep.equal(['1:true']);
@@ -876,24 +859,21 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('reports on a record update (id missing)', function (done) {
+        it('reports on a record update (id missing)', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
 
-                var changes = [];
-                var each = function (err, item) {
+                const changes = [];
+                const each = (err, item) => changes.push(item.after.id);
 
-                    changes.push(item.after.id);
-                };
-
-                db.test.changes(1, each, function (err, cursor) {
+                db.test.changes(1, each, (err, cursor) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.insert({ id: 1, a: 1 }, function (err, keys) {
+                    db.test.insert({ id: 1, a: 1 }, (err, keys) => {
 
                         expect(err).to.not.exist();
                         expect(changes).to.deep.equal([1]);
@@ -903,15 +883,14 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('errors on bad cursor', function (done) {
+        it('errors on bad cursor', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
 
-                var changes = [];
-                var each = function (err, item) {
+                const each = (err, item) => {
 
                     if (err) {
                         expect(err.message).to.equal('Database error');
@@ -919,18 +898,18 @@ describe('Table', { parallel: false }, function () {
                     }
                 };
 
-                db.test.changes('*', each, function (err, cursor) {
+                db.test.changes('*', each, (err, cursor) => {
 
                     expect(err).to.not.exist();
 
-                    var orig = cursor._cursor._next;
-                    cursor._cursor._next = function (next) {
+                    const orig = cursor._cursor._next;
+                    cursor._cursor._next = (next) => {
 
                         cursor._cursor._next = orig;
                         return next(new Error('kaboom'));
                     };
 
-                    db.test.insert({ id: 1, a: 1 }, function (err, keys) {
+                    db.test.insert({ id: 1, a: 1 }, (err, keys) => {
 
                         expect(err).to.not.exist();
                     });
@@ -938,13 +917,13 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('errors on invalid table', function (done) {
+        it('errors on invalid table', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
+            const db = new Penseur.Db('penseurtest');
             db.table('invalid');
-            db.connect(function (err) {
+            db.connect((err) => {
 
-                db.invalid.changes('*', function (err, item) {
+                db.invalid.changes('*', (err, item) => {
 
                     expect(err).to.exist();
                     done();
@@ -953,19 +932,19 @@ describe('Table', { parallel: false }, function () {
         });
     });
 
-    describe('sync()', function () {
+    describe('sync()', () => {
 
-        it('returns when write is complete', function (done) {
+        it('returns when write is complete', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.establish(['test'], function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], function (err, keys) {
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.sync(function (err) {
+                    db.test.sync((err) => {
 
                         expect(err).to.not.exist();
                         done();
@@ -974,13 +953,13 @@ describe('Table', { parallel: false }, function () {
             });
         });
 
-        it('fails on database error', function (done) {
+        it('fails on database error', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
+            const db = new Penseur.Db('penseurtest');
             db.table('invalid');
-            db.connect(function (err) {
+            db.connect((err) => {
 
-                db.invalid.sync(function (err) {
+                db.invalid.sync((err) => {
 
                     expect(err).to.exist();
                     done();

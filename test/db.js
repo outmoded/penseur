@@ -1,38 +1,40 @@
+'use strict';
+
 // Load modules
 
-var Code = require('code');
-var Lab = require('lab');
-var Penseur = require('..');
-var RethinkDB = require('rethinkdb');
+const Code = require('code');
+const Lab = require('lab');
+const Penseur = require('..');
+const RethinkDB = require('rethinkdb');
 
 
 // Declare internals
 
-var internals = {};
+const internals = {};
 
 
 // Test shortcuts
 
-var lab = exports.lab = Lab.script();
-var describe = lab.describe;
-var it = lab.it;
-var expect = Code.expect;
+const lab = exports.lab = Lab.script();
+const describe = lab.describe;
+const it = lab.it;
+const expect = Code.expect;
 
 
-describe('Db', function () {
+describe('Db', () => {
 
-    it('establishes and interacts with a database', function (done) {
+    it('establishes and interacts with a database', (done) => {
 
-        var db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015 });
+        const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015 });
 
-        db.establish(['test'], function (err) {
+        db.establish(['test'], (err) => {
 
             expect(err).to.not.exist();
-            db.test.insert({ id: 1, value: 'x' }, function (err, result) {
+            db.test.insert({ id: 1, value: 'x' }, (err, result) => {
 
                 expect(err).to.not.exist();
 
-                db.test.get(1, function (err, item) {
+                db.test.get(1, (err, item) => {
 
                     expect(err).to.not.exist();
                     expect(item.value).to.equal('x');
@@ -42,24 +44,24 @@ describe('Db', function () {
         });
     });
 
-    describe('connect()', function () {
+    describe('connect()', () => {
 
-        it('uses default server location', function (done) {
+        it('uses default server location', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
+            const db = new Penseur.Db('penseurtest');
 
-            db.connect(function (err) {
+            db.connect((err) => {
 
                 expect(err).to.not.exist();
                 db.close(done);
             });
         });
 
-        it('fails connecting to missing server', function (done) {
+        it('fails connecting to missing server', (done) => {
 
-            var db = new Penseur.Db('penseurtest', { host: 'example.com', timeout: 0.001 });
+            const db = new Penseur.Db('penseurtest', { host: 'example.com', timeout: 0.001 });
 
-            db.connect(function (err) {
+            db.connect((err) => {
 
                 expect(err).to.exist();
                 db.close(done);
@@ -67,29 +69,29 @@ describe('Db', function () {
         });
     });
 
-    describe('close()', function () {
+    describe('close()', () => {
 
-        it('ignores unconnected state', function (done) {
+        it('ignores unconnected state', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
+            const db = new Penseur.Db('penseurtest');
             db.close(done);
         });
 
-        it('allows no callback', function (done) {
+        it('allows no callback', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
+            const db = new Penseur.Db('penseurtest');
             db.close();
             done();
         });
     });
 
-    describe('table()', function () {
+    describe('table()', () => {
 
-        it('skips decorating object when table name conflicts', function (done) {
+        it('skips decorating object when table name conflicts', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
+            const db = new Penseur.Db('penseurtest');
 
-            db.establish(['connect'], function (err) {
+            db.establish(['connect'], (err) => {
 
                 expect(err).to.not.exist();
                 expect(typeof db.connect).to.equal('function');
@@ -98,12 +100,12 @@ describe('Db', function () {
             });
         });
 
-        it('skips decorating object when table already set up', function (done) {
+        it('skips decorating object when table already set up', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
+            const db = new Penseur.Db('penseurtest');
 
             db.table('abc');
-            db.establish(['abc'], function (err) {
+            db.establish(['abc'], (err) => {
 
                 expect(err).to.not.exist();
                 expect(db.tables.abc).to.exist();
@@ -112,18 +114,18 @@ describe('Db', function () {
         });
     });
 
-    describe('establish()', function () {
+    describe('establish()', () => {
 
-        it('creates new database', function (done) {
+        it('creates new database', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            db.connect(function (err) {
+            const db = new Penseur.Db('penseurtest');
+            db.connect((err) => {
 
                 expect(err).to.not.exist();
 
-                RethinkDB.dbDrop(db._name).run(db._connection, function (err, dropped) {
+                RethinkDB.dbDrop(db._name).run(db._connection, (err, dropped) => {
 
-                    db.establish(['test'], function (err) {
+                    db.establish(['test'], (err) => {
 
                         expect(err).to.not.exist();
                         db.close(done);
@@ -132,32 +134,32 @@ describe('Db', function () {
             });
         });
 
-        it('fails creating a database', function (done) {
+        it('fails creating a database', (done) => {
 
-            var db = new Penseur.Db('penseur-test');
+            const db = new Penseur.Db('penseur-test');
 
-            db.establish(['test'], function (err) {
-
-                expect(err).to.exist();
-                db.close(done);
-            });
-        });
-
-        it('fails connecting to missing server', function (done) {
-
-            var db = new Penseur.Db('penseurtest', { host: 'example.com', timeout: 0.001 });
-
-            db.establish(['test'], function (err) {
+            db.establish(['test'], (err) => {
 
                 expect(err).to.exist();
                 db.close(done);
             });
         });
 
-        it('errors on database dbList() error', { parallel: false }, function (done) {
+        it('fails connecting to missing server', (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            var orig = RethinkDB.dbList;
+            const db = new Penseur.Db('penseurtest', { host: 'example.com', timeout: 0.001 });
+
+            db.establish(['test'], (err) => {
+
+                expect(err).to.exist();
+                db.close(done);
+            });
+        });
+
+        it('errors on database dbList() error', { parallel: false }, (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            const orig = RethinkDB.dbList;
             RethinkDB.dbList = function () {
 
                 RethinkDB.dbList = orig;
@@ -170,23 +172,23 @@ describe('Db', function () {
                 };
             };
 
-            db.establish(['test'], function (err) {
+            db.establish(['test'], (err) => {
 
                 expect(err).to.exist();
                 db.close(done);
             });
         });
 
-        it('errors on database dbCreate() error', { parallel: false }, function (done) {
+        it('errors on database dbCreate() error', { parallel: false }, (done) => {
 
-            var db = new Penseur.Db('penseur-test');
-            db.connect(function (err) {
+            const db = new Penseur.Db('penseur-test');
+            db.connect((err) => {
 
                 expect(err).to.not.exist();
 
-                RethinkDB.dbDrop(db._name).run(db._connection, function (err, dropped) {
+                RethinkDB.dbDrop(db._name).run(db._connection, (err, dropped) => {
 
-                    var orig = RethinkDB.dbCreate;
+                    const orig = RethinkDB.dbCreate;
                     RethinkDB.dbCreate = function () {
 
                         RethinkDB.dbCreate = orig;
@@ -199,7 +201,7 @@ describe('Db', function () {
                         };
                     };
 
-                    db.establish(['test'], function (err) {
+                    db.establish(['test'], (err) => {
 
                         expect(err).to.exist();
                         db.close(done);
@@ -209,12 +211,12 @@ describe('Db', function () {
         });
     });
 
-    describe('_createTable', function () {
+    describe('_createTable', () => {
 
-        it('errors on database dbList() error', { parallel: false }, function (done) {
+        it('errors on database dbList() error', { parallel: false }, (done) => {
 
-            var db = new Penseur.Db('penseurtest');
-            var orig = RethinkDB.db;
+            const db = new Penseur.Db('penseurtest');
+            const orig = RethinkDB.db;
             RethinkDB.db = function () {
 
                 RethinkDB.db = orig;
@@ -232,7 +234,7 @@ describe('Db', function () {
                 };
             };
 
-            db.establish(['test'], function (err) {
+            db.establish(['test'], (err) => {
 
                 expect(err).to.exist();
                 db.close(done);
@@ -240,31 +242,31 @@ describe('Db', function () {
         });
     });
 
-    describe('disable()', function () {
+    describe('disable()', () => {
 
-        it('simulates an error', function (done) {
+        it('simulates an error', (done) => {
 
-            var db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015, test: true });
+            const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015, test: true });
 
-            db.establish(['test'], function (err) {
+            db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: 1, value: 'x' }, function (err, result) {
+                db.test.insert({ id: 1, value: 'x' }, (err, result) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.get(1, function (err, item1) {
+                    db.test.get(1, (err, item1) => {
 
                         expect(err).to.not.exist();
                         expect(item1.value).to.equal('x');
 
                         db.disable('test', 'get');
-                        db.test.get(1, function (err, item2) {
+                        db.test.get(1, (err, item2) => {
 
                             expect(err).to.exist();
 
                             db.enable('test', 'get');
-                            db.test.get(1, function (err, item3) {
+                            db.test.get(1, (err, item3) => {
 
                                 expect(err).to.not.exist();
                                 expect(item3.value).to.equal('x');
