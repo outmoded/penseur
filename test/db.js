@@ -44,6 +44,40 @@ describe('Db', () => {
         });
     });
 
+    it('overrides table methods', (done) => {
+
+        const Override = class extends Penseur.Table {
+            insert(items, callback) {
+
+                items = [].concat(items);
+                for (let i = 0; i < items.length; ++i) {
+                    items[i].flag = true;
+                }
+
+                return super.insert(items, callback);
+            }
+        };
+
+        const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015, extended: Override });
+
+        db.establish(['test'], (err) => {
+
+            expect(err).to.not.exist();
+            db.test.insert({ id: 1, value: 'x' }, (err, result) => {
+
+                expect(err).to.not.exist();
+
+                db.test.get(1, (err, item) => {
+
+                    expect(err).to.not.exist();
+                    expect(item.value).to.equal('x');
+                    expect(item.flag).to.equal(true);
+                    db.close(done);
+                });
+            });
+        });
+    });
+
     describe('connect()', () => {
 
         it('uses default server location', (done) => {
