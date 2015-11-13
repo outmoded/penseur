@@ -627,6 +627,50 @@ describe('Table', { parallel: false }, () => {
         });
     });
 
+    describe('empty()', () => {
+
+        it('removes all records', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.empty((err, count1) => {
+
+                        expect(err).to.not.exist();
+                        expect(count1).to.equal(2);
+
+                        db.test.count({ a: 1 }, (err, count2) => {
+
+                            expect(err).to.not.exist();
+                            expect(count2).to.equal(0);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('errors on unknown table', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.connect((err) => {
+
+                db.table('no_such_table_test');
+                db.no_such_table_test.empty((err, count) => {
+
+                    expect(err).to.exist();
+                    expect(count).to.equal(0);
+                    done();
+                });
+            });
+        });
+    });
+
     describe('_run()', () => {
 
         it('errors on invalid cursor', { parallel: false }, (done) => {
