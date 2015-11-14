@@ -159,10 +159,14 @@ describe('Db', () => {
 
                 RethinkDB.dbDrop(db._name).run(db._connection, (err, dropped) => {
 
-                    db.establish(['test'], (err) => {
+                    db.establish({ test: { index: 'other' } }, (err) => {
 
                         expect(err).to.not.exist();
-                        db.close(done);
+                        RethinkDB.db(db._name).table('test').indexList().run(db._connection, (err, result) => {
+
+                            expect(result).to.deep.equal(['other']);
+                            db.close(done);
+                        });
                     });
                 });
             });
@@ -205,6 +209,42 @@ describe('Db', () => {
             });
         });
 
+        it('creates database with different table indexes', (done) => {
+
+            const db1 = new Penseur.Db('penseurtest');
+            db1.connect((err) => {
+
+                expect(err).to.not.exist();
+
+                db1.establish({ test: { index: 'other' } }, (err) => {
+
+                    expect(err).to.not.exist();
+                    RethinkDB.db(db1._name).table('test').indexList().run(db1._connection, (err, result1) => {
+
+                        expect(result1).to.deep.equal(['other']);
+                        db1.close(() => {
+
+                            const db2 = new Penseur.Db('penseurtest');
+                            db2.connect((err) => {
+
+                                expect(err).to.not.exist();
+
+                                db2.establish(['test'], (err) => {
+
+                                    expect(err).to.not.exist();
+                                    RethinkDB.db(db2._name).table('test').indexList().run(db2._connection, (err, result2) => {
+
+                                        expect(result2).to.deep.equal([]);
+                                        db2.close(done);
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
         it('fails creating a database', (done) => {
 
             const db = new Penseur.Db('penseur-test');
@@ -219,6 +259,29 @@ describe('Db', () => {
         it('fails connecting to missing server', (done) => {
 
             const db = new Penseur.Db('penseurtest', { host: 'example.com', timeout: 0.001 });
+
+            db.establish(['test'], (err) => {
+
+                expect(err).to.exist();
+                db.close(done);
+            });
+        });
+
+        it('errors on database indexList() error', { parallel: false }, (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            const orig = RethinkDB.dbList;
+            RethinkDB.dbList = function () {
+
+                RethinkDB.dbList = orig;
+
+                return {
+                    run: function (connection, next) {
+
+                        return next(new Error('Bad database'));
+                    }
+                };
+            };
 
             db.establish(['test'], (err) => {
 
@@ -278,6 +341,81 @@ describe('Db', () => {
                         db.close(done);
                     });
                 });
+            });
+        });
+
+        it('errors on database indexList() error', { parallel: false }, (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            const orig = RethinkDB.db;
+            let count = 0;
+            RethinkDB.db = function () {
+
+                return {
+                    tableList: function () {
+
+                        return {
+                            run: function (connection, next) {
+
+                                return next(null, ['test']);
+                            }
+                        };
+                    },
+                    table: function () {
+
+                        if (++count === 1) {
+                            return orig('penseurtest').table('test');
+                        }
+
+                        RethinkDB.db = orig;
+                        return {
+                            indexList: function () {
+
+                                return {
+                                    run: function (connection, next) {
+
+                                        return next(new Error('Bad database'));
+                                    }
+                                };
+                            }
+                        };
+                    }
+                };
+            };
+
+            db.establish(['test'], (err) => {
+
+                expect(err).to.exist();
+                db.close(done);
+            });
+        });
+
+        it('errors creating new table', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+
+            db.establish(['bad name'], (err) => {
+
+                expect(err).to.exist();
+                db.close(done);
+            });
+        });
+
+        it('errors emptying existing table', (done) => {
+
+            const Override = class extends Penseur.Table {
+                empty(callback) {
+
+                    return callback(new Error('failed'));
+                }
+            };
+
+            const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015 });
+
+            db.establish({ test: { extended: Override } }, (err) => {
+
+                expect(err).to.exist();
+                db.close(done);
             });
         });
     });
