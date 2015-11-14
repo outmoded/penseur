@@ -245,6 +245,42 @@ describe('Db', () => {
             });
         });
 
+        it('creates database with different table indexes (partial overlap)', (done) => {
+
+            const db1 = new Penseur.Db('penseurtest');
+            db1.connect((err) => {
+
+                expect(err).to.not.exist();
+
+                db1.establish({ test: { index: ['a', 'b'] } }, (err) => {
+
+                    expect(err).to.not.exist();
+                    RethinkDB.db(db1._name).table('test').indexList().run(db1._connection, (err, result1) => {
+
+                        expect(result1).to.deep.equal(['a', 'b']);
+                        db1.close(() => {
+
+                            const db2 = new Penseur.Db('penseurtest');
+                            db2.connect((err) => {
+
+                                expect(err).to.not.exist();
+
+                                db2.establish({ test: { index: ['b', 'c'] } }, (err) => {
+
+                                    expect(err).to.not.exist();
+                                    RethinkDB.db(db2._name).table('test').indexList().run(db2._connection, (err, result2) => {
+
+                                        expect(result2).to.deep.equal(['b', 'c']);
+                                        db2.close(done);
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
         it('fails creating a database', (done) => {
 
             const db = new Penseur.Db('penseur-test');
