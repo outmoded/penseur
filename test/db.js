@@ -281,6 +281,43 @@ describe('Db', () => {
             });
         });
 
+        it('retains records in existing table', (done) => {
+
+            const db1 = new Penseur.Db('penseurtest');
+            db1.connect((err) => {
+
+                expect(err).to.not.exist();
+
+                db1.establish(['test'], (err) => {
+
+                    expect(err).to.not.exist();
+                    db1.test.insert({ id: 1 }, (err, id) => {
+
+                        expect(err).to.not.exist();
+                        db1.close(() => {
+
+                            const db2 = new Penseur.Db('penseurtest');
+                            db2.connect((err) => {
+
+                                expect(err).to.not.exist();
+
+                                db2.establish({ test: { purge: false } }, (err) => {
+
+                                    expect(err).to.not.exist();
+                                    db2.test.get(1, (err, item) => {
+
+                                        expect(err).to.not.exist();
+                                        expect(item.id).to.equal(1);
+                                        db2.close(done);
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
         it('fails creating a database', (done) => {
 
             const db = new Penseur.Db('penseur-test');
