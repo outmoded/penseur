@@ -3,6 +3,7 @@
 // Load modules
 
 const Code = require('code');
+const Hoek = require('hoek');
 const Lab = require('lab');
 const Penseur = require('..');
 const RethinkDB = require('rethinkdb');
@@ -556,6 +557,45 @@ describe('Db', () => {
                             });
                         });
                     });
+                });
+            });
+        });
+
+        it('simulates a changes error', (done) => {
+
+            const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015, test: true });
+
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.disable('test', 'changes');
+
+                db.test.changes({ a: 1 }, Hoek.ignore, (err) => {
+
+                    expect(err).to.exist();
+                    done();
+                });
+            });
+        });
+
+        it('simulates a changes update error', (done) => {
+
+            const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015, test: true });
+
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.disable('test', 'changes', { updates: true });
+
+                const each = (err, update) => {
+
+                    expect(err).to.exist();
+                    done();
+                };
+
+                db.test.changes({ a: 1 }, each, (err) => {
+
+                    expect(err).to.not.exist();
                 });
             });
         });
