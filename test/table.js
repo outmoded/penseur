@@ -30,6 +30,7 @@ describe('Table', { parallel: false }, () => {
             db.table('invalid');
             db.connect((err) => {
 
+                expect(err).to.not.exist();
                 db.invalid.get(1, (err, item) => {
 
                     expect(err).to.exist();
@@ -660,6 +661,8 @@ describe('Table', { parallel: false }, () => {
             const db = new Penseur.Db('penseurtest');
             db.connect((err) => {
 
+                expect(err).to.not.exist();
+
                 db.table('no_such_table_test');
                 db.no_such_table_test.empty((err, count) => {
 
@@ -684,6 +687,8 @@ describe('Table', { parallel: false }, () => {
                     expect(err).to.not.exist();
 
                     db.test._table.filter({ a: 1 }).run(db._connection, (err, cursor) => {
+
+                        expect(err).to.not.exist();
 
                         const proto = Object.getPrototypeOf(cursor);
                         const orig = proto.toArray;
@@ -716,7 +721,11 @@ describe('Table', { parallel: false }, () => {
                 expect(err).to.not.exist();
 
                 const changes = [];
-                const each = (err, item) => changes.push(item.after.id);
+                const each = (err, item) => {
+
+                    expect(err).to.not.exist();
+                    changes.push(item.after.id);
+                };
 
                 db.test.changes('*', each, (err, cursor) => {
 
@@ -746,7 +755,11 @@ describe('Table', { parallel: false }, () => {
                 expect(err).to.not.exist();
 
                 const changes = [];
-                const each = (err, item) => changes.push(item.after.id);
+                const each = (err, item) => {
+
+                    expect(err).to.not.exist();
+                    changes.push(item.after.id);
+                };
 
                 db.test.changes('*', each, (err, cursor) => {
 
@@ -777,7 +790,11 @@ describe('Table', { parallel: false }, () => {
                 expect(err).to.not.exist();
 
                 const changes = [];
-                const each = (err, item) => changes.push(item.after.id);
+                const each = (err, item) => {
+
+                    expect(err).to.not.exist();
+                    changes.push(item.after.id);
+                };
 
                 db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
 
@@ -812,7 +829,11 @@ describe('Table', { parallel: false }, () => {
                 expect(err).to.not.exist();
 
                 const changes = [];
-                const each = (err, item) => changes.push(item.after.id);
+                const each = (err, item) => {
+
+                    expect(err).to.not.exist();
+                    changes.push(item.after.id);
+                };
 
                 db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
 
@@ -847,7 +868,11 @@ describe('Table', { parallel: false }, () => {
                 expect(err).to.not.exist();
 
                 const changes = [];
-                const each = (err, item) => changes.push(item.after.id);
+                const each = (err, item) => {
+
+                    expect(err).to.not.exist();
+                    changes.push(item.after.id);
+                };
 
                 db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
 
@@ -882,7 +907,11 @@ describe('Table', { parallel: false }, () => {
                 expect(err).to.not.exist();
 
                 const changes = [];
-                const each = (err, item) => changes.push(item.before.id + ':' + (item.after === null));
+                const each = (err, item) => {
+
+                    expect(err).to.not.exist();
+                    changes.push(item.before.id + ':' + (item.after === null));
+                };
 
                 db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
 
@@ -911,7 +940,11 @@ describe('Table', { parallel: false }, () => {
                 expect(err).to.not.exist();
 
                 const changes = [];
-                const each = (err, item) => changes.push(item.after.id);
+                const each = (err, item) => {
+
+                    expect(err).to.not.exist();
+                    changes.push(item.after.id);
+                };
 
                 db.test.changes(1, each, (err, cursor) => {
 
@@ -967,6 +1000,7 @@ describe('Table', { parallel: false }, () => {
             db.table('invalid');
             db.connect((err) => {
 
+                expect(err).to.not.exist();
                 db.invalid.changes('*', (err, item) => {
 
                     expect(err).to.exist();
@@ -1002,6 +1036,8 @@ describe('Table', { parallel: false }, () => {
             const db = new Penseur.Db('penseurtest');
             db.table('invalid');
             db.connect((err) => {
+
+                expect(err).to.not.exist();
 
                 db.invalid.sync((err) => {
 
