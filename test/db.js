@@ -158,14 +158,14 @@ describe('Db', () => {
 
                 expect(err).to.not.exist();
 
-                RethinkDB.dbDrop(db._name).run(db._connection, (err, dropped) => {
+                RethinkDB.dbDrop(db.name).run(db._connection, (err, dropped) => {
 
                     expect(err).to.not.exist();
 
                     db.establish({ test: { index: 'other' } }, (err) => {
 
                         expect(err).to.not.exist();
-                        RethinkDB.db(db._name).table('test').indexList().run(db._connection, (err, result) => {
+                        RethinkDB.db(db.name).table('test').indexList().run(db._connection, (err, result) => {
 
                             expect(err).to.not.exist();
                             expect(result).to.deep.equal(['other']);
@@ -224,7 +224,7 @@ describe('Db', () => {
 
                     expect(err).to.not.exist();
 
-                    RethinkDB.db(db1._name).table('test').indexList().run(db1._connection, (err, result1) => {
+                    RethinkDB.db(db1.name).table('test').indexList().run(db1._connection, (err, result1) => {
 
                         expect(err).to.not.exist();
                         expect(result1).to.deep.equal(['other']);
@@ -238,7 +238,7 @@ describe('Db', () => {
                                 db2.establish(['test'], (err) => {
 
                                     expect(err).to.not.exist();
-                                    RethinkDB.db(db2._name).table('test').indexList().run(db2._connection, (err, result2) => {
+                                    RethinkDB.db(db2.name).table('test').indexList().run(db2._connection, (err, result2) => {
 
                                         expect(err).to.not.exist();
                                         expect(result2).to.deep.equal([]);
@@ -262,7 +262,7 @@ describe('Db', () => {
                 db1.establish({ test: { index: ['a', 'b'] } }, (err) => {
 
                     expect(err).to.not.exist();
-                    RethinkDB.db(db1._name).table('test').indexList().run(db1._connection, (err, result1) => {
+                    RethinkDB.db(db1.name).table('test').indexList().run(db1._connection, (err, result1) => {
 
                         expect(err).to.not.exist();
                         expect(result1).to.deep.equal(['a', 'b']);
@@ -276,7 +276,7 @@ describe('Db', () => {
                                 db2.establish({ test: { index: ['b', 'c'] } }, (err) => {
 
                                     expect(err).to.not.exist();
-                                    RethinkDB.db(db2._name).table('test').indexList().run(db2._connection, (err, result2) => {
+                                    RethinkDB.db(db2.name).table('test').indexList().run(db2._connection, (err, result2) => {
 
                                         expect(err).to.not.exist();
                                         expect(result2).to.deep.equal(['b', 'c']);
@@ -402,7 +402,7 @@ describe('Db', () => {
 
                 expect(err).to.not.exist();
 
-                RethinkDB.dbDrop(db._name).run(db._connection, (err, dropped) => {
+                RethinkDB.dbDrop(db.name).run(db._connection, (err, dropped) => {
 
                     expect(err).to.exist();
 
