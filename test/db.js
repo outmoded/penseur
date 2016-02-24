@@ -102,6 +102,82 @@ describe('Db', () => {
                 db.close(done);
             });
         });
+
+        it('reconnects automatically', (done) => {
+
+            let count = 0;
+            const onConnect = () => {
+
+                ++count;
+                if (count === 2) {
+                    db.close(done);
+                }
+            };
+
+            const onDisconnect = (willReconnect) => {
+
+                expect(willReconnect).to.equal(count !== 2);
+            };
+
+            const db = new Penseur.Db('penseurtest', { onDisconnect: onDisconnect, onConnect: onConnect });
+
+            db.connect((err) => {
+
+                expect(err).to.not.exist();
+                db._connection.close(Hoek.ignore);
+            });
+        });
+
+        it('does not reconnect automatically', (done) => {
+
+            const onDisconnect = (willReconnect) => {
+
+                expect(willReconnect).to.be.false();
+                done();
+            };
+
+            const db = new Penseur.Db('penseurtest', { onDisconnect: onDisconnect, reconnect: false });
+
+            db.connect((err) => {
+
+                expect(err).to.not.exist();
+                db._connection.close(Hoek.ignore);
+            });
+        });
+
+        it('notifies of errors', (done) => {
+
+            const onError = (err) => {
+
+                expect(err.message).to.equal('boom');
+                db.close(done);
+            };
+
+            const db = new Penseur.Db('penseurtest', { onError: onError });
+
+            db.connect((err) => {
+
+                expect(err).to.not.exist();
+                db._connection.emit('error', new Error('boom'));
+            });
+        });
+
+        it('notifies of timeout', (done) => {
+
+            const onError = (err) => {
+
+                expect(err.message).to.equal('Database connection timeout');
+                db.close(done);
+            };
+
+            const db = new Penseur.Db('penseurtest', { onError: onError });
+
+            db.connect((err) => {
+
+                expect(err).to.not.exist();
+                db._connection.emit('timeout');
+            });
+        });
     });
 
     describe('close()', () => {
