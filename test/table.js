@@ -3,6 +3,7 @@
 // Load modules
 
 const Code = require('code');
+const Hoek = require('hoek');
 const Lab = require('lab');
 const Penseur = require('..');
 
@@ -127,6 +128,18 @@ describe('Table', { parallel: false }, () => {
                         done();
                     });
                 });
+            });
+        });
+
+        it('fails on disconnected database', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.table('test');
+            db.test.get('1', (err) => {
+
+                expect(err).to.exist();
+                expect(err.message).to.equal('Database disconnected');
+                done();
             });
         });
     });
@@ -891,6 +904,18 @@ describe('Table', { parallel: false }, () => {
 
     describe('changes()', () => {
 
+        it('fails on disconnected database', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.table('test');
+            db.test.changes('*', Hoek.ignore, (err) => {
+
+                expect(err).to.exist();
+                expect(err.message).to.equal('Database disconnected');
+                done();
+            });
+        });
+
         it('reports on a record update (*)', (done) => {
 
             const db = new Penseur.Db('penseurtest');
@@ -1222,6 +1247,18 @@ describe('Table', { parallel: false }, () => {
                     expect(err).to.exist();
                     done();
                 });
+            });
+        });
+
+        it('fails on disconnected database', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.table('test');
+            db.test.sync((err) => {
+
+                expect(err).to.exist();
+                expect(err.message).to.equal('Database disconnected');
+                done();
             });
         });
     });
