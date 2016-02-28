@@ -23,18 +23,18 @@ const expect = Code.expect;
 
 describe('Table', { parallel: false }, () => {
 
-    describe('get()', () => {
+    it('exposes table name', (done) => {
 
-        it('exposes table name', (done) => {
+        const db = new Penseur.Db('penseurtest');
+        db.establish(['test'], (err) => {
 
-            const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
-
-                expect(err).to.not.exist();
-                expect(db.test.name).to.equal('test');
-                done();
-            });
+            expect(err).to.not.exist();
+            expect(db.test.name).to.equal('test');
+            done();
         });
+    });
+
+    describe('get()', () => {
 
         it('fails on database error', (done) => {
 
