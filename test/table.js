@@ -64,7 +64,7 @@ describe('Table', { parallel: false }, () => {
                     db.test.get([1, 3], (err, result) => {
 
                         expect(err).to.not.exist();
-                        expect(result).to.deep.include([{ id: 3, a: 1 }, { id: 1, a: 1 }]);
+                        expect(result).to.deep.equal([{ id: 3, a: 1 }, { id: 1, a: 1 }]);
                         done();
                     });
                 });
@@ -159,7 +159,227 @@ describe('Table', { parallel: false }, () => {
                     db.test.query({ a: 1 }, (err, result) => {
 
                         expect(err).to.not.exist();
-                        expect(result).to.deep.include([{ id: 3, a: 1 }, { id: 1, a: 1 }]);
+                        expect(result).to.deep.equal([{ id: 3, a: 1 }, { id: 1, a: 1 }]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('returns the requested objects (empty criteria)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.query({}, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result.length).to.equal(3);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('returns the requested objects (multiple keys)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1, b: 2 }, { id: 2, a: 2, b: 1 }, { id: 3, a: 1, b: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.query({ a: 1, b: 1 }, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.deep.equal([{ id: 3, a: 1, b: 1 }]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('returns the requested objects (nested keys)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1, b: { c: 2 } }, { id: 2, a: 2, b: { c: 1 } }, { id: 3, a: 1, b: { c: 1 } }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.query({ a: 1, b: { c: 1 } }, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.deep.equal([{ id: 3, a: 1, b: { c: 1 } }]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('returns the requested objects (or)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1, b: { c: 2 } }, { id: 2, a: 2, b: { c: 1 } }, { id: 3, a: 1, b: { c: 1 } }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.query({ a: 1, b: { c: db.or([1, 2]) } }, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.deep.equal([{ id: 3, a: 1, b: { c: 1 } }, { id: 1, a: 1, b: { c: 2 } }]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('returns the requested objects (contains)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1, b: { c: [1, 2] } }, { id: 2, a: 2, b: { c: [3, 4] } }, { id: 3, a: 1, b: { c: [2, 3] } }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.query({ a: 1, b: { c: db.contains(1) } }, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.deep.equal([{ id: 1, a: 1, b: { c: [1, 2] } }]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('returns the requested objects (contains or)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1, b: { c: [1, 2] } }, { id: 2, a: 2, b: { c: [3, 4] } }, { id: 3, a: 1, b: { c: [2, 3] } }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.query({ a: 1, b: { c: db.contains([1, 2], { condition: 'or' }) } }, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.deep.equal([{ id: 3, a: 1, b: { c: [2, 3] } }, { id: 1, a: 1, b: { c: [1, 2] } }]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('returns the requested objects (contains and)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1, b: { c: [1, 2] } }, { id: 2, a: 2, b: { c: [3, 4] } }, { id: 3, a: 1, b: { c: [2, 3] } }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.query({ a: 1, b: { c: db.contains([1, 2], { condition: 'and' }) } }, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.deep.equal([{ id: 1, a: 1, b: { c: [1, 2] } }]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('returns the requested objects (contains and default)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1, b: { c: [1, 2] } }, { id: 2, a: 2, b: { c: [3, 4] } }, { id: 3, a: 1, b: { c: [2, 3] } }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.query({ a: 1, b: { c: db.contains([1, 2]) } }, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.deep.equal([{ id: 1, a: 1, b: { c: [1, 2] } }]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('returns the requested objects (contains key)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1, b: { c: [1, 2] } }, { id: 2, a: 2, b: { d: [3, 4] } }, { id: 3, a: 1, b: { e: [2, 3] } }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.query({ a: 1, b: db.contains('c', { keys: true }) }, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.deep.equal([{ id: 1, a: 1, b: { c: [1, 2] } }]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('returns the requested objects (contains keys or)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1, b: { c: [1, 2] } }, { id: 2, a: 2, b: { d: [3, 4] } }, { id: 3, a: 1, b: { e: [2, 3] } }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.query({ a: 1, b: db.contains(['c', 'e'], { keys: true, condition: 'or' }) }, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.deep.equal([{ id: 3, a: 1, b: { e: [2, 3] } }, { id: 1, a: 1, b: { c: [1, 2] } }]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('returns the requested objects (contains keys and)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1, b: { c: [1, 2] } }, { id: 2, a: 2, b: { d: [3, 4] } }, { id: 3, a: 1, b: { e: [2, 3], f: 'x' } }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.query({ a: 1, b: db.contains(['f', 'e'], { keys: true, condition: 'and' }) }, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.deep.equal([{ id: 3, a: 1, b: { e: [2, 3], f: 'x' } }]);
                         done();
                     });
                 });
