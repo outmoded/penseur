@@ -385,6 +385,50 @@ describe('Table', { parallel: false }, () => {
                 });
             });
         });
+
+        it('handles query into nested object where item is not an object', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1, b: false }, { id: 2, a: 2, b: { c: 1 } }, { id: 3, a: 1, b: { c: 1 } }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.query({ a: 1, b: { c: 1 } }, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.deep.equal([{ id: 3, a: 1, b: { c: 1 } }]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('handles query into double nested object where item is not an object', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([
+                    { id: 1, a: 1, b: false },
+                    { id: 2, a: 2, b: { c: { d: 4 } } },
+                    { id: 3, a: 1, b: { c: 1 } }
+                ], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.query({ b: { c: { d: 4 } } }, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.deep.equal([{ id: 2, a: 2, b: { c: { d: 4 } } }]);
+                        done();
+                    });
+                });
+            });
+        });
     });
 
     describe('single()', () => {
