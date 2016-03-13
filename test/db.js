@@ -223,6 +223,15 @@ describe('Db', () => {
                 db.close(done);
             });
         });
+
+        it('decorates an array of tables', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.table(['test1', 'test2']);
+            expect(db.tables.test1).to.exist();
+            expect(db.tables.test2).to.exist();
+            db.close(done);
+        });
     });
 
     describe('establish()', () => {
@@ -238,7 +247,7 @@ describe('Db', () => {
 
                     expect(err).to.not.exist();
 
-                    db.establish({ test: { index: 'other' } }, (err) => {
+                    db.establish({ test: { secondary: 'other' } }, (err) => {
 
                         expect(err).to.not.exist();
                         RethinkDB.db(db.name).table('test').indexList().run(db._connection, (err, result) => {
@@ -252,7 +261,7 @@ describe('Db', () => {
             });
         });
 
-        it('customize table options', (done) => {
+        it('customizes table options', (done) => {
 
             const Override = class extends Penseur.Table {
                 insert(items, callback) {
@@ -289,6 +298,41 @@ describe('Db', () => {
             });
         });
 
+        it('customizes table options before establish', (done) => {
+
+            const Override = class extends Penseur.Table {
+                insert(items, callback) {
+
+                    items = [].concat(items);
+                    for (let i = 0; i < items.length; ++i) {
+                        items[i].flag = true;
+                    }
+
+                    return super.insert(items, callback);
+                }
+            };
+
+            const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015 });
+            db.table('test', { extended: Override });
+            db.establish('test', (err) => {
+
+                expect(err).to.not.exist();
+
+                db.test.insert({ id: 1, value: 'x' }, (err, result) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.get(1, (err, item) => {
+
+                        expect(err).to.not.exist();
+                        expect(item.value).to.equal('x');
+                        expect(item.flag).to.equal(true);
+                        db.close(done);
+                    });
+                });
+            });
+        });
+
         it('creates database with different table indexes', (done) => {
 
             const db1 = new Penseur.Db('penseurtest');
@@ -296,7 +340,7 @@ describe('Db', () => {
 
                 expect(err).to.not.exist();
 
-                db1.establish({ test: { index: 'other' } }, (err) => {
+                db1.establish({ test: { secondary: 'other' } }, (err) => {
 
                     expect(err).to.not.exist();
 
@@ -328,6 +372,45 @@ describe('Db', () => {
             });
         });
 
+        it('creates database and retains table indexes', (done) => {
+
+            const db1 = new Penseur.Db('penseurtest');
+            db1.connect((err) => {
+
+                expect(err).to.not.exist();
+
+                db1.establish({ test: { secondary: 'other' } }, (err) => {
+
+                    expect(err).to.not.exist();
+
+                    RethinkDB.db(db1.name).table('test').indexList().run(db1._connection, (err, result1) => {
+
+                        expect(err).to.not.exist();
+                        expect(result1).to.deep.equal(['other']);
+                        db1.close(() => {
+
+                            const db2 = new Penseur.Db('penseurtest');
+                            db2.connect((err) => {
+
+                                expect(err).to.not.exist();
+
+                                db2.establish({ test: { secondary: false } }, (err) => {
+
+                                    expect(err).to.not.exist();
+                                    RethinkDB.db(db2.name).table('test').indexList().run(db2._connection, (err, result2) => {
+
+                                        expect(err).to.not.exist();
+                                        expect(result2).to.deep.equal(['other']);
+                                        db2.close(done);
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
         it('creates database with different table indexes (partial overlap)', (done) => {
 
             const db1 = new Penseur.Db('penseurtest');
@@ -335,7 +418,7 @@ describe('Db', () => {
 
                 expect(err).to.not.exist();
 
-                db1.establish({ test: { index: ['a', 'b'] } }, (err) => {
+                db1.establish({ test: { secondary: ['a', 'b'] } }, (err) => {
 
                     expect(err).to.not.exist();
                     RethinkDB.db(db1.name).table('test').indexList().run(db1._connection, (err, result1) => {
@@ -349,7 +432,7 @@ describe('Db', () => {
 
                                 expect(err).to.not.exist();
 
-                                db2.establish({ test: { index: ['b', 'c'] } }, (err) => {
+                                db2.establish({ test: { secondary: ['b', 'c'] } }, (err) => {
 
                                     expect(err).to.not.exist();
                                     RethinkDB.db(db2.name).table('test').indexList().run(db2._connection, (err, result2) => {
@@ -417,29 +500,6 @@ describe('Db', () => {
         it('fails connecting to missing server', (done) => {
 
             const db = new Penseur.Db('penseurtest', { host: 'example.com', timeout: 0.001 });
-
-            db.establish(['test'], (err) => {
-
-                expect(err).to.exist();
-                db.close(done);
-            });
-        });
-
-        it('errors on database indexList() error', { parallel: false }, (done) => {
-
-            const db = new Penseur.Db('penseurtest');
-            const orig = RethinkDB.dbList;
-            RethinkDB.dbList = function () {
-
-                RethinkDB.dbList = orig;
-
-                return {
-                    run: function (connection, next) {
-
-                        return next(new Error('Bad database'));
-                    }
-                };
-            };
 
             db.establish(['test'], (err) => {
 
@@ -582,11 +642,18 @@ describe('Db', () => {
 
     describe('_createTable', () => {
 
-        it('errors on database dbList() error', { parallel: false }, (done) => {
+        it('errors on database tableList() error', { parallel: false }, (done) => {
 
             const db = new Penseur.Db('penseurtest');
             const orig = RethinkDB.db;
-            RethinkDB.db = function () {
+            let count = 0;
+
+            RethinkDB.db = function (name) {
+
+                ++count;
+                if (count === 1) {
+                    return orig(name);
+                }
 
                 RethinkDB.db = orig;
 
