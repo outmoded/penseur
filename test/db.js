@@ -178,6 +178,29 @@ describe('Db', () => {
                 db._connection.emit('timeout');
             });
         });
+
+        it('prepares generate id table', (done) => {
+
+            const prep = new Penseur.Db('penseurtest');
+            prep.establish(['allocate', 'test'], (err) => {         // Cleanup
+
+                expect(err).to.not.exist();
+                prep.close();
+
+                const db = new Penseur.Db('penseurtest');
+                db.table('test', { id: { table: 'allocate' } });
+                db.connect((err) => {
+
+                    expect(err).to.not.exist();
+                    db.test.insert({ id: db.id('increment'), a: 1 }, (err, keys) => {
+
+                        expect(err).to.not.exist();
+                        expect(keys).to.equal('2');
+                        done();
+                    });
+                });
+            });
+        });
     });
 
     describe('close()', () => {
@@ -674,6 +697,28 @@ describe('Db', () => {
 
                 expect(err).to.exist();
                 db.close(done);
+            });
+        });
+    });
+
+    describe('verify()', () => {
+
+        it('prepares generate id table', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish({ allocate: true, test: { id: { table: 'allocate' } } }, (err) => {
+
+                expect(err).to.not.exist();
+                db.verify((err) => {
+
+                    expect(err).to.not.exist();
+                    db.test.insert({ id: db.id('increment'), a: 1 }, (err, keys) => {
+
+                        expect(err).to.not.exist();
+                        expect(keys).to.equal('2');
+                        done();
+                    });
+                });
             });
         });
     });
