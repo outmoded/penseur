@@ -572,28 +572,13 @@ describe('Table', { parallel: false }, () => {
         it('generates key locally (uuid)', (done) => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            db.establish({ test: { id: { type: 'uuid' } } }, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: db.id('uuid'), a: 1 }, (err, keys) => {
+                db.test.insert({ a: 1 }, (err, keys) => {
 
                     expect(err).to.not.exist();
                     expect(keys).to.match(/^[\da-f]{8}\-[\da-f]{4}\-[\da-f]{4}\-[\da-f]{4}\-[\da-f]{12}$/);
-                    done();
-                });
-            });
-        });
-
-        it('generates keys locally (uuid)', (done) => {
-
-            const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
-
-                expect(err).to.not.exist();
-                db.test.insert([{ id: db.id('uuid'), a: 1 }, { id: db.id('uuid'), a: 2 }], (err, keys) => {
-
-                    expect(err).to.not.exist();
-                    expect(keys.length).to.equal(2);
                     done();
                 });
             });

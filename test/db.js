@@ -188,11 +188,11 @@ describe('Db', () => {
                 prep.close();
 
                 const db = new Penseur.Db('penseurtest');
-                db.table('test', { id: { table: 'allocate' } });
+                db.table('test', { id: { type: 'increment', table: 'allocate' } });
                 db.connect((err) => {
 
                     expect(err).to.not.exist();
-                    db.test.insert({ id: db.id('increment'), a: 1 }, (err, keys) => {
+                    db.test.insert({ a: 1 }, (err, keys) => {
 
                         expect(err).to.not.exist();
                         expect(keys).to.equal('2');
@@ -706,13 +706,13 @@ describe('Db', () => {
         it('prepares generate id table', (done) => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish({ allocate: true, test: { id: { table: 'allocate' } } }, (err) => {
+            db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } }, (err) => {
 
                 expect(err).to.not.exist();
                 db.verify((err) => {
 
                     expect(err).to.not.exist();
-                    db.test.insert({ id: db.id('increment'), a: 1 }, (err, keys) => {
+                    db.test.insert({ a: 1 }, (err, keys) => {
 
                         expect(err).to.not.exist();
                         expect(keys).to.equal('2');
