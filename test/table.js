@@ -1442,6 +1442,264 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
+        it('includes initial state', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                const changes = [];
+                const each = (err, item) => {
+
+                    expect(err).to.not.exist();
+                    changes.push(item.id);
+                };
+
+                db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.changes(1, { handler: each, initial: true }, (err, cursor) => {
+
+                        expect(err).to.not.exist();
+
+                        db.test.update(1, { a: 2 }, (err, keys2) => {
+
+                            expect(err).to.not.exist();
+
+                            db.test.insert({ id: 2, a: 2 }, (err) => {
+
+                                expect(err).to.not.exist();
+
+                                expect(changes).to.deep.equal([1, 1]);
+                                db.close(done);
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
+        it('handles initial state on missing initial item', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.changes('1', { handler: Hoek.ignore, initial: true }, (err, cursor) => {
+
+                    expect(err).to.not.exist();
+                    db.close(done);
+                });
+            });
+        });
+
+        it('reconnects', (done) => {
+
+            let step2 = null;
+            let count = 0;
+            const onConnect = () => {
+
+                ++count;
+                if (step2) {
+                    step2();
+                }
+            };
+
+            const db = new Penseur.Db('penseurtest', { onConnect: onConnect });
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                const changes = [];
+                const each = (err, item) => {
+
+                    if (!err) {
+                        changes.push(item.type);
+
+                        if (changes.length === 3) {
+
+                            expect(changes).to.deep.equal(['insert', { willReconnect: true, disconnected: true }, 'initial']);
+                            expect(count).to.equal(2);
+                            db.close(done);
+                        }
+                    }
+                    else {
+                        changes.push(err.flags);
+                    }
+                };
+
+                db.test.changes(1, { handler: each, initial: true }, (err, cursor) => {
+
+                    expect(err).to.not.exist();
+                    db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
+
+                        expect(err).to.not.exist();
+                        step2 = () => {
+
+                            step2 = null;
+                            db.test.update(1, { a: 2 }, Hoek.ignore);
+                        };
+
+                        db._connection.close(Hoek.ignore);
+                    });
+                });
+            });
+        });
+
+        it('does not reconnect on manual cursor close', (done) => {
+
+            let step2 = null;
+            let count = 0;
+            const onConnect = () => {
+
+                ++count;
+                if (step2) {
+                    step2();
+                }
+            };
+
+            const db = new Penseur.Db('penseurtest', { onConnect: onConnect });
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                const changes = [];
+                const each = (err, item) => {
+
+                    if (!err) {
+                        changes.push(item.type);
+                    }
+                    else {
+                        changes.push(err.flags);
+                    }
+                };
+
+                db.test.changes(1, { handler: each, initial: true }, (err, cursor) => {
+
+                    expect(err).to.not.exist();
+                    db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
+
+                        expect(err).to.not.exist();
+                        cursor.close();
+
+                        step2 = () => {
+
+                            step2 = null;
+                            db.test.update(1, { a: 2 }, (err) => {
+
+                                expect(err).to.not.exist();
+                                db.test.update(1, { a: 2 }, (err) => {
+
+                                    expect(err).to.not.exist();
+                                    expect(changes).to.deep.equal(['insert']);
+                                    expect(count).to.equal(2);
+                                    db.close(done);
+                                });
+                            });
+                        };
+
+                        db._connection.close();
+                    });
+                });
+            });
+        });
+
+        it('does not reconnect (feed reconnect disabled)', (done) => {
+
+            let step2 = null;
+            let count = 0;
+            const onConnect = () => {
+
+                ++count;
+                if (step2) {
+                    step2();
+                }
+            };
+
+            const db = new Penseur.Db('penseurtest', { onConnect: onConnect });
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                const changes = [];
+                const each = (err, item) => {
+
+                    if (!err) {
+                        changes.push(item.type);
+                    }
+                    else {
+                        changes.push(err.flags);
+                    }
+                };
+
+                db.test.changes(1, { handler: each, initial: true, reconnect: false }, (err, cursor) => {
+
+                    expect(err).to.not.exist();
+                    db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
+
+                        expect(err).to.not.exist();
+
+                        step2 = () => {
+
+                            step2 = null;
+                            db.test.update(1, { a: 2 }, (err) => {
+
+                                expect(err).to.not.exist();
+                                db.test.update(1, { a: 2 }, (err) => {
+
+                                    expect(err).to.not.exist();
+                                    expect(changes).to.deep.equal(['insert', { willReconnect: false, disconnected: true }]);
+                                    expect(count).to.equal(2);
+                                    db.close(done);
+                                });
+                            });
+                        };
+
+                        db._connection.close();
+                    });
+                });
+            });
+        });
+
+        it('does not reconnect (db reconnect disabled)', (done) => {
+
+            let count = 0;
+            const onConnect = () => {
+
+                ++count;
+            };
+
+            const db = new Penseur.Db('penseurtest', { onConnect: onConnect, reconnect: false });
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                const changes = [];
+                const each = (err, item) => {
+
+                    if (!err) {
+                        changes.push(item.type);
+                    }
+                    else {
+                        changes.push(err.flags);
+                    }
+                };
+
+                db.test.changes(1, { handler: each, initial: true }, (err, cursor) => {
+
+                    expect(err).to.not.exist();
+                    db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
+
+                        db._connection.close(() => {
+
+                            expect(err).to.not.exist();
+                            expect(changes).to.deep.equal(['insert', { willReconnect: false, disconnected: true }]);
+                            expect(count).to.equal(1);
+                            db.close(done);
+                        });
+                    });
+                });
+            });
+        });
+
         it('errors on bad cursor', (done) => {
 
             const db = new Penseur.Db('penseurtest');
@@ -1483,7 +1741,7 @@ describe('Table', { parallel: false }, () => {
             db.connect((err) => {
 
                 expect(err).to.not.exist();
-                db.invalid.changes('*', (err, item) => {
+                db.invalid.changes('*', Hoek.ignore, (err, item) => {
 
                     expect(err).to.exist();
                     done();

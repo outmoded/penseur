@@ -20,7 +20,7 @@ const it = lab.it;
 const expect = Code.expect;
 
 
-describe('Id', { parallel: false }, () => {
+describe('Id', () => {
 
     describe('wrap()', () => {
 
@@ -220,7 +220,7 @@ describe('Id', { parallel: false }, () => {
                     db.test.insert({ a: 1 }, (err, keys) => {
 
                         expect(err).to.exist();
-                        expect(err.message).to.equal('Increment id record contains non-integer value: test');
+                        expect(err.data.error.message).to.equal('Increment id record contains non-integer value: test');
                         done();
                     });
                 });
@@ -237,7 +237,7 @@ describe('Id', { parallel: false }, () => {
                 db.test.insert({ a: 1 }, (err, keys) => {
 
                     expect(err).to.exist();
-                    expect(err.message).to.equal('Failed creating increment id table: test');
+                    expect(err.data.error.message).to.equal('Failed creating increment id table: test');
                     done();
                 });
             });
@@ -253,7 +253,7 @@ describe('Id', { parallel: false }, () => {
                 db.test.insert({ a: 1 }, (err, keys) => {
 
                     expect(err).to.exist();
-                    expect(err.message).to.equal('Failed verifying increment id record: test');
+                    expect(err.data.error.message).to.equal('Failed verifying increment id record: test');
                     done();
                 });
             });
@@ -272,7 +272,7 @@ describe('Id', { parallel: false }, () => {
                     db.test.insert({ a: 1 }, (err, keys) => {
 
                         expect(err).to.exist();
-                        expect(err.message).to.equal('Failed initializing key-value pair to increment id record: test');
+                        expect(err.data.error.message).to.equal('Failed initializing key-value pair to increment id record: test');
                         done();
                     });
                 });
@@ -289,7 +289,7 @@ describe('Id', { parallel: false }, () => {
                 db.test.insert({ a: 1 }, (err, keys) => {
 
                     expect(err).to.exist();
-                    expect(err.message).to.equal('Failed inserting increment id record: test');
+                    expect(err.data.error.message).to.equal('Failed inserting increment id record: test');
                     done();
                 });
             });
@@ -305,7 +305,7 @@ describe('Id', { parallel: false }, () => {
                 db.test.insert([{ a: 1 }, { a: 1 }], (err, keys) => {
 
                     expect(err).to.exist();
-                    expect(err.message).to.equal('Failed allocating increment id: test');
+                    expect(err.data.error.message).to.equal('Failed allocating increment id: test');
                     done();
                 });
             });

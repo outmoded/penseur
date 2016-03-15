@@ -721,6 +721,66 @@ describe('Db', () => {
                 });
             });
         });
+
+        it('errors on create table error (id)', (done) => {
+
+            const prep = new Penseur.Db('penseurtest');
+            const settings = {
+                penseur_unique_test_a: true,                 // Test cleanup
+                test: {
+                    id: { type: 'increment', table: 'allocate' },
+                    unique: {
+                        path: 'a'
+                    }
+                }
+            };
+
+            prep.establish(settings, (err) => {
+
+                expect(err).to.not.exist();
+                prep.close();
+
+                const db = new Penseur.Db('penseurtest');
+                db.table(settings);
+
+                db.test._db._createTable = (options, callback) => callback(new Error('Failed'));
+                db.connect((err) => {
+
+                    expect(err).to.exist();
+                    db.close(done);
+                });
+            });
+        });
+
+        it('errors on create table error (unique)', (done) => {
+
+            const prep = new Penseur.Db('penseurtest');
+            const settings = {
+                penseur_unique_test_a: true,                 // Test cleanup
+                test: {
+                    id: 'uuid',
+                    unique: {
+                        path: 'a'
+                    }
+                }
+            };
+
+            prep.establish(settings, (err) => {
+
+                expect(err).to.not.exist();
+                prep.close();
+
+                const db = new Penseur.Db('penseurtest');
+                db.table(settings);
+
+                db.test._db._createTable = (options, callback) => callback(new Error('Failed'));
+                db.connect((err) => {
+
+                    expect(err).to.exist();
+                    db.close(done);
+                });
+            });
+        });
     });
 
     describe('disable()', () => {
