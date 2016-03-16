@@ -195,7 +195,7 @@ describe('Db', () => {
                     db.test.insert({ a: 1 }, (err, keys) => {
 
                         expect(err).to.not.exist();
-                        expect(keys).to.equal('2');
+                        expect(keys).to.equal('1');
                         done();
                     });
                 });
@@ -737,11 +737,17 @@ describe('Db', () => {
                 db.verify((err) => {
 
                     expect(err).to.not.exist();
-                    db.test.insert({ a: 1 }, (err, keys) => {
+                    db.allocate.get('test', (err, record) => {
 
                         expect(err).to.not.exist();
-                        expect(keys).to.equal('2');
-                        done();
+                        expect(record.value).to.equal(0);
+
+                        db.test.insert({ a: 1 }, (err, keys) => {
+
+                            expect(err).to.not.exist();
+                            expect(keys).to.equal('1');
+                            done();
+                        });
                     });
                 });
             });

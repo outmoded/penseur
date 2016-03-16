@@ -136,15 +136,16 @@ describe('Id', () => {
             });
         });
 
-        it('updates generate record', (done) => {
+        it('completes an existing incomplete allocation record', (done) => {
 
             const db = new Penseur.Db('penseurtest');
             db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } }, (err) => {
 
                 expect(err).to.not.exist();
-                db.allocate.insert({ id: 'test' }, (err, key) => {
+                db.allocate.update('test', { value: db.unset() }, (err) => {
 
                     expect(err).to.not.exist();
+                    db.test._id.verified = false;
                     db.test.insert({ a: 1 }, (err, keys) => {
 
                         expect(err).to.not.exist();
@@ -161,7 +162,7 @@ describe('Id', () => {
             db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } }, (err) => {
 
                 expect(err).to.not.exist();
-                db.allocate.insert({ id: 'test', value: 33 }, (err, key) => {
+                db.allocate.update('test', { value: 33 }, (err) => {
 
                     expect(err).to.not.exist();
                     db.test.insert({ a: 1 }, (err, keys) => {
@@ -180,7 +181,7 @@ describe('Id', () => {
             db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate', radix: 62 } } }, (err) => {
 
                 expect(err).to.not.exist();
-                db.allocate.insert({ id: 'test', value: 1324 }, (err, key) => {
+                db.allocate.update('test', { value: 1324 }, (err) => {
 
                     expect(err).to.not.exist();
                     db.test.insert({ a: 1 }, (err, keys) => {
@@ -214,9 +215,10 @@ describe('Id', () => {
             db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } }, (err) => {
 
                 expect(err).to.not.exist();
-                db.allocate.insert({ id: 'test', value: 'string' }, (err, key) => {
+                db.allocate.update('test', { value: 'string' }, (err) => {
 
                     expect(err).to.not.exist();
+                    db.test._id.verified = false;
                     db.test.insert({ a: 1 }, (err, keys) => {
 
                         expect(err).to.exist();
@@ -234,6 +236,7 @@ describe('Id', () => {
 
                 expect(err).to.not.exist();
                 db.test._db._createTable = (options, callback) => callback(new Error('Failed'));
+                db.test._id.verified = false;
                 db.test.insert({ a: 1 }, (err, keys) => {
 
                     expect(err).to.exist();
@@ -250,6 +253,7 @@ describe('Id', () => {
 
                 expect(err).to.not.exist();
                 db.test._id.table.get = (id, callback) => callback(new Error('Failed'));
+                db.test._id.verified = false;
                 db.test.insert({ a: 1 }, (err, keys) => {
 
                     expect(err).to.exist();
@@ -265,10 +269,11 @@ describe('Id', () => {
             db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } }, (err) => {
 
                 expect(err).to.not.exist();
-                db.allocate.insert({ id: 'test' }, (err, key) => {
+                db.allocate.update('test', { value: db.unset() }, (err, key) => {
 
                     expect(err).to.not.exist();
                     db.test._id.table.update = (id, changes, callback) => callback(new Error('Failed'));
+                    db.test._id.verified = false;
                     db.test.insert({ a: 1 }, (err, keys) => {
 
                         expect(err).to.exist();
@@ -285,12 +290,17 @@ describe('Id', () => {
             db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } }, (err) => {
 
                 expect(err).to.not.exist();
-                db.test._id.table.insert = (item, callback) => callback(new Error('Failed'));
-                db.test.insert({ a: 1 }, (err, keys) => {
+                db.allocate.remove('test', (err) => {
 
-                    expect(err).to.exist();
-                    expect(err.data.error.message).to.equal('Failed inserting increment id record: test');
-                    done();
+                    expect(err).to.not.exist();
+                    db.test._id.table.insert = (item, callback) => callback(new Error('Failed'));
+                    db.test._id.verified = false;
+                    db.test.insert({ a: 1 }, (err, keys) => {
+
+                        expect(err).to.exist();
+                        expect(err.data.error.message).to.equal('Failed inserting increment id record: test');
+                        done();
+                    });
                 });
             });
         });
@@ -302,6 +312,7 @@ describe('Id', () => {
 
                 expect(err).to.not.exist();
                 db.test._id.table.next = (id, key, inc, callback) => callback(new Error('Failed'));
+                db.test._id.verified = false;
                 db.test.insert([{ a: 1 }, { a: 1 }], (err, keys) => {
 
                     expect(err).to.exist();
