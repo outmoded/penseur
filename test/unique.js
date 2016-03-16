@@ -137,6 +137,78 @@ describe('Unique', () => {
             });
         });
 
+        it('forbids violating a unique value (keys)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            const settings = {
+                penseur_unique_test_a: true,                 // Test cleanup
+                test: {
+                    id: 'uuid',
+                    unique: {
+                        path: 'a'
+                    }
+                }
+            };
+
+            db.establish(settings, (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ a: { b: 1 } }, (err, key1) => {
+
+                    expect(err).to.not.exist();
+                    db.test.insert({ a: { c: 2, d: 4 } }, (err, key2) => {
+
+                        expect(err).to.not.exist();
+                        db.test.insert({ a: { b: 3 } }, (err, key3) => {
+
+                            expect(err).to.exist();
+                            db.test.insert({ a: { d: 5 } }, (err, key4) => {
+
+                                expect(err).to.exist();
+                                done();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
+        it('forbids violating a unique value (array)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            const settings = {
+                penseur_unique_test_a: true,                 // Test cleanup
+                test: {
+                    id: 'uuid',
+                    unique: {
+                        path: 'a'
+                    }
+                }
+            };
+
+            db.establish(settings, (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ a: ['b'] }, (err, key1) => {
+
+                    expect(err).to.not.exist();
+                    db.test.insert({ a: ['c', 'a'] }, (err, key2) => {
+
+                        expect(err).to.not.exist();
+                        db.test.insert({ a: ['b'] }, (err, key3) => {
+
+                            expect(err).to.exist();
+                            db.test.insert({ a: ['a'] }, (err, key4) => {
+
+                                expect(err).to.exist();
+                                done();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
         it('cusomizes unique table name', (done) => {
 
             const db = new Penseur.Db('penseurtest');
@@ -189,30 +261,6 @@ describe('Unique', () => {
 
                     expect(err).to.not.exist();
                     expect(keys.length).to.equal(2);
-                    done();
-                });
-            });
-        });
-
-        it('ignore non-plain values', (done) => {
-
-            const db = new Penseur.Db('penseurtest');
-            const settings = {
-                penseur_unique_test_a: true,                 // Test cleanup
-                test: {
-                    id: 'uuid',
-                    unique: {
-                        path: 'a'
-                    }
-                }
-            };
-
-            db.establish(settings, (err) => {
-
-                expect(err).to.not.exist();
-                db.test.insert({ a: { b: 1 } }, (err, key) => {
-
-                    expect(err).to.not.exist();
                     done();
                 });
             });
