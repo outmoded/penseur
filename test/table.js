@@ -124,7 +124,7 @@ describe('Table', { parallel: false }, () => {
                     db.test.get([4, 5, 6], (err, result) => {
 
                         expect(err).to.not.exist();
-                        expect(result).to.deep.equal(null);
+                        expect(result).to.equal(null);
                         done();
                     });
                 });
