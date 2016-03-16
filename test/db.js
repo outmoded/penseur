@@ -201,6 +201,41 @@ describe('Db', () => {
                 });
             });
         });
+
+        it('errors on missing database', (done) => {
+
+            const db = new Penseur.Db('penseurtest_no_such_db');
+
+            db.connect((err) => {
+
+                expect(err).to.exist();
+                expect(err.message).to.equal('Missing database: penseurtest_no_such_db');
+                db.close(done);
+            });
+        });
+
+        it('errors on database dbList() error', { parallel: false }, (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            const orig = RethinkDB.dbList;
+            RethinkDB.dbList = function () {
+
+                RethinkDB.dbList = orig;
+
+                return {
+                    run: function (connection, next) {
+
+                        return next(new Error('Bad database'));
+                    }
+                };
+            };
+
+            db.connect((err) => {
+
+                expect(err).to.exist();
+                db.close(done);
+            });
+        });
     });
 
     describe('close()', () => {
@@ -279,6 +314,29 @@ describe('Db', () => {
                             expect(result).to.deep.equal(['other']);
                             db.close(done);
                         });
+                    });
+                });
+            });
+        });
+
+        it('creates new database (complex tables pre-loaded)', (done) => {
+
+            const prep = new Penseur.Db('penseurtest');
+            prep.connect((err) => {
+
+                expect(err).to.not.exist();
+                RethinkDB.dbDrop('penseurtest').run(prep._connection, (err, dropped) => {
+
+                    expect(err).to.not.exist();
+                    prep.close();
+
+                    const db = new Penseur.Db('penseurtest');
+                    db.table({ test: { id: 'increment' } });
+
+                    db.establish(['test'], (err) => {
+
+                        expect(err).to.not.exist();
+                        db.close(done);
                     });
                 });
             });
@@ -551,39 +609,6 @@ describe('Db', () => {
 
                 expect(err).to.exist();
                 db.close(done);
-            });
-        });
-
-        it('errors on database dbCreate() error', { parallel: false }, (done) => {
-
-            const db = new Penseur.Db('penseur-test');
-            db.connect((err) => {
-
-                expect(err).to.not.exist();
-
-                RethinkDB.dbDrop(db.name).run(db._connection, (err, dropped) => {
-
-                    expect(err).to.exist();
-
-                    const orig = RethinkDB.dbCreate;
-                    RethinkDB.dbCreate = function () {
-
-                        RethinkDB.dbCreate = orig;
-
-                        return {
-                            run: function (connection, next) {
-
-                                return next(new Error('Bad database'));
-                            }
-                        };
-                    };
-
-                    db.establish(['test'], (err) => {
-
-                        expect(err).to.exist();
-                        db.close(done);
-                    });
-                });
             });
         });
 
