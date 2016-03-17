@@ -71,6 +71,26 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
+        it('returns the requested objects (array of one)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.get([1], (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.deep.equal([{ id: 1, a: 1 }]);
+                        done();
+                    });
+                });
+            });
+        });
+
         it('returns the requested objects found (partial)', (done) => {
 
             const db = new Penseur.Db('penseurtest');
@@ -646,6 +666,24 @@ describe('Table', { parallel: false }, () => {
                     expect(keys[5]).to.equal(3);
                     expect(keys[6]).to.equal(4);
                     done();
+                });
+            });
+        });
+
+        it('errors on key conflict', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: 1, a: 1 }, (err, key1) => {
+
+                    expect(err).to.not.exist();
+                    db.test.insert({ id: 1, a: 1 }, (err, key2) => {
+
+                        expect(err).to.exist();
+                        done();
+                    });
                 });
             });
         });

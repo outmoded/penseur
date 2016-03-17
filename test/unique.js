@@ -113,6 +113,98 @@ describe('Unique', () => {
             });
         });
 
+        it('allows appending a unique value', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            const settings = {
+                penseur_unique_test_a: true,                 // Test cleanup
+                test: {
+                    id: 'uuid',
+                    unique: {
+                        path: 'a'
+                    }
+                }
+            };
+
+            db.establish(settings, (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: '1', a: [1] }, (err, key) => {
+
+                    expect(err).to.not.exist();
+                    db.test.update('1', { a: db.append(2) }, (err) => {
+
+                        expect(err).to.not.exist();
+                        db.test.update('1', { a: db.append(1) }, (err) => {
+
+                            expect(err).to.not.exist();
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('releases value on unset', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            const settings = {
+                penseur_unique_test_a: true,                 // Test cleanup
+                test: {
+                    id: 'uuid',
+                    unique: {
+                        path: 'a'
+                    }
+                }
+            };
+
+            db.establish(settings, (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: '1', a: 1 }, (err, key) => {
+
+                    expect(err).to.not.exist();
+                    db.test.update('1', { a: db.unset() }, (err) => {
+
+                        expect(err).to.not.exist();
+                        db.test.insert({ id: 2, a: 1 }, (err) => {
+
+                            expect(err).to.not.exist();
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('allows adding a unique value via update', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            const settings = {
+                penseur_unique_test_a: true,                 // Test cleanup
+                test: {
+                    id: 'uuid',
+                    unique: {
+                        path: 'a'
+                    }
+                }
+            };
+
+            db.establish(settings, (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: '1' }, (err, key) => {
+
+                    expect(err).to.not.exist();
+                    db.test.update('1', { a: 2 }, (err) => {
+
+                        expect(err).to.not.exist();
+                        done();
+                    });
+                });
+            });
+        });
+
         it('forbids violating a unique value', (done) => {
 
             const db = new Penseur.Db('penseurtest');
@@ -173,6 +265,70 @@ describe('Unique', () => {
             });
         });
 
+        it('allows same owner changes', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            const settings = {
+                penseur_unique_test_a: true,                 // Test cleanup
+                test: {
+                    id: 'uuid',
+                    unique: {
+                        path: 'a'
+                    }
+                }
+            };
+
+            db.establish(settings, (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: 1, a: { c: 1 } }, (err, key1) => {
+
+                    expect(err).to.not.exist();
+                    db.test.update(1, { a: { c: 5 } }, (err) => {
+
+                        expect(err).to.not.exist();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('releases reservations on update (keys)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            const settings = {
+                penseur_unique_test_a: true,                 // Test cleanup
+                test: {
+                    id: 'uuid',
+                    unique: {
+                        path: 'a'
+                    }
+                }
+            };
+
+            db.establish(settings, (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: 1, a: { b: 1 } }, (err, key1) => {
+
+                    expect(err).to.not.exist();
+                    db.test.insert({ id: 2, a: { c: 2, d: 4 } }, (err, key2) => {
+
+                        expect(err).to.not.exist();
+                        db.test.update(2, { a: { c: db.unset() } }, (err) => {
+
+                            expect(err).to.not.exist();
+                            db.test.update(1, { a: { c: 5 } }, (err) => {
+
+                                expect(err).to.not.exist();
+                                done();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
         it('forbids violating a unique value (array)', (done) => {
 
             const db = new Penseur.Db('penseurtest');
@@ -209,7 +365,7 @@ describe('Unique', () => {
             });
         });
 
-        it('cusomizes unique table name', (done) => {
+        it('customizes unique table name', (done) => {
 
             const db = new Penseur.Db('penseurtest');
             const settings = {
