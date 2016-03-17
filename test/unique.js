@@ -67,7 +67,7 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: { b: 1 } }, { id: 2, a: { c: { d: 2 } } }], (err, keys) => {
+                db.test.insert([{ id: 1, a: { b: 1 } }, { id: 2, a: { c: { d: [2] } } }], (err, keys) => {
 
                     expect(err).to.not.exist();
                     expect(keys.length).to.equal(2);
@@ -75,7 +75,12 @@ describe('Unique', () => {
                     db.test.update(2, { a: { b: 1 } }, (err) => {
 
                         expect(err).to.exist();
-                        done();
+
+                        db.test.update(2, { a: { c: { d: db.append([1, 2]) } } }, (err) => {
+
+                            expect(err).to.not.exist();
+                            done();
+                        });
                     });
                 });
             });
@@ -177,6 +182,30 @@ describe('Unique', () => {
             });
         });
 
+        it('ignores empty object', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            const settings = {
+                penseur_unique_test_a: true,                 // Test cleanup
+                test: {
+                    id: 'uuid',
+                    unique: {
+                        path: 'a'
+                    }
+                }
+            };
+
+            db.establish(settings, (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: '1', a: {} }, (err, key) => {
+
+                    expect(err).to.not.exist();
+                    done();
+                });
+            });
+        });
+
         it('allows adding a unique value via update', (done) => {
 
             const db = new Penseur.Db('penseurtest');
@@ -245,19 +274,23 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ a: { b: 1 } }, (err, key1) => {
+                db.test.insert({ a: { b: [1] } }, (err, key1) => {
 
                     expect(err).to.not.exist();
-                    db.test.insert({ a: { c: 2, d: 4 } }, (err, key2) => {
+                    db.test.update(key1, { a: { b: db.append(2) } }, (err) => {
 
                         expect(err).to.not.exist();
-                        db.test.insert({ a: { b: 3 } }, (err, key3) => {
+                        db.test.insert({ a: { c: 2, d: 4 } }, (err, key2) => {
 
-                            expect(err).to.exist();
-                            db.test.insert({ a: { d: 5 } }, (err, key4) => {
+                            expect(err).to.not.exist();
+                            db.test.insert({ a: { b: 3 } }, (err, key3) => {
 
                                 expect(err).to.exist();
-                                done();
+                                db.test.insert({ a: { d: 5 } }, (err, key4) => {
+
+                                    expect(err).to.exist();
+                                    done();
+                                });
                             });
                         });
                     });
@@ -357,7 +390,15 @@ describe('Unique', () => {
                             db.test.insert({ a: ['a'] }, (err, key4) => {
 
                                 expect(err).to.exist();
-                                done();
+                                db.test.update(key2, { a: [] }, (err) => {
+
+                                    expect(err).to.not.exist();
+                                    db.test.insert({ a: ['a'] }, (err, key5) => {
+
+                                        expect(err).to.not.exist();
+                                        done();
+                                    });
+                                });
                             });
                         });
                     });
@@ -465,6 +506,87 @@ describe('Unique', () => {
                 db.test.insert({ d: { b: 1 } }, (err, key) => {
 
                     expect(err).to.not.exist();
+                    done();
+                });
+            });
+        });
+
+        it('errors on incrementing unique index', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            const settings = {
+                penseur_unique_test_a: true,                 // Test cleanup
+                test: {
+                    id: 'uuid',
+                    unique: {
+                        path: 'a'
+                    }
+                }
+            };
+
+            db.establish(settings, (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ a: 1 }, (err, key) => {
+
+                    expect(err).to.not.exist();
+                    db.test.update(key, { a: db.increment(1) }, (err) => {
+
+                        expect(err).to.exist();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('errors on appending a single array to a unique index', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            const settings = {
+                penseur_unique_test_a: true,                 // Test cleanup
+                test: {
+                    id: 'uuid',
+                    unique: {
+                        path: 'a'
+                    }
+                }
+            };
+
+            db.establish(settings, (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ a: [1] }, (err, key) => {
+
+                    expect(err).to.not.exist();
+                    db.test.update(key, { a: db.append([2], { single: true }) }, (err) => {
+
+                        expect(err).to.exist();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('errors on database unique table get error', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            const settings = {
+                penseur_unique_test_a: true,                 // Test cleanup
+                test: {
+                    id: 'uuid',
+                    unique: {
+                        path: 'a'
+                    }
+                }
+            };
+
+            db.establish(settings, (err) => {
+
+                expect(err).to.not.exist();
+                db.test._unique.rules[0].table.get = (id, callback) => callback(new Error('boom'));
+                db.test.insert([{ a: 1 }, { a: 2 }], (err, keys) => {
+
+                    expect(err).to.exist();
                     done();
                 });
             });
