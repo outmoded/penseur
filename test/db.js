@@ -128,6 +128,42 @@ describe('Db', () => {
             });
         });
 
+        it('reports reconnect errors and tries again', (done) => {
+
+            let orig = null;
+            let count = 0;
+            const onConnect = () => {
+
+                ++count;
+                if (count === 2) {
+                    db.close(done);
+                }
+            };
+
+            const onDisconnect = (willReconnect) => {
+
+                expect(willReconnect).to.equal(count !== 2);
+            };
+
+            let e = 0;
+            const onError = (err) => {
+
+                expect(err).to.exist();
+                ++e;
+                db.connect = orig;
+            };
+
+            const db = new Penseur.Db('penseurtest', { onDisconnect: onDisconnect, onConnect: onConnect, onError: onError });
+            orig = db.connect;
+
+            db.connect((err) => {
+
+                expect(err).to.not.exist();
+                db.connect = (callback) => callback(new Error('failed to connect'));
+                db._connection.close(Hoek.ignore);
+            });
+        });
+
         it('does not reconnect automatically', (done) => {
 
             const onDisconnect = (willReconnect) => {
