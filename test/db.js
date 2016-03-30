@@ -915,6 +915,30 @@ describe('Db', () => {
                 const each = (err, update) => {
 
                     expect(err).to.exist();
+                    expect(err.flags.willReconnect).to.be.true();
+                    done();
+                };
+
+                db.test.changes({ a: 1 }, each, (err) => {
+
+                    expect(err).to.not.exist();
+                });
+            });
+        });
+
+        it('simulates a changes update error (flags)', (done) => {
+
+            const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015, test: true });
+
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.disable('test', 'changes', { updates: true, flags: { willReconnect: false } });
+
+                const each = (err, update) => {
+
+                    expect(err).to.exist();
+                    expect(err.flags.willReconnect).to.be.false();
                     done();
                 };
 
