@@ -716,6 +716,56 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
+        it('updates a record with empty object', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: 1, a: 1 }, (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.update(1, { a: {} }, (err) => {
+
+                        expect(err).to.not.exist();
+
+                        db.test.get(1, (err, item) => {
+
+                            expect(err).to.not.exist();
+                            expect(item.a).to.deep.equal({});
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('updates a record with nested empty object', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: 1 }, (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.update(1, { a: { b: {} } }, (err) => {
+
+                        expect(err).to.not.exist();
+
+                        db.test.get(1, (err, item) => {
+
+                            expect(err).to.not.exist();
+                            expect(item.a.b).to.deep.equal({});
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
         it('errors on unknown key', (done) => {
 
             const db = new Penseur.Db('penseurtest');
