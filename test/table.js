@@ -776,6 +776,7 @@ describe('Table', { parallel: false }, () => {
                 db.test.update(2, { a: 2 }, (err) => {
 
                     expect(err).to.exist();
+                    expect(err.data.error).to.equal('No document found');
                     done();
                 });
             });
@@ -1024,6 +1025,114 @@ describe('Table', { parallel: false }, () => {
                             expect(updated).to.deep.equal({
                                 id: 1,
                                 a: 2,
+                                b: {}
+                            });
+
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('updates a record (only unset modifier)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                const item = {
+                    id: 1,
+                    a: 1
+                };
+
+                db.test.insert(item, (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    const changes = {
+                        a: db.unset()
+                    };
+
+                    db.test.update(1, changes, (err) => {
+
+                        expect(err).to.not.exist();
+                        db.test.get(1, (err, updated) => {
+
+                            expect(err).to.not.exist();
+                            expect(updated).to.deep.equal({ id: 1 });
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('updates a record (no changes)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                const item = {
+                    id: 1,
+                    a: 1
+                };
+
+                db.test.insert(item, (err, keys) => {
+
+                    expect(err).to.not.exist();
+                    db.test.update(1, {}, (err) => {
+
+                        expect(err).to.not.exist();
+                        db.test.get(1, (err, updated) => {
+
+                            expect(err).to.not.exist();
+                            expect(updated).to.deep.equal({ id: 1, a: 1 });
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('updates a record (unset and append modifiers)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                const item = {
+                    id: 1,
+                    a: [1],
+                    b: {
+                        c: [2]
+                    }
+                };
+
+                db.test.insert(item, (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    const changes = {
+                        a: db.append(2),
+                        b: {
+                            c: db.unset()
+                        }
+                    };
+
+                    db.test.update(1, changes, (err) => {
+
+                        expect(err).to.not.exist();
+                        db.test.get(1, (err, updated) => {
+
+                            expect(err).to.not.exist();
+                            expect(updated).to.deep.equal({
+                                id: 1,
+                                a: [1, 2],
                                 b: {}
                             });
 
