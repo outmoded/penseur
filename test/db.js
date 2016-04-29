@@ -886,6 +886,48 @@ describe('Db', () => {
             });
         });
 
+        it('simulates a response', (done) => {
+
+            const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015, test: true });
+
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: 1, value: 'x' }, (err, result) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.get(1, (err, item1) => {
+
+                        expect(err).to.not.exist();
+                        expect(item1.value).to.equal('x');
+
+                        db.disable('test', 'get', { value: 'hello' });
+                        db.test.get(1, (err, item2) => {
+
+                            expect(err).to.not.exist();
+                            expect(item2).to.equal('hello');
+
+                            db.disable('test', 'get', { value: null });
+                            db.test.get(1, (err, item3) => {
+
+                                expect(err).to.not.exist();
+                                expect(item3).to.be.null();
+
+                                db.enable('test', 'get');
+                                db.test.get(1, (err, item4) => {
+
+                                    expect(err).to.not.exist();
+                                    expect(item4.value).to.equal('x');
+                                    db.close(done);
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
         it('simulates a changes error', (done) => {
 
             const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015, test: true });
