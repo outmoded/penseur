@@ -162,6 +162,34 @@ describe('Table', { parallel: false }, () => {
                 done();
             });
         });
+
+        it('errors on invalid id', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.get('0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789', (err, result) => {
+
+                    expect(err).to.exist();
+                    done();
+                });
+            });
+        });
+
+        it('errors on invalid ids', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.get(['0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789'], (err, result) => {
+
+                    expect(err).to.exist();
+                    done();
+                });
+            });
+        });
     });
 
     describe('query()', () => {
