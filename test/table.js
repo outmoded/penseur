@@ -64,7 +64,7 @@ describe('Table', { parallel: false }, () => {
                     db.test.get([1, 3], (err, result) => {
 
                         expect(err).to.not.exist();
-                        expect(result).to.deep.equal([{ id: 3, a: 1 }, { id: 1, a: 1 }]);
+                        expect(result).to.equal([{ id: 3, a: 1 }, { id: 1, a: 1 }]);
                         done();
                     });
                 });
@@ -84,7 +84,7 @@ describe('Table', { parallel: false }, () => {
                     db.test.get([1], (err, result) => {
 
                         expect(err).to.not.exist();
-                        expect(result).to.deep.equal([{ id: 1, a: 1 }]);
+                        expect(result).to.equal([{ id: 1, a: 1 }]);
                         done();
                     });
                 });
@@ -207,7 +207,7 @@ describe('Table', { parallel: false }, () => {
                     db.test.query({ a: 1 }, (err, result) => {
 
                         expect(err).to.not.exist();
-                        expect(result).to.deep.equal([{ id: 3, a: 1 }, { id: 1, a: 1 }]);
+                        expect(result).to.equal([{ id: 3, a: 1 }, { id: 1, a: 1 }]);
                         done();
                     });
                 });
@@ -247,7 +247,7 @@ describe('Table', { parallel: false }, () => {
                     db.test.query({ a: 1, b: 1 }, (err, result) => {
 
                         expect(err).to.not.exist();
-                        expect(result).to.deep.equal([{ id: 3, a: 1, b: 1 }]);
+                        expect(result).to.equal([{ id: 3, a: 1, b: 1 }]);
                         done();
                     });
                 });
@@ -267,7 +267,7 @@ describe('Table', { parallel: false }, () => {
                     db.test.query({ a: 1, b: { c: 1 } }, (err, result) => {
 
                         expect(err).to.not.exist();
-                        expect(result).to.deep.equal([{ id: 3, a: 1, b: { c: 1 } }]);
+                        expect(result).to.equal([{ id: 3, a: 1, b: { c: 1 } }]);
                         done();
                     });
                 });
@@ -287,7 +287,7 @@ describe('Table', { parallel: false }, () => {
                     db.test.query({ a: 1, b: { c: db.or([1, 2]) } }, (err, result) => {
 
                         expect(err).to.not.exist();
-                        expect(result).to.deep.equal([{ id: 3, a: 1, b: { c: 1 } }, { id: 1, a: 1, b: { c: 2 } }]);
+                        expect(result).to.equal([{ id: 3, a: 1, b: { c: 1 } }, { id: 1, a: 1, b: { c: 2 } }]);
                         done();
                     });
                 });
@@ -307,7 +307,7 @@ describe('Table', { parallel: false }, () => {
                     db.test.query({ a: 1, b: { c: db.contains(1) } }, (err, result) => {
 
                         expect(err).to.not.exist();
-                        expect(result).to.deep.equal([{ id: 1, a: 1, b: { c: [1, 2] } }]);
+                        expect(result).to.equal([{ id: 1, a: 1, b: { c: [1, 2] } }]);
                         done();
                     });
                 });
@@ -327,7 +327,7 @@ describe('Table', { parallel: false }, () => {
                     db.test.query({ a: 1, b: { c: db.contains([1, 2], { condition: 'or' }) } }, (err, result) => {
 
                         expect(err).to.not.exist();
-                        expect(result).to.deep.equal([{ id: 3, a: 1, b: { c: [2, 3] } }, { id: 1, a: 1, b: { c: [1, 2] } }]);
+                        expect(result).to.equal([{ id: 3, a: 1, b: { c: [2, 3] } }, { id: 1, a: 1, b: { c: [1, 2] } }]);
                         done();
                     });
                 });
@@ -347,7 +347,7 @@ describe('Table', { parallel: false }, () => {
                     db.test.query({ a: 1, b: { c: db.contains([1, 2], { condition: 'and' }) } }, (err, result) => {
 
                         expect(err).to.not.exist();
-                        expect(result).to.deep.equal([{ id: 1, a: 1, b: { c: [1, 2] } }]);
+                        expect(result).to.equal([{ id: 1, a: 1, b: { c: [1, 2] } }]);
                         done();
                     });
                 });
@@ -367,7 +367,7 @@ describe('Table', { parallel: false }, () => {
                     db.test.query({ a: 1, b: { c: db.contains([1, 2]) } }, (err, result) => {
 
                         expect(err).to.not.exist();
-                        expect(result).to.deep.equal([{ id: 1, a: 1, b: { c: [1, 2] } }]);
+                        expect(result).to.equal([{ id: 1, a: 1, b: { c: [1, 2] } }]);
                         done();
                     });
                 });
@@ -387,7 +387,7 @@ describe('Table', { parallel: false }, () => {
                     db.test.query({ a: 1, b: db.contains('c', { keys: true }) }, (err, result) => {
 
                         expect(err).to.not.exist();
-                        expect(result).to.deep.equal([{ id: 1, a: 1, b: { c: [1, 2] } }]);
+                        expect(result).to.equal([{ id: 1, a: 1, b: { c: [1, 2] } }]);
                         done();
                     });
                 });
@@ -407,7 +407,7 @@ describe('Table', { parallel: false }, () => {
                     db.test.query({ a: 1, b: db.contains(['c', 'e'], { keys: true, condition: 'or' }) }, (err, result) => {
 
                         expect(err).to.not.exist();
-                        expect(result).to.deep.equal([{ id: 3, a: 1, b: { e: [2, 3] } }, { id: 1, a: 1, b: { c: [1, 2] } }]);
+                        expect(result).to.equal([{ id: 3, a: 1, b: { e: [2, 3] } }, { id: 1, a: 1, b: { c: [1, 2] } }]);
                         done();
                     });
                 });
@@ -427,7 +427,7 @@ describe('Table', { parallel: false }, () => {
                     db.test.query({ a: 1, b: db.contains(['f', 'e'], { keys: true, condition: 'and' }) }, (err, result) => {
 
                         expect(err).to.not.exist();
-                        expect(result).to.deep.equal([{ id: 3, a: 1, b: { e: [2, 3], f: 'x' } }]);
+                        expect(result).to.equal([{ id: 3, a: 1, b: { e: [2, 3], f: 'x' } }]);
                         done();
                     });
                 });
@@ -447,7 +447,7 @@ describe('Table', { parallel: false }, () => {
                     db.test.query({ a: 1, b: { c: 1 } }, (err, result) => {
 
                         expect(err).to.not.exist();
-                        expect(result).to.deep.equal([{ id: 3, a: 1, b: { c: 1 } }]);
+                        expect(result).to.equal([{ id: 3, a: 1, b: { c: 1 } }]);
                         done();
                     });
                 });
@@ -471,7 +471,7 @@ describe('Table', { parallel: false }, () => {
                     db.test.query({ b: { c: { d: 4 } } }, (err, result) => {
 
                         expect(err).to.not.exist();
-                        expect(result).to.deep.equal([{ id: 2, a: 2, b: { c: { d: 4 } } }]);
+                        expect(result).to.equal([{ id: 2, a: 2, b: { c: { d: 4 } } }]);
                         done();
                     });
                 });
@@ -494,7 +494,7 @@ describe('Table', { parallel: false }, () => {
                     db.test.single({ a: 2 }, (err, result) => {
 
                         expect(err).to.not.exist();
-                        expect(result).to.deep.equal({ id: 2, a: 2 });
+                        expect(result).to.equal({ id: 2, a: 2 });
                         done();
                     });
                 });
@@ -761,7 +761,7 @@ describe('Table', { parallel: false }, () => {
                         db.test.get(1, (err, item) => {
 
                             expect(err).to.not.exist();
-                            expect(item.a).to.deep.equal({});
+                            expect(item.a).to.equal({});
                             done();
                         });
                     });
@@ -786,7 +786,7 @@ describe('Table', { parallel: false }, () => {
                         db.test.get(1, (err, item) => {
 
                             expect(err).to.not.exist();
-                            expect(item.a.b).to.deep.equal({});
+                            expect(item.a.b).to.equal({});
                             done();
                         });
                     });
@@ -846,7 +846,7 @@ describe('Table', { parallel: false }, () => {
                         db.test.get(1, (err, updated) => {
 
                             expect(err).to.not.exist();
-                            expect(updated).to.deep.equal({
+                            expect(updated).to.equal({
                                 id: 1,
                                 a: 2,
                                 b: {
@@ -897,7 +897,7 @@ describe('Table', { parallel: false }, () => {
                         db.test.get(1, (err, updated) => {
 
                             expect(err).to.not.exist();
-                            expect(updated).to.deep.equal({
+                            expect(updated).to.equal({
                                 id: 1,
                                 a: 2,
                                 b: {
@@ -948,7 +948,7 @@ describe('Table', { parallel: false }, () => {
                         db.test.get(1, (err, updated) => {
 
                             expect(err).to.not.exist();
-                            expect(updated).to.deep.equal({
+                            expect(updated).to.equal({
                                 id: 1,
                                 a: 2,
                                 b: {
@@ -999,7 +999,7 @@ describe('Table', { parallel: false }, () => {
                         db.test.get(1, (err, updated) => {
 
                             expect(err).to.not.exist();
-                            expect(updated).to.deep.equal({
+                            expect(updated).to.equal({
                                 id: 1,
                                 a: 2,
                                 b: {
@@ -1050,7 +1050,7 @@ describe('Table', { parallel: false }, () => {
                         db.test.get(1, (err, updated) => {
 
                             expect(err).to.not.exist();
-                            expect(updated).to.deep.equal({
+                            expect(updated).to.equal({
                                 id: 1,
                                 a: 2,
                                 b: {}
@@ -1089,7 +1089,7 @@ describe('Table', { parallel: false }, () => {
                         db.test.get(1, (err, updated) => {
 
                             expect(err).to.not.exist();
-                            expect(updated).to.deep.equal({ id: 1 });
+                            expect(updated).to.equal({ id: 1 });
                             done();
                         });
                     });
@@ -1118,7 +1118,7 @@ describe('Table', { parallel: false }, () => {
                         db.test.get(1, (err, updated) => {
 
                             expect(err).to.not.exist();
-                            expect(updated).to.deep.equal({ id: 1, a: 1 });
+                            expect(updated).to.equal({ id: 1, a: 1 });
                             done();
                         });
                     });
@@ -1158,7 +1158,7 @@ describe('Table', { parallel: false }, () => {
                         db.test.get(1, (err, updated) => {
 
                             expect(err).to.not.exist();
-                            expect(updated).to.deep.equal({
+                            expect(updated).to.equal({
                                 id: 1,
                                 a: [1, 2],
                                 b: {}
@@ -1446,7 +1446,7 @@ describe('Table', { parallel: false }, () => {
 
                             expect(err).to.not.exist();
 
-                            expect(changes).to.deep.equal([1, 1]);
+                            expect(changes).to.equal([1, 1]);
                             db.close(done);
                         });
                     });
@@ -1480,7 +1480,7 @@ describe('Table', { parallel: false }, () => {
 
                             expect(err).to.not.exist();
 
-                            expect(changes).to.deep.equal([1, 1]);
+                            expect(changes).to.equal([1, 1]);
                             cursor.close();
                             db.close(done);
                         });
@@ -1519,7 +1519,7 @@ describe('Table', { parallel: false }, () => {
 
                                 expect(err).to.not.exist();
 
-                                expect(changes).to.deep.equal([1]);
+                                expect(changes).to.equal([1]);
                                 db.close(done);
                             });
                         });
@@ -1558,7 +1558,7 @@ describe('Table', { parallel: false }, () => {
 
                                 expect(err).to.not.exist();
 
-                                expect(changes).to.deep.equal([1, 2]);
+                                expect(changes).to.equal([1, 2]);
                                 db.close(done);
                             });
                         });
@@ -1597,7 +1597,7 @@ describe('Table', { parallel: false }, () => {
 
                                 expect(err).to.not.exist();
 
-                                expect(changes).to.deep.equal([1, 2]);
+                                expect(changes).to.equal([1, 2]);
                                 db.close(done);
                             });
                         });
@@ -1631,7 +1631,7 @@ describe('Table', { parallel: false }, () => {
                         db.test.remove(1, (err) => {
 
                             expect(err).to.not.exist();
-                            expect(changes).to.deep.equal(['1:true']);
+                            expect(changes).to.equal(['1:true']);
                             db.close(done);
                         });
                     });
@@ -1660,7 +1660,7 @@ describe('Table', { parallel: false }, () => {
                     db.test.insert({ id: 1, a: 1 }, (err, keys) => {
 
                         expect(err).to.not.exist();
-                        expect(changes).to.deep.equal([1]);
+                        expect(changes).to.equal([1]);
                         db.close(done);
                     });
                 });
@@ -1697,7 +1697,7 @@ describe('Table', { parallel: false }, () => {
 
                                 expect(err).to.not.exist();
 
-                                expect(changes).to.deep.equal([1, 1]);
+                                expect(changes).to.equal([1, 1]);
                                 db.close(done);
                             });
                         });
@@ -1744,7 +1744,7 @@ describe('Table', { parallel: false }, () => {
 
                         if (changes.length === 3) {
 
-                            expect(changes).to.deep.equal(['insert', { willReconnect: true, disconnected: true }, 'initial']);
+                            expect(changes).to.equal(['insert', { willReconnect: true, disconnected: true }, 'initial']);
                             expect(count).to.equal(2);
                             db.close(done);
                         }
@@ -1816,7 +1816,7 @@ describe('Table', { parallel: false }, () => {
                                 db.test.update(1, { a: 2 }, (err) => {
 
                                     expect(err).to.not.exist();
-                                    expect(changes).to.deep.equal(['insert']);
+                                    expect(changes).to.equal(['insert']);
                                     expect(count).to.equal(2);
                                     db.close(done);
                                 });
@@ -1872,7 +1872,7 @@ describe('Table', { parallel: false }, () => {
                                 db.test.update(1, { a: 2 }, (err) => {
 
                                     expect(err).to.not.exist();
-                                    expect(changes).to.deep.equal(['insert', { willReconnect: false, disconnected: true }]);
+                                    expect(changes).to.equal(['insert', { willReconnect: false, disconnected: true }]);
                                     expect(count).to.equal(2);
                                     db.close(done);
                                 });
@@ -1916,7 +1916,7 @@ describe('Table', { parallel: false }, () => {
                         db._connection.close(() => {
 
                             expect(err).to.not.exist();
-                            expect(changes).to.deep.equal(['insert', { willReconnect: false, disconnected: true }]);
+                            expect(changes).to.equal(['insert', { willReconnect: false, disconnected: true }]);
                             expect(count).to.equal(1);
                             db.close(done);
                         });
