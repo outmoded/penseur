@@ -49,7 +49,7 @@ describe('Id', () => {
                 db.test.insert([{ id: 'abc', a: 1 }, { id: 'def', a: 2 }], (err, keys) => {
 
                     expect(err).to.not.exist();
-                    expect(keys).to.deep.equal(['abc', 'def']);
+                    expect(keys).to.equal(['abc', 'def']);
                     done();
                 });
             });
@@ -130,7 +130,7 @@ describe('Id', () => {
                 db.test.insert([{ a: 1 }, { a: 2 }], (err, keys) => {
 
                     expect(err).to.not.exist();
-                    expect(keys).to.deep.equal(['1', '2']);
+                    expect(keys).to.equal(['1', '2']);
                     done();
                 });
             });

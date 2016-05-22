@@ -65,7 +65,7 @@ describe('Modifier', { parallel: false }, () => {
                         db.test.get(1, (err, updated) => {
 
                             expect(err).to.not.exist();
-                            expect(updated).to.deep.equal({
+                            expect(updated).to.equal({
                                 id: 1,
                                 a: 2,
                                 b: {
@@ -123,7 +123,7 @@ describe('Modifier', { parallel: false }, () => {
                         db.test.get(1, (err, updated) => {
 
                             expect(err).to.not.exist();
-                            expect(updated).to.deep.equal({
+                            expect(updated).to.equal({
                                 id: 1,
                                 a: 2,
                                 b: {
@@ -172,7 +172,7 @@ describe('Modifier', { parallel: false }, () => {
                         db.test.get(1, (err, updated) => {
 
                             expect(err).to.not.exist();
-                            expect(updated).to.deep.equal({
+                            expect(updated).to.equal({
                                 id: 1,
                                 b: {}
                             });

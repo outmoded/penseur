@@ -347,7 +347,7 @@ describe('Db', () => {
                         RethinkDB.db(db.name).table('test').indexList().run(db._connection, (err, result) => {
 
                             expect(err).to.not.exist();
-                            expect(result).to.deep.equal(['other']);
+                            expect(result).to.equal(['other']);
                             db.close(done);
                         });
                     });
@@ -464,7 +464,7 @@ describe('Db', () => {
                     RethinkDB.db(db1.name).table('test').indexList().run(db1._connection, (err, result1) => {
 
                         expect(err).to.not.exist();
-                        expect(result1).to.deep.equal(['other']);
+                        expect(result1).to.equal(['other']);
                         db1.close(() => {
 
                             const db2 = new Penseur.Db('penseurtest');
@@ -478,7 +478,7 @@ describe('Db', () => {
                                     RethinkDB.db(db2.name).table('test').indexList().run(db2._connection, (err, result2) => {
 
                                         expect(err).to.not.exist();
-                                        expect(result2).to.deep.equal([]);
+                                        expect(result2).to.equal([]);
                                         db2.close(done);
                                     });
                                 });
@@ -503,7 +503,7 @@ describe('Db', () => {
                     RethinkDB.db(db1.name).table('test').indexList().run(db1._connection, (err, result1) => {
 
                         expect(err).to.not.exist();
-                        expect(result1).to.deep.equal(['other']);
+                        expect(result1).to.equal(['other']);
                         db1.close(() => {
 
                             const db2 = new Penseur.Db('penseurtest');
@@ -517,7 +517,7 @@ describe('Db', () => {
                                     RethinkDB.db(db2.name).table('test').indexList().run(db2._connection, (err, result2) => {
 
                                         expect(err).to.not.exist();
-                                        expect(result2).to.deep.equal(['other']);
+                                        expect(result2).to.equal(['other']);
                                         db2.close(done);
                                     });
                                 });
@@ -541,7 +541,7 @@ describe('Db', () => {
                     RethinkDB.db(db1.name).table('test').indexList().run(db1._connection, (err, result1) => {
 
                         expect(err).to.not.exist();
-                        expect(result1).to.deep.equal(['a', 'b']);
+                        expect(result1).to.equal(['a', 'b']);
                         db1.close(() => {
 
                             const db2 = new Penseur.Db('penseurtest');
@@ -555,7 +555,7 @@ describe('Db', () => {
                                     RethinkDB.db(db2.name).table('test').indexList().run(db2._connection, (err, result2) => {
 
                                         expect(err).to.not.exist();
-                                        expect(result2).to.deep.equal(['b', 'c']);
+                                        expect(result2).to.equal(['b', 'c']);
                                         db2.close(done);
                                     });
                                 });
