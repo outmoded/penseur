@@ -341,7 +341,7 @@ describe('Db', () => {
 
                     expect(err).to.not.exist();
 
-                    db.establish({ test: { secondary: 'other' } }, (err) => {
+                    db.establish({ test: { primaryKey: 'seq', secondary: 'other' } }, (err) => {
 
                         expect(err).to.not.exist();
                         RethinkDB.db(db.name).table('test').indexList().run(db._connection, (err, result) => {
