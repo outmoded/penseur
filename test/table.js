@@ -574,7 +574,7 @@ describe('Table', { parallel: false }, () => {
 
                     expect(err).to.not.exist();
 
-                    db.test.count(db.fields(['a']), (err, result) => {
+                    db.test.count(db.contains('a'), (err, result) => {
 
                         expect(err).to.not.exist();
                         expect(result).to.equal(3);
