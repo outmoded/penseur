@@ -762,32 +762,7 @@ describe('Db', () => {
         });
     });
 
-    describe('verify()', () => {
-
-        it('prepares generate id table', (done) => {
-
-            const db = new Penseur.Db('penseurtest');
-            db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } }, (err) => {
-
-                expect(err).to.not.exist();
-                db.verify((err) => {
-
-                    expect(err).to.not.exist();
-                    db.allocate.get('test', (err, record) => {
-
-                        expect(err).to.not.exist();
-                        expect(record.value).to.equal(0);
-
-                        db.test.insert({ a: 1 }, (err, keys) => {
-
-                            expect(err).to.not.exist();
-                            expect(keys).to.equal('1');
-                            done();
-                        });
-                    });
-                });
-            });
-        });
+    describe('_verify()', () => {
 
         it('errors on create table error (id)', (done) => {
 
