@@ -332,6 +332,54 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
+        it('returns the requested objects (or root)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([
+                    { id: 1, a: 1, b: { c: 2 } },
+                    { id: 2, a: 2, b: { c: 1 } },
+                    { id: 3, a: 3, b: { c: 3 } },
+                    { id: 4, a: 1 }
+                ], (err, keys) => {
+
+                    expect(err).to.not.exist();
+                    db.test.query(db.or([{ a: 1 }, { b: { c: 3 } }]), (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.equal([{ id: 4, a: 1 }, { id: 3, a: 3, b: { c: 3 } }, { id: 1, a: 1, b: { c: 2 } }]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('returns the requested objects (or objects)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([
+                    { id: 1, x: { a: 1, b: { c: 2 } } },
+                    { id: 2, x: { a: 2, b: { c: 1 } } },
+                    { id: 3, x: { a: 3, b: { c: 3 } } },
+                    { id: 4, x: { a: 1 } }
+                ], (err, keys) => {
+
+                    expect(err).to.not.exist();
+                    db.test.query({ x: db.or([{ a: 1 }, { b: { c: 3 } }]) }, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.equal([{ id: 4, x: { a: 1 } }, { id: 3, x: { a: 3, b: { c: 3 } } }, { id: 1, x: { a: 1, b: { c: 2 } } }]);
+                        done();
+                    });
+                });
+            });
+        });
+
         it('returns the requested objects (contains)', (done) => {
 
             const db = new Penseur.Db('penseurtest');
