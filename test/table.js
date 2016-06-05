@@ -283,11 +283,49 @@ describe('Table', { parallel: false }, () => {
                 db.test.insert([{ id: 1, a: 1, b: { c: 2 } }, { id: 2, a: 2, b: { c: 1 } }, { id: 3, a: 1, b: { c: 1 } }], (err, keys) => {
 
                     expect(err).to.not.exist();
-
                     db.test.query({ a: 1, b: { c: db.or([1, 2]) } }, (err, result) => {
 
                         expect(err).to.not.exist();
                         expect(result).to.equal([{ id: 3, a: 1, b: { c: 1 } }, { id: 1, a: 1, b: { c: 2 } }]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('returns the requested objects (or unset)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, b: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+                    db.test.query({ a: db.or([2, db.unset()]) }, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.equal([{ id: 3, b: 1 }, { id: 2, a: 2 }]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('returns the requested objects (or unset nested)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1, b: { c: 2 } }, { id: 2, a: 1, b: { d: 3 } }, { id: 3, a: 1, b: { c: 66 } }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.query({ a: 1, b: { c: db.or([66, db.unset()]) } }, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.equal([{ id: 3, a: 1, b: { c: 66 } }, { id: 2, a: 1, b: { d: 3 } }]);
                         done();
                     });
                 });
@@ -428,6 +466,26 @@ describe('Table', { parallel: false }, () => {
 
                         expect(err).to.not.exist();
                         expect(result).to.equal([{ id: 3, a: 1, b: { e: [2, 3], f: 'x' } }]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('returns the requested objects (unset key)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1, b: { c: 2 } }, { id: 2, a: 1, b: { d: 3 } }, { id: 3, a: 1, b: { c: null } }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.query({ a: 1, b: { c: db.unset() } }, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.equal([{ id: 3, a: 1, b: { c: null } }, { id: 2, a: 1, b: { d: 3 } }]);
                         done();
                     });
                 });
