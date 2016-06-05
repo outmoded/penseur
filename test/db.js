@@ -991,16 +991,4 @@ describe('Db', () => {
             });
         });
     });
-
-    describe('isModifier()', () => {
-
-        it('indicates if a value is a modifier', (done) => {
-
-            const db = new Penseur.Db('penseurtest');
-            expect(db.isModifier(1)).to.be.false();
-            expect(db.isModifier(() => { })).to.be.false();
-            expect(db.isModifier(db.increment(1))).to.be.true();
-            done();
-        });
-    });
 });
