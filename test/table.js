@@ -658,6 +658,49 @@ describe('Table', { parallel: false }, () => {
                 });
             });
         });
+
+        it('includes results from a given position', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 3, a: 3, b: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+                    db.test.query({ b: 1 }, { sort: 'a', from: 1 }, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.equal([{ id: 2, a: 2, b: 1 }, { id: 3, a: 3, b: 1 }]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('includes n number of results', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 3, a: 3, b: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+                    db.test.query({ b: 1 }, { sort: 'a', count: 2 }, (err, result1) => {
+
+                        expect(err).to.not.exist();
+                        expect(result1).to.equal([{ id: 1, a: 1, b: 1 }, { id: 2, a: 2, b: 1 }]);
+                        db.test.query({ b: 1 }, { sort: 'a', from: 1, count: 1 }, (err, result2) => {
+
+                            expect(err).to.not.exist();
+                            expect(result2).to.equal([{ id: 2, a: 2, b: 1 }]);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
     });
 
     describe('single()', () => {
