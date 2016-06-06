@@ -583,6 +583,81 @@ describe('Table', { parallel: false }, () => {
                 });
             });
         });
+
+        it('sorts the requested objects (key)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 3, a: 3, b: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+                    db.test.query({ b: 1 }, {}, (err, result1) => {
+
+                        expect(err).to.not.exist();
+                        expect(result1).to.equal([{ id: 3, a: 3, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 1, a: 1, b: 1 }]);
+
+                        db.test.query({ b: 1 }, { sort: 'a' }, (err, result2) => {
+
+                            expect(err).to.not.exist();
+                            expect(result2).to.equal([{ id: 1, a: 1, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 3, a: 3, b: 1 }]);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('sorts the requested objects (nested key)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, x: { a: 1 }, b: 1 }, { id: 2, x: { a: 2 }, b: 1 }, { id: 3, x: { a: 3 }, b: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+                    db.test.query({ b: 1 }, {}, (err, result1) => {
+
+                        expect(err).to.not.exist();
+                        expect(result1).to.equal([{ id: 3, x: { a: 3 }, b: 1 }, { id: 2, x: { a: 2 }, b: 1 }, { id: 1, x: { a: 1 }, b: 1 }]);
+
+                        db.test.query({ b: 1 }, { sort: ['x', 'a'] }, (err, result2) => {
+
+                            expect(err).to.not.exist();
+                            expect(result2).to.equal([{ id: 1, x: { a: 1 }, b: 1 }, { id: 2, x: { a: 2 }, b: 1 }, { id: 3, x: { a: 3 }, b: 1 }]);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('sorts the requested objects (object)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 3, a: 3, b: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+                    db.test.query({ b: 1 }, {}, (err, result1) => {
+
+                        expect(err).to.not.exist();
+                        expect(result1).to.equal([{ id: 3, a: 3, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 1, a: 1, b: 1 }]);
+
+                        db.test.query({ b: 1 }, { sort: { key: 'a', order: 'descending' } }, (err, result2) => {
+
+                            expect(err).to.not.exist();
+                            expect(result2).to.equal([{ id: 3, a: 3, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 1, a: 1, b: 1 }]);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
     });
 
     describe('single()', () => {
