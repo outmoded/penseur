@@ -648,52 +648,6 @@ describe('Db', () => {
             });
         });
 
-        it('errors on database indexList() error', { parallel: false }, (done) => {
-
-            const db = new Penseur.Db('penseurtest');
-            const orig = RethinkDB.db;
-            let count = 0;
-            RethinkDB.db = function () {
-
-                return {
-                    tableList: function () {
-
-                        return {
-                            run: function (connection, next) {
-
-                                return next(null, ['test']);
-                            }
-                        };
-                    },
-                    table: function () {
-
-                        if (++count === 1) {
-                            return orig('penseurtest').table('test');
-                        }
-
-                        RethinkDB.db = orig;
-                        return {
-                            indexList: function () {
-
-                                return {
-                                    run: function (connection, next) {
-
-                                        return next(new Error('Bad database'));
-                                    }
-                                };
-                            }
-                        };
-                    }
-                };
-            };
-
-            db.establish(['test'], (err) => {
-
-                expect(err).to.exist();
-                db.close(done);
-            });
-        });
-
         it('errors creating new table', (done) => {
 
             const db = new Penseur.Db('penseurtest');
@@ -726,6 +680,25 @@ describe('Db', () => {
 
     describe('_createTable', () => {
 
+        it('creates table with custom primary key', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish({ test: { primary: 'other', id: 'uuid' } }, (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ a: 1 }, (err, id) => {
+
+                    expect(err).to.not.exist();
+                    db.test.get(id, (err, item) => {
+
+                        expect(err).to.not.exist();
+                        expect(item).to.equal({ other: id, a: 1 });
+                        db.close(done);
+                    });
+                });
+            });
+        });
+
         it('errors on database tableList() error', { parallel: false }, (done) => {
 
             const db = new Penseur.Db('penseurtest');
@@ -745,9 +718,14 @@ describe('Db', () => {
                     tableList: function () {
 
                         return {
-                            run: function (connection, next) {
+                            map: function () {
 
-                                return next(new Error('Bad database'));
+                                return {
+                                    run: function (connection, next) {
+
+                                        return next(new Error('Bad database'));
+                                    }
+                                };
                             }
                         };
                     }
