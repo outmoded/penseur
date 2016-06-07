@@ -1566,7 +1566,48 @@ describe('Table', { parallel: false }, () => {
             db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.changes('1', { handler: Hoek.ignore, initial: true }, (err, cursor) => {
+
+                const changes = [];
+                const each = (err, item) => {
+
+                    expect(err).to.not.exist();
+                    changes.push(item.id);
+                };
+
+                db.test.changes(1, { handler: each, initial: true }, (err, cursor) => {
+
+                    expect(err).to.not.exist();
+                    db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
+
+                        expect(err).to.not.exist();
+                        db.test.update(1, { a: 2 }, (err, keys2) => {
+
+                            expect(err).to.not.exist();
+                            db.test.insert({ id: 2, a: 2 }, (err) => {
+
+                                expect(err).to.not.exist();
+                                expect(changes).to.equal([1, 1]);
+                                db.close(done);
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
+        it('handles closed cursor while still processing rows', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                const each = (err, item) => {
+
+                    expect(err).to.not.exist();
+                };
+
+                db.test.changes(1, { handler: each, initial: true }, (err, cursor) => {
 
                     expect(err).to.not.exist();
                     db.close(done);
@@ -1770,9 +1811,12 @@ describe('Table', { parallel: false }, () => {
                         db._connection.close(() => {
 
                             expect(err).to.not.exist();
-                            expect(changes).to.equal(['insert', { willReconnect: false, disconnected: true }]);
-                            expect(count).to.equal(1);
-                            db.close(done);
+                            setTimeout(() => {
+
+                                expect(changes).to.equal(['insert', { willReconnect: false, disconnected: true }]);
+                                expect(count).to.equal(1);
+                                db.close(done);
+                            }, 100);
                         });
                     });
                 });
