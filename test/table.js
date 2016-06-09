@@ -441,6 +441,35 @@ describe('Table', { parallel: false }, () => {
 
     describe('insert()', () => {
 
+        it('updates a record if exists', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: 1, a: 1, b: 1 }, { merge: true }, (err, keys1) => {
+
+                    expect(err).to.not.exist();
+                    db.test.get(1, (err, item1) => {
+
+                        expect(err).to.not.exist();
+                        expect(item1).to.equal({ id: 1, a: 1, b: 1 });
+
+                        db.test.insert({ id: 1, a: 2 }, { merge: true }, (err, keys2) => {
+
+                            expect(err).to.not.exist();
+                            db.test.get(1, (err, item2) => {
+
+                                expect(err).to.not.exist();
+                                expect(item2).to.equal({ id: 1, a: 2, b: 1 });
+                                done();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
         it('returns the generate key', (done) => {
 
             const db = new Penseur.Db('penseurtest');
