@@ -79,6 +79,17 @@ describe('Db', () => {
         });
     });
 
+    it('decorates static methods', (done) => {
+
+        expect(Penseur.Db.or).to.exist();
+        expect(Penseur.Db.contains).to.exist();
+        expect(Penseur.Db.not).to.exist();
+        expect(Penseur.Db.unset).to.exist();
+        expect(Penseur.Db.append).to.exist();
+        expect(Penseur.Db.increment).to.exist();
+        done();
+    });
+
     describe('connect()', () => {
 
         it('uses default server location', (done) => {
