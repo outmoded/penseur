@@ -36,21 +36,6 @@ describe('Table', { parallel: false }, () => {
 
     describe('get()', () => {
 
-        it('fails on database error', (done) => {
-
-            const db = new Penseur.Db('penseurtest');
-            db.table('invalid');
-            db.connect((err) => {
-
-                expect(err).to.not.exist();
-                db.invalid.get(1, (err, item) => {
-
-                    expect(err).to.exist();
-                    done();
-                });
-            });
-        });
-
         it('returns the requested objects', (done) => {
 
             const db = new Penseur.Db('penseurtest');
@@ -67,6 +52,21 @@ describe('Table', { parallel: false }, () => {
                         expect(result).to.equal([{ id: 3, a: 1 }, { id: 1, a: 1 }]);
                         done();
                     });
+                });
+            });
+        });
+
+        it('fails on database error', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.table('invalid');
+            db.connect((err) => {
+
+                expect(err).to.not.exist();
+                db.invalid.get(1, (err, item) => {
+
+                    expect(err).to.exist();
+                    done();
                 });
             });
         });
@@ -184,6 +184,59 @@ describe('Table', { parallel: false }, () => {
 
                 expect(err).to.not.exist();
                 db.test.get(['0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789'], (err, result) => {
+
+                    expect(err).to.exist();
+                    done();
+                });
+            });
+        });
+    });
+
+    describe('exist()', () => {
+
+        it('checks if record exists', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: 1, a: 1 }, (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.exist(1, (err, exists) => {
+
+                        expect(err).to.not.exist();
+                        expect(exists).to.be.true();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('checks if record does not exists', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                db.test.exist(1, (err, exists) => {
+
+                    expect(err).to.not.exist();
+                    expect(exists).to.be.false();
+                    done();
+                });
+            });
+        });
+
+        it('errors on invalid id', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.exist('0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789', (err, result) => {
 
                     expect(err).to.exist();
                     done();
