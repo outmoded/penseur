@@ -156,11 +156,9 @@ describe('Db', () => {
                 expect(willReconnect).to.equal(count !== 2);
             };
 
-            let e = 0;
             const onError = (err) => {
 
                 expect(err).to.exist();
-                ++e;
                 db.connect = orig;
             };
 
