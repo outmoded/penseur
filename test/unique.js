@@ -118,6 +118,38 @@ describe('Unique', () => {
             });
         });
 
+        it('allows replacing a unique value', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            const settings = {
+                penseur_unique_test_a: true,                 // Test cleanup
+                test: {
+                    id: 'uuid',
+                    unique: {
+                        path: 'a'
+                    }
+                }
+            };
+
+            db.establish(settings, (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: '1', a: 1 }, { id: '2', a: 2 }], (err, key) => {
+
+                    expect(err).to.not.exist();
+                    db.test.replace('1', { id: '1', a: 2 }, (err) => {
+
+                        expect(err).to.exist();
+                        db.test.replace('1', { id: '1', a: 3 }, (err) => {
+
+                            expect(err).to.not.exist();
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
         it('allows appending a unique value', (done) => {
 
             const db = new Penseur.Db('penseurtest');
