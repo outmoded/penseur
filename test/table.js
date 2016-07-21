@@ -1106,6 +1106,39 @@ describe('Table', { parallel: false }, () => {
                 });
             });
         });
+
+        it('updates a record (override key)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: 1, a: 1, b: { c: 1, d: 1 }, e: 1 }, (err, keys) => {
+
+                    expect(err).to.not.exist();
+                    db.test.update(1, { a: 2, b: { d: 2 } }, (err) => {
+
+                        expect(err).to.not.exist();
+                        db.test.get(1, (err, item1) => {
+
+                            expect(err).to.not.exist();
+                            expect(item1).to.equal({ id: 1, a: 2, b: { c: 1, d: 2 }, e: 1 });
+
+                            db.test.update(1, { a: 3, b: db.override({ c: 2 }) }, (err) => {
+
+                                expect(err).to.not.exist();
+                                db.test.get(1, (err, item2) => {
+
+                                    expect(err).to.not.exist();
+                                    expect(item2).to.equal({ id: 1, a: 3, b: { c: 2 }, e: 1 });
+                                    done();
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
     });
 
     describe('next()', () => {
