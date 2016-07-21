@@ -5,6 +5,7 @@
 const Code = require('code');
 const Lab = require('lab');
 const Penseur = require('..');
+const RethinkDB = require('rethinkdb');
 
 
 // Declare internals
@@ -121,7 +122,7 @@ describe('Id', () => {
             });
         });
 
-        it('generates keys', (done) => {
+        it('generates keys (same table)', (done) => {
 
             const db = new Penseur.Db('penseurtest');
             db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } }, (err) => {
@@ -132,6 +133,35 @@ describe('Id', () => {
                     expect(err).to.not.exist();
                     expect(keys).to.equal(['1', '2']);
                     done();
+                });
+            });
+        });
+
+        it('generates key (different tables)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.connect((err) => {
+
+                expect(err).to.not.exist();
+
+                RethinkDB.dbDrop(db.name).run(db._connection, (err, dropped) => {
+
+                    expect(err).to.not.exist();
+                    db.establish({ test1: { id: { type: 'increment', table: 'allocate' } }, test2: { id: { type: 'increment', table: 'allocate' } } }, (err) => {
+
+                        expect(err).to.not.exist();
+                        db.test1.insert({ a: 1 }, (err, keys1) => {
+
+                            expect(err).to.not.exist();
+                            expect(keys1).to.equal('1');
+                            db.test2.insert({ a: 1 }, (err, keys2) => {
+
+                                expect(err).to.not.exist();
+                                expect(keys2).to.equal('1');
+                                db.close(done);
+                            });
+                        });
+                    });
                 });
             });
         });
