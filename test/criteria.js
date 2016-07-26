@@ -101,6 +101,25 @@ describe('Criteria', { parallel: false }, () => {
         });
     });
 
+    it('parses or with comparator', (done) => {
+
+        const db = new Penseur.Db('penseurtest');
+        db.establish(['test'], (err) => {
+
+            expect(err).to.not.exist();
+            db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 3 }], (err, keys) => {
+
+                expect(err).to.not.exist();
+                db.test.query({ a: db.or([db.is('>=', 3), db.is('eq', 1)]) }, (err, result) => {
+
+                    expect(err).to.not.exist();
+                    expect(result).to.equal([{ id: 3, a: 3 }, { id: 1, a: 1 }]);
+                    done();
+                });
+            });
+        });
+    });
+
     it('parses or unset', (done) => {
 
         const db = new Penseur.Db('penseurtest');
@@ -202,6 +221,25 @@ describe('Criteria', { parallel: false }, () => {
 
                     expect(err).to.not.exist();
                     expect(result).to.equal([{ id: 4, x: { a: 1 } }, { id: 3, x: { a: 3, b: { c: 3 } } }, { id: 1, x: { a: 1, b: { c: 2 } } }]);
+                    done();
+                });
+            });
+        });
+    });
+
+    it('parses is', (done) => {
+
+        const db = new Penseur.Db('penseurtest');
+        db.establish(['test'], (err) => {
+
+            expect(err).to.not.exist();
+            db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 3 }], (err, keys) => {
+
+                expect(err).to.not.exist();
+                db.test.query({ a: db.is('<', 2) }, (err, result) => {
+
+                    expect(err).to.not.exist();
+                    expect(result).to.equal([{ id: 1, a: 1 }]);
                     done();
                 });
             });
