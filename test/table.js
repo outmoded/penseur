@@ -384,6 +384,25 @@ describe('Table', { parallel: false }, () => {
                 });
             });
         });
+
+        it('filters fields', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 3, a: 3, b: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+                    db.test.query({ a: 1 }, { filter: ['b'] }, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.equal([{ b: 1 }]);
+                        done();
+                    });
+                });
+            });
+        });
     });
 
     describe('single()', () => {
