@@ -953,4 +953,27 @@ describe('Db', () => {
             });
         });
     });
+
+    describe('is()', () => {
+
+        it('errors on invalid number of arguments (3)', (done) => {
+
+            expect(() => {
+
+                Penseur.Db.is('=', 5, '<');
+            }).to.throw('Cannot have odd number of arguments');
+
+            done();
+        });
+
+        it('errors on invalid number of arguments (1)', (done) => {
+
+            expect(() => {
+
+                Penseur.Db.is('=');
+            }).to.throw('Missing value argument');
+
+            done();
+        });
+    });
 });
