@@ -192,6 +192,44 @@ describe('Table', { parallel: false }, () => {
         });
     });
 
+    describe('all()', () => {
+
+        it('returns the requested objects', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.all((err, items) => {
+
+                        expect(err).to.not.exist();
+                        expect(items).to.equal([{ id: 3, a: 1 }, { id: 2, a: 2 }, { id: 1, a: 1 }]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('fails on database error', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.table('invalid');
+            db.connect((err) => {
+
+                expect(err).to.not.exist();
+                db.invalid.all((err, items) => {
+
+                    expect(err).to.exist();
+                    done();
+                });
+            });
+        });
+    });
+
     describe('exist()', () => {
 
         it('checks if record exists', (done) => {
