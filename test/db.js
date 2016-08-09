@@ -130,7 +130,7 @@ describe('Db', () => {
                 expect(willReconnect).to.equal(count !== 2);
             };
 
-            const db = new Penseur.Db('penseurtest', { onDisconnect: onDisconnect, onConnect: onConnect });
+            const db = new Penseur.Db('penseurtest', { onDisconnect, onConnect });
 
             db.connect((err) => {
 
@@ -162,13 +162,97 @@ describe('Db', () => {
                 db.connect = orig;
             };
 
-            const db = new Penseur.Db('penseurtest', { onDisconnect: onDisconnect, onConnect: onConnect, onError: onError });
+            const db = new Penseur.Db('penseurtest', { onDisconnect, onConnect, onError });
             orig = db.connect;
 
             db.connect((err) => {
 
                 expect(err).to.not.exist();
                 db.connect = (callback) => callback(new Error('failed to connect'));
+                db._connection.close(Hoek.ignore);
+            });
+        });
+
+        it('waits between reconnections', (done) => {
+
+            const timer = new Hoek.Bench();
+
+            let orig = null;
+            let count = 0;
+            const onConnect = () => {
+
+                ++count;
+                if (count === 2) {
+                    expect(timer.elapsed()).to.be.above(200);
+                    db.close(done);
+                }
+            };
+
+            const onDisconnect = (willReconnect) => {
+
+                expect(willReconnect).to.equal(count !== 2);
+            };
+
+            let errors = 0;
+            const onError = (err) => {
+
+                ++errors;
+                expect(err).to.exist();
+                if (errors === 2) {
+                    db.connect = orig;
+                }
+            };
+
+            const db = new Penseur.Db('penseurtest', { onDisconnect, onConnect, onError, reconnectTimeout: 100 });
+            orig = db.connect;
+
+            db.connect((err) => {
+
+                expect(err).to.not.exist();
+                db.connect = (callback) => callback(new Error('failed to connect'));
+                timer.reset();
+                db._connection.close(Hoek.ignore);
+            });
+        });
+
+        it('reconnects immediately', (done) => {
+
+            const timer = new Hoek.Bench();
+
+            let orig = null;
+            let count = 0;
+            const onConnect = () => {
+
+                ++count;
+                if (count === 2) {
+                    expect(timer.elapsed()).to.be.below(100);
+                    db.close(done);
+                }
+            };
+
+            const onDisconnect = (willReconnect) => {
+
+                expect(willReconnect).to.equal(count !== 2);
+            };
+
+            let errors = 0;
+            const onError = (err) => {
+
+                ++errors;
+                expect(err).to.exist();
+                if (errors === 2) {
+                    db.connect = orig;
+                }
+            };
+
+            const db = new Penseur.Db('penseurtest', { onDisconnect, onConnect, onError, reconnectTimeout: false });
+            orig = db.connect;
+
+            db.connect((err) => {
+
+                expect(err).to.not.exist();
+                db.connect = (callback) => callback(new Error('failed to connect'));
+                timer.reset();
                 db._connection.close(Hoek.ignore);
             });
         });
@@ -181,7 +265,7 @@ describe('Db', () => {
                 done();
             };
 
-            const db = new Penseur.Db('penseurtest', { onDisconnect: onDisconnect, reconnect: false });
+            const db = new Penseur.Db('penseurtest', { onDisconnect, reconnect: false });
 
             db.connect((err) => {
 
@@ -198,7 +282,7 @@ describe('Db', () => {
                 db.close(done);
             };
 
-            const db = new Penseur.Db('penseurtest', { onError: onError });
+            const db = new Penseur.Db('penseurtest', { onError });
 
             db.connect((err) => {
 
@@ -215,7 +299,7 @@ describe('Db', () => {
                 db.close(done);
             };
 
-            const db = new Penseur.Db('penseurtest', { onError: onError });
+            const db = new Penseur.Db('penseurtest', { onError });
 
             db.connect((err) => {
 

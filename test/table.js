@@ -1799,7 +1799,7 @@ describe('Table', { parallel: false }, () => {
                 }
             };
 
-            const db = new Penseur.Db('penseurtest', { onConnect: onConnect });
+            const db = new Penseur.Db('penseurtest', { onConnect });
             db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
@@ -1851,7 +1851,7 @@ describe('Table', { parallel: false }, () => {
                 }
             };
 
-            const db = new Penseur.Db('penseurtest', { onConnect: onConnect });
+            const db = new Penseur.Db('penseurtest', { onConnect });
             db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
@@ -1908,7 +1908,7 @@ describe('Table', { parallel: false }, () => {
                 }
             };
 
-            const db = new Penseur.Db('penseurtest', { onConnect: onConnect });
+            const db = new Penseur.Db('penseurtest', { onConnect });
             db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
@@ -1960,7 +1960,7 @@ describe('Table', { parallel: false }, () => {
                 ++count;
             };
 
-            const db = new Penseur.Db('penseurtest', { onConnect: onConnect, reconnect: false });
+            const db = new Penseur.Db('penseurtest', { onConnect, reconnect: false });
             db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
