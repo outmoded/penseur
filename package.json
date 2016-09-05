@@ -1,7 +1,7 @@
 {
   "name": "penseur",
   "description": "Lightweight RethinkDB wrapper",
-  "version": "7.2.0",
+  "version": "7.2.1",
   "author": "Eran Hammer <eran@hammer.io> (http://hueniverse.com)",
   "repository": "git://github.com/hueniverse/penseur",
   "main": "lib/index.js",
@@ -12,7 +12,7 @@
     "node": ">=6.3.0"
   },
   "dependencies": {
-    "boom": "3.x.x",
+    "boom": "4.x.x",
     "hoek": "4.x.x",
     "items": "2.x.x",
     "joi": "9.x.x",
@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "code": "3.x.x",
-    "lab": "10.x.x"
+    "lab": "11.x.x"
   },
   "scripts": {
     "test": "lab -a code -t 100 -L -m 10000",

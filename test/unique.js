@@ -206,6 +206,30 @@ describe('Unique', () => {
             });
         });
 
+        it('ignores missing path parent (2 segments)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            const settings = {
+                penseur_unique_test_a: true,                 // Test cleanup
+                test: {
+                    id: 'uuid',
+                    unique: {
+                        path: ['a', 'b']
+                    }
+                }
+            };
+
+            db.establish(settings, (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: '1' }, (err, key) => {
+
+                    expect(err).to.not.exist();
+                    done();
+                });
+            });
+        });
+
         it('allows adding a unique value via update', (done) => {
 
             const db = new Penseur.Db('penseurtest');
