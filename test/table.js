@@ -498,7 +498,7 @@ describe('Table', { parallel: false }, () => {
                     db.test.single({ a: 1 }, (err, result) => {
 
                         expect(err).to.exist();
-                        expect(err.message).to.equal('Database error');
+                        expect(err.message).to.equal('Found multiple items');
                         done();
                     });
                 });
