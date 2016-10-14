@@ -6,6 +6,7 @@ const Code = require('code');
 const Hoek = require('hoek');
 const Lab = require('lab');
 const Penseur = require('..');
+const RethinkDB = require('rethinkdb');
 
 
 // Declare internals
@@ -184,6 +185,73 @@ describe('Table', { parallel: false }, () => {
 
                 expect(err).to.not.exist();
                 db.test.get(['0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789'], (err, result) => {
+
+                    expect(err).to.exist();
+                    done();
+                });
+            });
+        });
+
+        it('returns the requested objects by secondary index', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish({ test: { secondary: 'a' } }, (err) => {
+
+                expect(err).to.not.exist();
+
+                RethinkDB.db(db.name).table('test').indexWait().run(db._connection, (err) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+
+                        expect(err).to.not.exist();
+
+                        db.test.get(1, 'a', (err, result) => {
+
+                            expect(err).to.not.exist();
+                            expect(result).to.equal([{ id: 3, a: 1 }, { id: 1, a: 1 }]);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('returns the requested objects by secondary index (array)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish({ test: { secondary: 'a' } }, (err) => {
+
+                expect(err).to.not.exist();
+
+                RethinkDB.db(db.name).table('test').indexWait().run(db._connection, (err) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+
+                        expect(err).to.not.exist();
+
+                        db.test.get([1, 2], 'a', (err, result) => {
+
+                            expect(err).to.not.exist();
+                            expect(result).to.equal([{ id: 3, a: 1 }, { id: 2, a: 2 }, { id: 1, a: 1 }]);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('errors on non-existent secondary index', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                db.test.get(1, 'a', (err, result) => {
 
                     expect(err).to.exist();
                     done();
