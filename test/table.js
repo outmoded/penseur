@@ -6,6 +6,7 @@ const Code = require('code');
 const Hoek = require('hoek');
 const Lab = require('lab');
 const Penseur = require('..');
+const RethinkDB = require('rethinkdb');
 
 
 // Declare internals
@@ -2091,6 +2092,153 @@ describe('Table', { parallel: false }, () => {
                 expect(err).to.exist();
                 expect(err.message).to.equal('Database disconnected');
                 done();
+            });
+        });
+    });
+
+    describe('index()', () => {
+
+        it('creates simple index from a string', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                db.test.index('simple', (err) => {
+
+                    expect(err).to.not.exist();
+
+                    RethinkDB.db(db.name).table('test').indexStatus().run(db._connection, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.contain([{ index: 'simple', multi: false, geo: false, ready: true }]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('creates index from function', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                db.test.index({
+                    name: 'name',
+                    func: (row) => row.getField('name')
+                }, (err) => {
+
+                    expect(err).to.not.exist();
+
+                    RethinkDB.db(db.name).table('test').indexStatus().run(db._connection, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.contain([{ index: 'name', multi: false, geo: false, ready: true }]);
+                        expect(result[0].query).to.contain('getField("name")');
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('creates compound index from an array of fields', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                db.test.index({ name: 'compound', func: ['some', 'other'] }, (err) => {
+
+                    expect(err).to.not.exist();
+
+                    RethinkDB.db(db.name).table('test').indexStatus().run(db._connection, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.contain([{ index: 'compound', multi: false, geo: false, ready: true }]);
+                        expect(result[0].query).to.include('r.row("some")').and.to.include('r.row("other")');
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('creates index with options', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                db.test.index({ name: 'simple-multi', options: { multi: true } }, (err) => {
+
+                    expect(err).to.not.exist();
+
+                    RethinkDB.db(db.name).table('test').indexStatus().run(db._connection, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.contain([{ index: 'simple-multi', multi: true, geo: false, ready: true }]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('creates multiple indexes from array', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                db.test.index([
+                    'simple',
+                    { name: 'location', options: { geo: true } }
+                ], (err) => {
+
+                    expect(err).to.not.exist();
+
+                    RethinkDB.db(db.name).table('test').indexStatus().run(db._connection, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.contain([
+                            { geo: false, index: 'simple', multi: false, ready: true },
+                            { geo: true, index: 'location', multi: false, ready: true }
+                        ]);
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('propogates errors from indexCreate', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                const orig = db.test._table.indexCreate;
+                db.test._table.indexCreate = () =>
+                    ({
+                        run(connection, callback) {
+
+                            setImmediate(() => callback(new Error('simulated error')));
+                        }
+                    });
+
+                db.test.index('simple', (err) => {
+
+                    db.test._table.indexCreate = orig;
+                    expect(err).to.be.an.error('Database error');
+                    expect(err.data.error.message).to.equal('simulated error');
+
+                    done();
+                });
             });
         });
     });
