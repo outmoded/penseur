@@ -6,6 +6,7 @@ const Code = require('code');
 const Hoek = require('hoek');
 const Lab = require('lab');
 const Penseur = require('..');
+const RethinkDB = require('rethinkdb');
 
 
 // Declare internals
@@ -1395,39 +1396,104 @@ describe('Table', { parallel: false }, () => {
         });
     });
 
-    describe('_run()', () => {
+    describe('sync()', () => {
 
-        it('errors on invalid cursor', { parallel: false }, (done) => {
+        it('returns when write is complete', (done) => {
 
             const db = new Penseur.Db('penseurtest');
             db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }], (err, keys) => {
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
 
                     expect(err).to.not.exist();
 
-                    db.test._table.filter({ a: 1 }).run(db._connection, (err, cursor) => {
+                    db.test.sync((err) => {
 
                         expect(err).to.not.exist();
-
-                        const proto = Object.getPrototypeOf(cursor);
-                        const orig = proto.toArray;
-                        proto.toArray = function (callback) {
-
-                            proto.toArray = orig;
-                            return callback(new Error('boom'));
-                        };
-
-                        cursor.close();
-
-                        db.test.query({ a: 1 }, (err, result) => {
-
-                            expect(err).to.exist();
-                            done();
-                        });
+                        done();
                     });
                 });
+            });
+        });
+
+        it('fails on database error', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.table('invalid');
+            db.connect((err) => {
+
+                expect(err).to.not.exist();
+
+                db.invalid.sync((err) => {
+
+                    expect(err).to.exist();
+                    done();
+                });
+            });
+        });
+
+        it('fails on disconnected database', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.table('test');
+            db.test.sync((err) => {
+
+                expect(err).to.exist();
+                expect(err.message).to.equal('Database disconnected');
+                done();
+            });
+        });
+    });
+
+    describe('index()', () => {
+
+        it('adds a secondary index', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.index('x', (err) => {
+
+                    expect(err).to.not.exist();
+                    expect(db.test.secondary).to.equal(['x']);
+
+                    RethinkDB.db('penseurtest').table('test').config().run(db._connection, (err, configs) => {
+
+                        expect(err).to.not.exist();
+                        expect(configs.indexes).to.equal(['x']);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('fails on database error', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.table('invalid');
+            db.connect((err) => {
+
+                expect(err).to.not.exist();
+
+                db.invalid.index('x', (err) => {
+
+                    expect(err).to.exist();
+                    done();
+                });
+            });
+        });
+
+        it('fails on disconnected database', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.table('test');
+            db.test.index('x', (err) => {
+
+                expect(err).to.exist();
+                expect(err.message).to.equal('Database disconnected');
+                done();
             });
         });
     });
@@ -2045,52 +2111,39 @@ describe('Table', { parallel: false }, () => {
         });
     });
 
-    describe('sync()', () => {
+    describe('_run()', () => {
 
-        it('returns when write is complete', (done) => {
+        it('errors on invalid cursor', { parallel: false }, (done) => {
 
             const db = new Penseur.Db('penseurtest');
             db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }], (err, keys) => {
 
                     expect(err).to.not.exist();
 
-                    db.test.sync((err) => {
+                    db.test._table.filter({ a: 1 }).run(db._connection, (err, cursor) => {
 
                         expect(err).to.not.exist();
-                        done();
+
+                        const proto = Object.getPrototypeOf(cursor);
+                        const orig = proto.toArray;
+                        proto.toArray = function (callback) {
+
+                            proto.toArray = orig;
+                            return callback(new Error('boom'));
+                        };
+
+                        cursor.close();
+
+                        db.test.query({ a: 1 }, (err, result) => {
+
+                            expect(err).to.exist();
+                            done();
+                        });
                     });
                 });
-            });
-        });
-
-        it('fails on database error', (done) => {
-
-            const db = new Penseur.Db('penseurtest');
-            db.table('invalid');
-            db.connect((err) => {
-
-                expect(err).to.not.exist();
-
-                db.invalid.sync((err) => {
-
-                    expect(err).to.exist();
-                    done();
-                });
-            });
-        });
-
-        it('fails on disconnected database', (done) => {
-
-            const db = new Penseur.Db('penseurtest');
-            db.table('test');
-            db.test.sync((err) => {
-
-                expect(err).to.exist();
-                expect(err.message).to.equal('Database disconnected');
-                done();
             });
         });
     });
