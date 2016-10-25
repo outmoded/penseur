@@ -1457,12 +1457,12 @@ describe('Table', { parallel: false }, () => {
                 db.test.index('x', (err) => {
 
                     expect(err).to.not.exist();
-                    expect(db.test.secondary).to.equal(['x']);
+                    expect(db.test._secondary).to.equal(['x']);
 
-                    RethinkDB.db('penseurtest').table('test').config().run(db._connection, (err, configs) => {
+                    RethinkDB.db(db.name).table('test').indexStatus().run(db._connection, (err, result) => {
 
                         expect(err).to.not.exist();
-                        expect(configs.indexes).to.equal(['x']);
+                        expect(result[0]).to.contain({ index: 'x', multi: false, geo: false, ready: true });
                         done();
                     });
                 });
