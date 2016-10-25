@@ -1496,6 +1496,145 @@ describe('Table', { parallel: false }, () => {
                 done();
             });
         });
+
+        it('creates simple index from a string', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.index('simple', (err) => {
+
+                    expect(err).to.not.exist();
+                    RethinkDB.db(db.name).table('test').indexStatus().run(db._connection, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result[0]).to.contain({ index: 'simple', multi: false, geo: false, ready: true });
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('creates index from function', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                const index = {
+                    name: 'name',
+                    source: (row) => row('name')
+                };
+
+                db.test.index(index, (err) => {
+
+                    expect(err).to.not.exist();
+                    RethinkDB.db(db.name).table('test').indexStatus().run(db._connection, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result[0]).to.contain({ index: 'name', multi: false, geo: false, ready: true });
+                        expect(result[0].query).to.contain('("name")');
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('creates compound index from an array of fields', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.index({ name: 'compound', source: ['some', 'other'] }, (err) => {
+
+                    expect(err).to.not.exist();
+                    RethinkDB.db(db.name).table('test').indexStatus().run(db._connection, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result[0]).to.contain({ index: 'compound', multi: false, geo: false, ready: true });
+                        expect(result[0].query).to.include('r.row("some")').and.to.include('r.row("other")');
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('creates index with options', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.index({ name: 'simple-multi', options: { multi: true } }, (err) => {
+
+                    expect(err).to.not.exist();
+                    RethinkDB.db(db.name).table('test').indexStatus().run(db._connection, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result[0]).to.contain({ index: 'simple-multi', multi: true, geo: false, ready: true });
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('creates multiple indexes from array', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                const indexes = [
+                    'simple',
+                    { name: 'location', options: { geo: true } }
+                ];
+
+                db.test.index(indexes, (err) => {
+
+                    expect(err).to.not.exist();
+                    RethinkDB.db(db.name).table('test').indexStatus().run(db._connection, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result[0]).to.contain({ geo: true, index: 'location', multi: false, ready: true });
+                        expect(result[1]).to.contain({ geo: false, index: 'simple', multi: false, ready: true });
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('propogates errors from indexCreate', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                const orig = db.test._table.indexCreate;
+                db.test._table.indexCreate = () => {
+
+                    return {
+                        run(connection, callback) {
+
+                            setImmediate(() => callback(new Error('simulated error')));
+                        }
+                    };
+                };
+
+                db.test.index('simple', (err) => {
+
+                    db.test._table.indexCreate = orig;
+                    expect(err).to.be.an.error('Database error');
+                    expect(err.data.error.message).to.equal('simulated error');
+
+                    done();
+                });
+            });
+        });
     });
 
     describe('changes()', () => {
