@@ -477,19 +477,16 @@ describe('Criteria', { parallel: false }, () => {
             db.establish({ test: { secondary: 'a' } }, (err) => {
 
                 expect(err).to.not.exist();
-                setTimeout(() => {
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
 
-                    db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+                    expect(err).to.not.exist();
+                    db.test.query({ a: 1 }, (err, result) => {
 
                         expect(err).to.not.exist();
-                        db.test.query({ a: 1 }, (err, result) => {
-
-                            expect(err).to.not.exist();
-                            expect(result).to.equal([{ id: 3, a: 1 }, { id: 1, a: 1 }]);
-                            done();
-                        });
+                        expect(result).to.equal([{ id: 3, a: 1 }, { id: 1, a: 1 }]);
+                        done();
                     });
-                }, 100);
+                });
             });
         });
 
@@ -519,19 +516,16 @@ describe('Criteria', { parallel: false }, () => {
             db.establish({ test: { secondary: 'a' } }, (err) => {
 
                 expect(err).to.not.exist();
-                setTimeout(() => {
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 3 }], (err, keys) => {
 
-                    db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 3 }], (err, keys) => {
+                    expect(err).to.not.exist();
+                    db.test.query({ a: db.or([1, 3]) }, (err, result) => {
 
                         expect(err).to.not.exist();
-                        db.test.query({ a: db.or([1, 3]) }, (err, result) => {
-
-                            expect(err).to.not.exist();
-                            expect(result).to.equal([{ id: 3, a: 3 }, { id: 1, a: 1 }]);
-                            done();
-                        });
+                        expect(result).to.equal([{ id: 3, a: 3 }, { id: 1, a: 1 }]);
+                        done();
                     });
-                }, 100);
+                });
             });
         });
 
@@ -541,19 +535,16 @@ describe('Criteria', { parallel: false }, () => {
             db.establish({ test: { secondary: 'a' } }, (err) => {
 
                 expect(err).to.not.exist();
-                setTimeout(() => {
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3 }], (err, keys) => {
 
-                    db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3 }], (err, keys) => {
+                    expect(err).to.not.exist();
+                    db.test.query({ a: db.or([1, db.unset()]) }, (err, result) => {
 
                         expect(err).to.not.exist();
-                        db.test.query({ a: db.or([1, db.unset()]) }, (err, result) => {
-
-                            expect(err).to.not.exist();
-                            expect(result).to.equal([{ id: 3 }, { id: 1, a: 1 }]);
-                            done();
-                        });
+                        expect(result).to.equal([{ id: 3 }, { id: 1, a: 1 }]);
+                        done();
                     });
-                }, 100);
+                });
             });
         });
     });
