@@ -1457,7 +1457,6 @@ describe('Table', { parallel: false }, () => {
                 db.test.index('x', (err) => {
 
                     expect(err).to.not.exist();
-                    expect(db.test._secondary).to.equal(['x']);
 
                     RethinkDB.db(db.name).table('test').indexStatus().run(db._connection, (err, result) => {
 

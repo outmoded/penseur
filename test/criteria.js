@@ -471,7 +471,7 @@ describe('Criteria', { parallel: false }, () => {
 
     describe('select()', () => {
 
-        it('optimizes for secondary index', (done) => {
+        it('selects by secondary index', (done) => {
 
             const db = new Penseur.Db('penseurtest');
             db.establish({ test: { secondary: 'a' } }, (err) => {
@@ -480,68 +480,10 @@ describe('Criteria', { parallel: false }, () => {
                 db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
 
                     expect(err).to.not.exist();
-                    db.test.query({ a: 1 }, (err, result) => {
+                    db.test.query(db.by('a', 1 ), (err, result) => {
 
                         expect(err).to.not.exist();
                         expect(result).to.equal([{ id: 3, a: 1 }, { id: 1, a: 1 }]);
-                        done();
-                    });
-                });
-            });
-        });
-
-        it('ignores secondary index when value is special', (done) => {
-
-            const db = new Penseur.Db('penseurtest');
-            db.establish({ test: { secondary: 'a' } }, (err) => {
-
-                expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3 }], (err, keys) => {
-
-                    expect(err).to.not.exist();
-
-                    db.test.query({ a: db.unset() }, (err, result) => {
-
-                        expect(err).to.not.exist();
-                        expect(result).to.equal([{ id: 3 }]);
-                        done();
-                    });
-                });
-            });
-        });
-
-        it('optimizes for secondary index (or)', (done) => {
-
-            const db = new Penseur.Db('penseurtest');
-            db.establish({ test: { secondary: 'a' } }, (err) => {
-
-                expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 3 }], (err, keys) => {
-
-                    expect(err).to.not.exist();
-                    db.test.query({ a: db.or([1, 3]) }, (err, result) => {
-
-                        expect(err).to.not.exist();
-                        expect(result).to.equal([{ id: 3, a: 3 }, { id: 1, a: 1 }]);
-                        done();
-                    });
-                });
-            });
-        });
-
-        it('ignores secondary index (or)', (done) => {
-
-            const db = new Penseur.Db('penseurtest');
-            db.establish({ test: { secondary: 'a' } }, (err) => {
-
-                expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3 }], (err, keys) => {
-
-                    expect(err).to.not.exist();
-                    db.test.query({ a: db.or([1, db.unset()]) }, (err, result) => {
-
-                        expect(err).to.not.exist();
-                        expect(result).to.equal([{ id: 3 }, { id: 1, a: 1 }]);
                         done();
                     });
                 });
