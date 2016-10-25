@@ -547,5 +547,47 @@ describe('Criteria', { parallel: false }, () => {
                 });
             });
         });
+
+        it('optimizes for compound secondary index', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish({ test: { secondary: [
+                'simple',
+                { name: 'custom', source: (row) => row('a') },
+                { name: 'compound', source: ['a', 'b'] }
+            ] } }, (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1, b: 1 }, { id: 2, a: 2, b: 2 }, { id: 3 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+                    db.test.query({ a: 1, b: 1 }, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.equal([{ id: 1, a: 1, b: 1 }]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('ignores compound secondary index when value is not scalar', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish({ test: { secondary: { name: 'compound', source: ['a', 'b'] } } }, (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1, b: { c: 3 } }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+                    db.test.query({ b: { c: 3 } }, (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.equal([{ id: 1, a: 1, b: { c: 3 } }]);
+                        done();
+                    });
+                });
+            });
+        });
     });
 });
