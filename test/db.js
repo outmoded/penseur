@@ -960,12 +960,19 @@ describe('Db', () => {
                                 expect(err).to.not.exist();
                                 expect(item3).to.be.null();
 
-                                db.enable('test', 'get');
+                                db.disable('test', 'get', { value: new Error('stuff') });
                                 db.test.get(1, (err, item4) => {
 
-                                    expect(err).to.not.exist();
-                                    expect(item4.value).to.equal('x');
-                                    db.close(done);
+                                    expect(err).to.be.an.error('stuff');
+                                    expect(item4).to.not.exist();
+
+                                    db.enable('test', 'get');
+                                    db.test.get(1, (err, item5) => {
+
+                                        expect(err).to.not.exist();
+                                        expect(item5.value).to.equal('x');
+                                        db.close(done);
+                                    });
                                 });
                             });
                         });
