@@ -771,7 +771,7 @@ describe('Db', () => {
         });
     });
 
-    describe('_createTable', () => {
+    describe('_createTable()', () => {
 
         it('creates table with custom primary key', (done) => {
 
@@ -891,6 +891,68 @@ describe('Db', () => {
 
                     expect(err).to.exist();
                     db.close(done);
+                });
+            });
+        });
+    });
+
+    describe('run()', () => {
+
+        it('makes custom request', (done) => {
+
+            const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015 });
+
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.run(db.test.raw.insert({ id: 1, value: 'x' }), (err, result) => {
+
+                    expect(err).to.not.exist();
+                    expect(result).to.equal({
+                        deleted: 0,
+                        errors: 0,
+                        inserted: 1,
+                        replaced: 0,
+                        skipped: 0,
+                        unchanged: 0
+                    });
+
+                    db.run(db.test.raw.get(1).pluck('id'), (err, item) => {
+
+                        expect(err).to.not.exist();
+                        expect(item).to.equal({ id: 1 });
+
+                        db.run(db.test.raw, (err, all) => {
+
+                            expect(err).to.not.exist();
+                            expect(all).to.equal([{ id: 1, value: 'x' }]);
+                            db.close(done);
+                        });
+                    });
+                });
+            });
+        });
+
+        it('includes table name on error', (done) => {
+
+            const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015 });
+            db.table('test123');
+            db.run(db.test123.raw.insert({ id: 1, value: 'x' }), (err, result) => {
+
+                expect(err).to.be.an.error('Database disconnected');
+                expect(err.data.table).to.equal('test123');
+
+                db.run(db.test123.raw.get(1).pluck('id'), (err, item) => {
+
+                    expect(err).to.be.an.error('Database disconnected');
+                    expect(err.data.table).to.equal('test123');
+
+                    db.run(db.test123.raw, (err, all) => {
+
+                        expect(err).to.be.an.error('Database disconnected');
+                        expect(err.data.table).to.equal('test123');
+                        done();
+                    });
                 });
             });
         });

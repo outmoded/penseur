@@ -1633,8 +1633,8 @@ describe('Table', { parallel: false }, () => {
 
                 expect(err).to.not.exist();
 
-                const orig = db.test._table.indexCreate;
-                db.test._table.indexCreate = () => {
+                const orig = db.test.raw.indexCreate;
+                db.test.raw.indexCreate = () => {
 
                     return {
                         run(connection, callback) {
@@ -1646,7 +1646,7 @@ describe('Table', { parallel: false }, () => {
 
                 db.test.index('simple', (err) => {
 
-                    db.test._table.indexCreate = orig;
+                    db.test.raw.indexCreate = orig;
                     expect(err).to.be.an.error('Database error');
                     expect(err.data.error.message).to.equal('simulated error');
 
@@ -2281,7 +2281,7 @@ describe('Table', { parallel: false }, () => {
 
                     expect(err).to.not.exist();
 
-                    db.test._table.filter({ a: 1 }).run(db._connection, (err, cursor) => {
+                    db.test.raw.filter({ a: 1 }).run(db._connection, (err, cursor) => {
 
                         expect(err).to.not.exist();
 
