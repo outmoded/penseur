@@ -24,6 +24,14 @@ const expect = Code.expect;
 
 describe('Db', () => {
 
+    it('exposes driver', (done) => {
+
+        const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015 });
+        expect(db.r).to.shallow.equal(RethinkDB);
+        expect(Penseur.r).to.shallow.equal(RethinkDB);
+        done();
+    });
+
     it('establishes and interacts with a database', (done) => {
 
         const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015 });
