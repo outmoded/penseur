@@ -925,7 +925,7 @@ describe('Db', () => {
                         unchanged: 0
                     });
 
-                    db.run(db.test.raw.get(1).pluck('id'), (err, item) => {
+                    db.run(db.test.raw.get(1).pluck('id'), {}, (err, item) => {
 
                         expect(err).to.not.exist();
                         expect(item).to.equal({ id: 1 });
