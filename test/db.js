@@ -941,6 +941,23 @@ describe('Db', () => {
             });
         });
 
+        it('makes custom request (options)', (done) => {
+
+            const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015 });
+
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.run(db.test.raw.insert({ id: 1, value: 'x' }), { profile: true }, (err, result) => {
+
+                    expect(err).to.not.exist();
+                    expect(result.profile).to.exist();
+
+                    db.close(done);
+                });
+            });
+        });
+
         it('includes table name on error', (done) => {
 
             const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015 });

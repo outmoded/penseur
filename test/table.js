@@ -1637,7 +1637,7 @@ describe('Table', { parallel: false }, () => {
                 db.test.raw.indexCreate = () => {
 
                     return {
-                        run(connection, callback) {
+                        run(connection, options, callback) {
 
                             setImmediate(() => callback(new Error('simulated error')));
                         }
