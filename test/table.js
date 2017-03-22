@@ -1647,7 +1647,8 @@ describe('Table', { parallel: false }, () => {
                 db.test.index('simple', (err) => {
 
                     db.test.raw.indexCreate = orig;
-                    expect(err).to.be.an.error('Database error');
+                    expect(err).to.be.an.error('simulated error');
+                    expect(err.data.error.stack).to.exist();
                     expect(err.data.error.message).to.equal('simulated error');
 
                     done();
@@ -2229,7 +2230,7 @@ describe('Table', { parallel: false }, () => {
                 const each = (err, item) => {
 
                     if (err) {
-                        expect(err.message).to.equal('Database error');
+                        expect(err.message).to.equal('kaboom');
                         done();
                     }
                 };
@@ -2239,10 +2240,10 @@ describe('Table', { parallel: false }, () => {
                     expect(err).to.not.exist();
 
                     const orig = cursor._cursor._next;
-                    cursor._cursor._next = (next) => {
+                    cursor._cursor._next = () => {
 
                         cursor._cursor._next = orig;
-                        return next(new Error('kaboom'));
+                        throw new Error('kaboom');
                     };
 
                     db.test.insert({ id: 1, a: 1 }, (err, keys) => {
