@@ -462,6 +462,26 @@ describe('Table', { parallel: false }, () => {
                 });
             });
         });
+
+        it('returns all objects', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.query(null, (err, items) => {
+
+                        expect(err).to.not.exist();
+                        expect(items).to.equal([{ id: 3, a: 1 }, { id: 2, a: 2 }, { id: 1, a: 1 }]);
+                        done();
+                    });
+                });
+            });
+        });
     });
 
     describe('single()', () => {
@@ -522,6 +542,21 @@ describe('Table', { parallel: false }, () => {
                         expect(err.message).to.equal('Found multiple items');
                         done();
                     });
+                });
+            });
+        });
+
+        it('fails on database error', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.table('invalid');
+            db.connect((err) => {
+
+                expect(err).to.not.exist();
+                db.invalid.single({ a: 1 }, (err, item) => {
+
+                    expect(err).to.exist();
+                    done();
                 });
             });
         });
@@ -1260,6 +1295,21 @@ describe('Table', { parallel: false }, () => {
                 });
             });
         });
+
+        it('fails on database error', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.table('invalid');
+            db.connect((err) => {
+
+                expect(err).to.not.exist();
+                db.invalid.next(1, 'a', 5, (err) => {
+
+                    expect(err).to.exist();
+                    done();
+                });
+            });
+        });
     });
 
     describe('remove()', () => {
@@ -1364,6 +1414,21 @@ describe('Table', { parallel: false }, () => {
                 db.test.remove([1], (err) => {
 
                     expect(err).to.not.exist();
+                    done();
+                });
+            });
+        });
+
+        it('fails on database error', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.table('invalid');
+            db.connect((err) => {
+
+                expect(err).to.not.exist();
+                db.invalid.remove(1, (err, item) => {
+
+                    expect(err).to.exist();
                     done();
                 });
             });
@@ -2265,43 +2330,6 @@ describe('Table', { parallel: false }, () => {
 
                     expect(err).to.exist();
                     done();
-                });
-            });
-        });
-    });
-
-    describe('_run()', () => {
-
-        it('errors on invalid cursor', { parallel: false }, (done) => {
-
-            const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
-
-                expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }], (err, keys) => {
-
-                    expect(err).to.not.exist();
-
-                    db.test.raw.filter({ a: 1 }).run(db._connection, (err, cursor) => {
-
-                        expect(err).to.not.exist();
-
-                        const proto = Object.getPrototypeOf(cursor);
-                        const orig = proto.toArray;
-                        proto.toArray = function (callback) {
-
-                            proto.toArray = orig;
-                            return callback(new Error('boom'));
-                        };
-
-                        cursor.close();
-
-                        db.test.query({ a: 1 }, (err, result) => {
-
-                            expect(err).to.exist();
-                            done();
-                        });
-                    });
                 });
             });
         });

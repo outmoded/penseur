@@ -182,6 +182,38 @@ describe('Unique', () => {
             });
         });
 
+        it.skip('releases value on unset (parent)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            const settings = {
+                penseur_unique_test_a_b: true,              // Test cleanup
+                test: {
+                    id: 'uuid',
+                    unique: {
+                        path: ['a', 'b']
+                    }
+                }
+            };
+
+            db.establish(settings, (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: '1', a: { b: 1 } }, (err, key) => {
+
+                    expect(err).to.not.exist();
+                    db.test.update('1', { a: db.unset() }, (err) => {
+
+                        expect(err).to.not.exist();
+                        db.test.insert({ id: 2, a: { b: 1 } }, (err) => {
+
+                            expect(err).to.not.exist();
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
         it('ignores empty object', (done) => {
 
             const db = new Penseur.Db('penseurtest');

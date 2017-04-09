@@ -2,6 +2,7 @@
 
 // Load modules
 
+const Apiece = require('apiece');
 const Code = require('code');
 const Hoek = require('hoek');
 const Lab = require('lab');
@@ -977,6 +978,111 @@ describe('Db', () => {
                         expect(err).to.be.an.error('Database disconnected');
                         expect(err.data.table).to.equal('test123');
                         done();
+                    });
+                });
+            });
+        });
+    });
+
+    describe('_run()', () => {
+
+        it('uses apiece callback', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    const results = [];
+                    const cb = Apiece.wrap({
+                        end: (err) => {
+
+                            expect(err).to.not.exist();
+                            expect(results).to.equal([{ id: 3, a: 1 }, { id: 2, a: 2 }, { id: 1, a: 1 }]);
+                            done();
+                        },
+                        each: (item) => {
+
+                            results.push(item);
+                        }
+                    });
+
+                    db.test.all(cb);
+                });
+            });
+        });
+
+        it('errors on invalid cursor', { parallel: false }, (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.raw.filter({ a: 1 }).run(db._connection, (err, cursor) => {
+
+                        expect(err).to.not.exist();
+
+                        const proto = Object.getPrototypeOf(cursor);
+                        const orig = proto.toArray;
+                        proto.toArray = function (callback) {
+
+                            proto.toArray = orig;
+                            return callback(new Error('boom'));
+                        };
+
+                        cursor.close();
+
+                        db.test.query({ a: 1 }, (err, result) => {
+
+                            expect(err).to.exist();
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('errors on database cursor each error', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.raw.filter({ a: 1 }).run(db._connection, (err, cursor) => {
+
+                        expect(err).to.not.exist();
+
+                        const proto = Object.getPrototypeOf(cursor);
+                        const orig = proto.toArray;
+                        proto.each = function (callback) {
+
+                            proto.each = orig;
+                            return callback(new Error('boom'));
+                        };
+
+                        cursor.close();
+
+                        const cb = Apiece.wrap({
+                            end: (err) => {
+
+                                expect(err).to.exist();
+                                done();
+                            },
+                            each: (item) => { }
+                        });
+
+                        db.test.query({ a: 1 }, cb);
                     });
                 });
             });
