@@ -2,6 +2,7 @@
 
 // Load modules
 
+const Apiece = require('apiece');
 const Code = require('code');
 const Hoek = require('hoek');
 const Lab = require('lab');
@@ -480,6 +481,80 @@ describe('Table', { parallel: false }, () => {
                         done();
                     });
                 });
+            });
+        });
+    });
+
+    describe('_chunks()', () => {
+
+        it('breaks query into chunks', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    const results = [];
+                    const cb = Apiece.wrap({
+                        end: (err) => {
+
+                            expect(err).to.not.exist();
+                            expect(results).to.equal([{ id: 3, a: 1 }, { id: 2, a: 2 }, { id: 1, a: 1 }]);
+                            done();
+                        },
+                        each: (item) => results.push(item)
+                    });
+
+                    db.test.query(null, { chunks: 1 }, cb);
+                });
+            });
+        });
+
+        it('errors on chunks with count', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                expect(() => {
+
+                    db.test.query(null, { chunks: 1, count: 1 }, Hoek.ignore);
+                }).to.throw('Cannot use chunks option with from or count');
+
+                done();
+            });
+        });
+
+        it('errors on chunks with from', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                expect(() => {
+
+                    db.test.query(null, { chunks: 1, from: 1 }, Hoek.ignore);
+                }).to.throw('Cannot use chunks option with from or count');
+
+                done();
+            });
+        });
+
+        it('errors on databse error', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test._run = (ignore1, ignore2, ignore3, next) => next(new Error());
+                db.test.query(null, { chunks: 1 }, Apiece.wrap((err) => {
+
+                    expect(err).to.exist();
+                    done();
+                }));
             });
         });
     });

@@ -1064,7 +1064,7 @@ describe('Db', () => {
                         expect(err).to.not.exist();
 
                         const proto = Object.getPrototypeOf(cursor);
-                        const orig = proto.toArray;
+                        const orig = proto.each;
                         proto.each = function (callback) {
 
                             proto.each = orig;
