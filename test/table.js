@@ -345,7 +345,19 @@ describe('Table', { parallel: false }, () => {
 
                             expect(err).to.not.exist();
                             expect(result2).to.equal([{ id: 1, a: 1, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 3, a: 3, b: 1 }]);
-                            done();
+
+                            const results = [];
+                            const cb = Apiece.wrap({
+                                end: (err) => {
+
+                                    expect(err).to.not.exist();
+                                    expect(results).to.equal([{ id: 1, a: 1, b: 1 }]);
+                                    done();
+                                },
+                                each: (item) => results.push(item)
+                            });
+
+                            db.test.query({ b: 1 }, { count: 1, sort: { key: 'id', order: 'ascending' }, from: 0 }, cb);
                         });
                     });
                 });
@@ -493,6 +505,32 @@ describe('Table', { parallel: false }, () => {
             db.establish(['test'], (err) => {
 
                 expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }, { id: 3, a: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    const results = [];
+                    const cb = Apiece.wrap({
+                        end: (err) => {
+
+                            expect(err).to.not.exist();
+                            expect(results).to.equal([{ id: 1, a: 1 }, { id: 2, a: 1 }, { id: 3, a: 1 }]);
+                            done();
+                        },
+                        each: (item) => results.push(item)
+                    });
+
+                    db.test.query({ a: 1 }, { chunks: 1 }, cb);
+                });
+            });
+        });
+
+        it('breaks query into chunks (custom sort)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
                 db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
 
                     expect(err).to.not.exist();
@@ -508,7 +546,7 @@ describe('Table', { parallel: false }, () => {
                         each: (item) => results.push(item)
                     });
 
-                    db.test.query(null, { chunks: 1 }, cb);
+                    db.test.query(null, { chunks: 1, sort: { key: 'id', order: 'descending' } }, cb);
                 });
             });
         });
