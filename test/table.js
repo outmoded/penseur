@@ -1367,6 +1367,98 @@ describe('Table', { parallel: false }, () => {
         });
     });
 
+    describe('replace()', () => {
+
+        it('replaces a record', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: 1, a: 1 }, (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.replace(1, { id: 1, a: 2 }, (err) => {
+
+                        expect(err).to.not.exist();
+
+                        db.test.get(1, (err, item) => {
+
+                            expect(err).to.not.exist();
+                            expect(item.a).to.equal(2);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('replaces a record with nested objects', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: 1, a: { b: 1, c: 2 } }, (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.replace(1, { id: 1, a: { b: 2 } }, (err) => {
+
+                        expect(err).to.not.exist();
+
+                        db.test.get(1, (err, item) => {
+
+                            expect(err).to.not.exist();
+                            expect(item.a.b).to.equal(2);
+                            expect(item.a.c).to.equal(undefined);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('errors if no item is present', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: 1, a: 1 }, (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    expect(() => {
+
+                        db.test.replace(1, undefined, () => { });
+                    }).to.throw('Invalid item');
+                    done();
+                });
+            });
+        });
+
+        it('errors if the id in the object doesn\'t match the id being replaced', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: 1, a: 1 }, (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    expect(() => {
+
+                        db.test.replace(1, { id: 2, a: 1 }, () => { });
+                    }).to.throw('Ids don\'t match');
+                    done();
+                });
+            });
+        });
+    });
+
     describe('next()', () => {
 
         it('updates a record', (done) => {
