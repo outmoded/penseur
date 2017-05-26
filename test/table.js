@@ -877,6 +877,35 @@ describe('Table', { parallel: false }, () => {
                 });
             });
         });
+
+        it('errors on upsert unique cleanup', (done) => {
+
+            const db = new Penseur.Db('penseurtest', { test: true });
+            const settings = {
+                penseur_unique_test_a: true,                 // Test cleanup
+                test: {
+                    id: 'uuid',
+                    unique: {
+                        path: 'a'
+                    }
+                }
+            };
+
+            db.establish(settings, (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: '1', a: 1 }, (err, key) => {
+
+                    expect(err).to.not.exist();
+                    db.test._unique.rules[0].table.remove = (ids, next) => next(new Error());
+                    db.test.insert({ id: '1', a: 2 }, { merge: true }, (err) => {
+
+                        expect(err).to.exist();
+                        done();
+                    });
+                });
+            });
+        });
     });
 
     describe('update()', () => {
