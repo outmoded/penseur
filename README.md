@@ -139,12 +139,20 @@ Create new record(s) in the table. Each item can specify a unique `id` property 
 - `callback` - function with `function(err, keys)` signature
 
 
-#### `db[table].update(id, changes, callback)`
+#### `db[table].update(ids, changes, callback)`
 
 Update an existing record with the provided changes.
 
-- `id` - identifier of record to update in the table
+- `ids` - an identifier or array of identifiers of records to update in the table
 - `changes` - the parts of the record to change and the values to change the parts to
+- `callback` - function with `function(err)` signature
+
+
+#### `db[table].update(updates, callback)`
+
+Update an existing record with the provided changes.
+
+- `updates` - an array of records to update (each must include an existing primary key)
 - `callback` - function with `function(err)` signature
 
 
