@@ -720,6 +720,127 @@ describe('Table', { parallel: false }, () => {
 
     describe('insert()', () => {
 
+        it('inserts a record', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: 1, a: 1 }, (err, keys) => {
+
+                    expect(err).to.not.exist();
+                    expect(keys).to.equal(1);
+
+                    db.test.get(1, (err, item) => {
+
+                        expect(err).to.not.exist();
+                        expect(item.a).to.equal(1);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('inserts multiple records', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                const batches = [];
+                const orig = db.test._insert;
+                db.test._insert = (items, ...args) => {
+
+                    batches.push(Array.isArray(items) ? items.length : 'single');
+                    return orig.call(db.test, items, ...args);
+                };
+
+                const records = [];
+                const ids = [];
+                for (let i = 1; i < 101; ++i) {
+                    records.push({ id: i, a: i });
+                    ids.push(i);
+                }
+
+                db.test.insert(records, { chunks: 30 }, (err, keys) => {
+
+                    expect(err).to.not.exist();
+                    expect(keys).to.equal(ids);
+                    expect(batches).to.equal([30, 30, 30, 10]);
+
+                    db.test.all((err, items) => {
+
+                        expect(err).to.not.exist();
+                        expect(items.length).to.equal(100);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('inserts a record (ignore batch on non array)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                const batches = [];
+                const orig = db.test._insert;
+                db.test._insert = (items, ...args) => {
+
+                    batches.push(Array.isArray(items) ? items.length : 'single');
+                    return orig.call(db.test, items, ...args);
+                };
+
+                db.test.insert({ id: 1, a: 1 }, { chunks: 10 }, (err, keys) => {
+
+                    expect(err).to.not.exist();
+                    expect(keys).to.equal(1);
+                    expect(batches).to.equal(['single']);
+
+                    db.test.get(1, (err, item) => {
+
+                        expect(err).to.not.exist();
+                        expect(item.a).to.equal(1);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('inserts a record (ignore batch on solo array)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                const batches = [];
+                const orig = db.test._insert;
+                db.test._insert = (items, ...args) => {
+
+                    batches.push(Array.isArray(items) ? items.length : 'single');
+                    return orig.call(db.test, items, ...args);
+                };
+
+                db.test.insert([{ id: 1, a: 1 }], { chunks: 10 }, (err, keys) => {
+
+                    expect(err).to.not.exist();
+                    expect(keys).to.equal([1]);
+                    expect(batches).to.equal([1]);
+
+                    db.test.get(1, (err, item) => {
+
+                        expect(err).to.not.exist();
+                        expect(item.a).to.equal(1);
+                        done();
+                    });
+                });
+            });
+        });
+
         it('updates a record if exists', (done) => {
 
             const db = new Penseur.Db('penseurtest');
@@ -903,6 +1024,28 @@ describe('Table', { parallel: false }, () => {
                         expect(err).to.exist();
                         done();
                     });
+                });
+            });
+        });
+
+        it('errors on batch insert with multiple records', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                db.test._insert = (items, options, next) => next(new Error());
+
+                const records = [];
+                for (let i = 1; i < 101; ++i) {
+                    records.push({ id: i, a: i });
+                }
+
+                db.test.insert(records, { chunks: 30 }, (err, keys) => {
+
+                    expect(err).to.exist();
+                    done();
                 });
             });
         });
@@ -1438,6 +1581,119 @@ describe('Table', { parallel: false }, () => {
 
                             expect(err).to.not.exist();
                             expect(items).to.equal([{ id: 2 }, { id: 1, a: 3 }]);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('updates a record (ignore batch)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    const batches = [];
+                    const orig = db.test._update;
+                    db.test._update = (ids, ...args) => {
+
+                        batches.push(ids.length);
+                        return orig.call(db.test, ids, ...args);
+                    };
+
+                    db.test.update([{ id: 1, a: 2 }], { chunks: 10 }, (err) => {
+
+                        expect(err).to.not.exist();
+                        expect(batches).to.equal([1]);
+
+                        db.test.get(1, (err, item) => {
+
+                            expect(err).to.not.exist();
+                            expect(item.a).to.equal(2);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('updates a record (ignore empty options)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    const batches = [];
+                    const orig = db.test._update;
+                    db.test._update = (ids, ...args) => {
+
+                        batches.push(ids.length);
+                        return orig.call(db.test, ids, ...args);
+                    };
+
+                    db.test.update([{ id: 1, a: 2 }], {}, (err) => {
+
+                        expect(err).to.not.exist();
+                        expect(batches).to.equal([1]);
+
+                        db.test.get(1, (err, item) => {
+
+                            expect(err).to.not.exist();
+                            expect(item.a).to.equal(2);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('updates multiple records (chunks)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                const records = [];
+                for (let i = 1; i < 101; ++i) {
+                    records.push({ id: i, a: i });
+                }
+
+                db.test.insert(records, (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    const batches = [];
+                    const orig = db.test._update;
+                    db.test._update = (ids, ...args) => {
+
+                        batches.push(ids.length);
+                        return orig.call(db.test, ids, ...args);
+                    };
+
+                    const updates = [];
+                    for (let i = 1; i < 101; ++i) {
+                        updates.push({ id: i, a: db.unset() });
+                    }
+
+                    db.test.update(updates, { chunks: 30 }, (err) => {
+
+                        expect(err).to.not.exist();
+                        expect(batches).to.equal([30, 30, 30, 10]);
+
+                        db.test.get(1, (err, item) => {
+
+                            expect(err).to.not.exist();
+                            expect(item.a).to.not.exist();
                             done();
                         });
                     });

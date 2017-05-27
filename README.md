@@ -135,7 +135,8 @@ Create new record(s) in the table. Each item can specify a unique `id` property 
 
 - `items` - item object or array of items to insert into the table
 - `options` - optional object with the following properties
-  - `merge` - boolean, when true any conflicts with existing items will result in an update, when false an error is returned.
+    - `merge` - boolean, when true any conflicts with existing items will result in an update, when false an error is returned
+	- `chunks` - maximum number of updates to send to the database at the same time
 - `callback` - function with `function(err, keys)` signature
 
 
@@ -148,11 +149,13 @@ Update an existing record with the provided changes.
 - `callback` - function with `function(err)` signature
 
 
-#### `db[table].update(updates, callback)`
+#### `db[table].update(updates, [options, ] callback)`
 
 Update an existing record with the provided changes.
 
 - `updates` - an array of records to update (each must include an existing primary key)
+- `options` - optional settings where:
+	- `chunks` - maximum number of updates to send to the database at the same time
 - `callback` - function with `function(err)` signature
 
 
