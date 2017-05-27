@@ -1394,6 +1394,56 @@ describe('Table', { parallel: false }, () => {
                 });
             });
         });
+
+        it('updates multiple records (same value)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.update([1, 2], { a: db.unset() }, (err) => {
+
+                        expect(err).to.not.exist();
+
+                        db.test.all((err, items) => {
+
+                            expect(err).to.not.exist();
+                            expect(items).to.equal([{ id: 2 }, { id: 1 }]);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('updates multiple records (different value)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.update([{ id: 1, a: 3 }, { id: 2, a: db.unset() }], (err) => {
+
+                        expect(err).to.not.exist();
+
+                        db.test.all((err, items) => {
+
+                            expect(err).to.not.exist();
+                            expect(items).to.equal([{ id: 2 }, { id: 1, a: 3 }]);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
     });
 
     describe('next()', () => {
