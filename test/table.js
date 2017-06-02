@@ -256,6 +256,32 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
+        it('breaks query into chunks', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }, { id: 3, a: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    const results = [];
+                    const cb = Apiece.wrap({
+                        end: (err) => {
+
+                            expect(err).to.not.exist();
+                            expect(results).to.equal([{ id: 1, a: 1 }, { id: 2, a: 1 }, { id: 3, a: 1 }]);
+                            done();
+                        },
+                        each: (item) => results.push(item)
+                    });
+
+                    db.test.all({ chunks: 1 }, cb);
+                });
+            });
+        });
+
         it('fails on database error', (done) => {
 
             const db = new Penseur.Db('penseurtest');
