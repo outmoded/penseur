@@ -236,6 +236,26 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
+        it('returns the requested objects (range)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.all({ count: 2 }, (err, items) => {
+
+                        expect(err).to.not.exist();
+                        expect(items).to.equal([{ id: 3, a: 1 }, { id: 2, a: 2 }]);
+                        done();
+                    });
+                });
+            });
+        });
+
         it('fails on database error', (done) => {
 
             const db = new Penseur.Db('penseurtest');
