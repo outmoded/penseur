@@ -276,6 +276,32 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
+        it('returns null when range is out of items', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.all((err, items1) => {
+
+                    expect(err).to.not.exist();
+                    expect(items1).to.be.null();
+
+                    db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+
+                        expect(err).to.not.exist();
+
+                        db.test.all({ from: 5 }, (err, items2) => {
+
+                            expect(err).to.not.exist();
+                            expect(items2).to.be.null();
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
         it('breaks query into chunks', (done) => {
 
             const db = new Penseur.Db('penseurtest');
