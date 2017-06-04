@@ -397,6 +397,133 @@ describe('Table', { parallel: false }, () => {
         });
     });
 
+    describe('distinct()', () => {
+
+        it('return distinct combinations (single field)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                const items = [
+                    { id: 1, a: 1, b: 2 },
+                    { id: 2, a: 2, b: 2 },
+                    { id: 3, a: 1, b: 2 },
+                    { id: 4, a: 2, b: 2 },
+                    { id: 5, a: 1, b: 3 },
+                    { id: 6, a: 3, b: 3 },
+                    { id: 7, a: 1, b: 2 }
+                ];
+
+                db.test.insert(items, (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.distinct(['a'], (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.equal([1, 2, 3]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('return distinct combinations (single field with criteria)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                const items = [
+                    { id: 1, a: 1, b: 2 },
+                    { id: 2, a: 2, b: 2 },
+                    { id: 3, a: 1, b: 2 },
+                    { id: 4, a: 2, b: 2 },
+                    { id: 5, a: 1, b: 3 },
+                    { id: 6, a: 3, b: 3 },
+                    { id: 7, a: 1, b: 2 }
+                ];
+
+                db.test.insert(items, (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.distinct({ b: 2 }, ['a'], (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.equal([1, 2]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('return distinct combinations (combination fields)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                const items = [
+                    { id: 1, a: 1, b: 2 },
+                    { id: 2, a: 2, b: 2 },
+                    { id: 3, a: 1, b: 2 },
+                    { id: 4, a: 2, b: 2 },
+                    { id: 5, a: 1, b: 3 },
+                    { id: 6, a: 3, b: 3 },
+                    { id: 7, a: 1, b: 2 }
+                ];
+
+                db.test.insert(items, (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.distinct(['a', 'b'], (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.equal([{ a: 1, b: 2 }, { a: 1, b: 3 }, { a: 2, b: 2 }, { a: 3, b: 3 }]);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('return null on no combinations', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                db.test.distinct(['a'], (err, result) => {
+
+                    expect(err).to.not.exist();
+                    expect(result).to.null();
+                    done();
+                });
+            });
+        });
+
+        it('fails on database error', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.table('invalid');
+            db.connect((err) => {
+
+                expect(err).to.not.exist();
+                db.invalid.distinct(['a'], (err, result) => {
+
+                    expect(err).to.exist();
+                    done();
+                });
+            });
+        });
+    });
+
     describe('query()', () => {
 
         it('returns the requested objects', (done) => {
