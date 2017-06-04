@@ -451,7 +451,7 @@ describe('Table', { parallel: false }, () => {
 
                     expect(err).to.not.exist();
 
-                    db.test.distinct({ b: 2 }, ['a'], (err, result) => {
+                    db.test.distinct({ b: 2 }, 'a', (err, result) => {
 
                         expect(err).to.not.exist();
                         expect(result).to.equal([1, 2]);
