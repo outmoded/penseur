@@ -1919,6 +1919,31 @@ describe('Table', { parallel: false }, () => {
                 });
             });
         });
+
+        it('updates a record with composite key', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: [1, 1], a: 1 }, (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.update([[1, 1]], { a: 2 }, (err) => {
+
+                        expect(err).to.not.exist();
+
+                        db.test.get([[1, 1]], (err, items) => {
+
+                            expect(err).to.not.exist();
+                            expect(items[0].a).to.equal(2);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
     });
 
     describe('next()', () => {
