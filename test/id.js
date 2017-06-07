@@ -23,6 +23,51 @@ const expect = Code.expect;
 
 describe('Id', () => {
 
+    describe('normalize()', () => {
+
+        it('errors on empty array of ids', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.get([], (err, result) => {
+
+                    expect(err).to.be.an.error('Empty array of ids not supported');
+                    done();
+                });
+            });
+        });
+
+        it('errors on null id', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.get([null], (err, result) => {
+
+                    expect(err).to.be.an.error('Invalid null or undefined id');
+                    done();
+                });
+            });
+        });
+
+        it('errors on undefined id', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.get([undefined], (err, result) => {
+
+                    expect(err).to.be.an.error('Invalid null or undefined id');
+                    done();
+                });
+            });
+        });
+    });
+
     describe('wrap()', () => {
 
         it('generates keys locally and server-side', (done) => {

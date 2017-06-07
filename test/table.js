@@ -58,6 +58,26 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
+        it('returns the requested object (zero id)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 0, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.get([0], (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.equal([{ id: 0, a: 1 }]);
+                        done();
+                    });
+                });
+            });
+        });
+
         it('fails on database error', (done) => {
 
             const db = new Penseur.Db('penseurtest');
@@ -1347,22 +1367,6 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('errors on unknown key', (done) => {
-
-            const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
-
-                expect(err).to.not.exist();
-
-                db.test.update(2, { a: 2 }, (err) => {
-
-                    expect(err).to.exist();
-                    expect(err.data.error).to.equal('No document found');
-                    done();
-                });
-            });
-        });
-
         it('updates a record (increment modifier)', (done) => {
 
             const db = new Penseur.Db('penseurtest');
@@ -1919,6 +1923,69 @@ describe('Table', { parallel: false }, () => {
                 });
             });
         });
+
+        it('updates a record (composite key)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: [1, 1], a: 1 }, (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.get({ id: [1, 1] }, (err, item1) => {
+
+                        expect(err).to.not.exist();
+                        expect(item1.a).to.equal(1);
+
+                        db.test.update({ id: [1, 1] }, { a: 2 }, (err) => {
+
+                            expect(err).to.not.exist();
+
+                            db.test.get({ id: [1, 1] }, (err, item2) => {
+
+                                expect(err).to.not.exist();
+                                expect(item2.a).to.equal(2);
+                                done();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
+        it('errors on unknown key', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                db.test.update(2, { a: 2 }, (err) => {
+
+                    expect(err).to.exist();
+                    expect(err.data.error).to.equal('No document found');
+                    done();
+                });
+            });
+        });
+
+        it('errors on invalid object key', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                db.test.update({}, { a: 2 }, (err) => {
+
+                    expect(err).to.exist();
+                    expect(err.data.error).to.equal('Invalid object id');
+                    done();
+                });
+            });
+        });
     });
 
     describe('next()', () => {
@@ -1958,6 +2025,21 @@ describe('Table', { parallel: false }, () => {
                 db.test.next(1, 'a', 5, (err) => {
 
                     expect(err).to.exist();
+                    done();
+                });
+            });
+        });
+
+        it('errors on invalid key', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                db.test.next([1], 'a', 5, (err) => {
+
+                    expect(err).to.be.an.error('Array of ids not supported');
                     done();
                 });
             });
