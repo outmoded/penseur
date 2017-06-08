@@ -2088,6 +2088,31 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
+        it('removes a record (composite id)', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert({ id: [1, 1], a: 1 }, (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.remove({ id: [1, 1] }, (err) => {
+
+                        expect(err).to.not.exist();
+
+                        db.test.get({ id: [1, 1] }, (err, item) => {
+
+                            expect(err).to.not.exist();
+                            expect(item).to.not.exist();
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
         it('removes multiple records', (done) => {
 
             const db = new Penseur.Db('penseurtest');
@@ -2146,6 +2171,21 @@ describe('Table', { parallel: false }, () => {
                 expect(err).to.not.exist();
 
                 db.test.remove(1, (err) => {
+
+                    expect(err).to.exist();
+                    done();
+                });
+            });
+        });
+
+        it('errors on invalid key', (done) => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+
+                db.test.remove([], (err) => {
 
                     expect(err).to.exist();
                     done();
