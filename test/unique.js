@@ -74,7 +74,9 @@ describe('Unique', () => {
 
                     db.test.update(2, { a: { b: 1 } }, (err) => {
 
+                        // console.log('err: ' + JSON.stringify(err, null, '\t'));
                         expect(err).to.exist();
+                        expect(err.data.error).to.startWith('Action will violate unique restriction');
 
                         db.test.update(2, { a: { c: { d: db.append([1, 2]) } } }, (err) => {
 
@@ -338,9 +340,11 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
+
                 db.test.insert([{ a: 1 }, { a: 1 }], (err, keys) => {
 
                     expect(err).to.exist();
+                    expect(err.data.error).to.startWith('Action will violate unique restriction');
                     done();
                 });
             });
