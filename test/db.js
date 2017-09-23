@@ -1089,155 +1089,6 @@ describe('Db', () => {
         });
     });
 
-    describe('disable()', () => {
-
-        it('simulates an error', (done) => {
-
-            const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015, test: true });
-
-            db.establish(['test'], (err) => {
-
-                expect(err).to.not.exist();
-                db.test.insert({ id: 1, value: 'x' }, (err, result) => {
-
-                    expect(err).to.not.exist();
-
-                    db.test.get(1, (err, item1) => {
-
-                        expect(err).to.not.exist();
-                        expect(item1.value).to.equal('x');
-
-                        db.disable('test', 'get');
-                        db.test.get(1, (err, item2) => {
-
-                            expect(err).to.exist();
-
-                            db.enable('test', 'get');
-                            db.test.get(1, (err, item3) => {
-
-                                expect(err).to.not.exist();
-                                expect(item3.value).to.equal('x');
-                                db.close(done);
-                            });
-                        });
-                    });
-                });
-            });
-        });
-
-        it('simulates a response', (done) => {
-
-            const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015, test: true });
-
-            db.establish(['test'], (err) => {
-
-                expect(err).to.not.exist();
-                db.test.insert({ id: 1, value: 'x' }, (err, result) => {
-
-                    expect(err).to.not.exist();
-
-                    db.test.get(1, (err, item1) => {
-
-                        expect(err).to.not.exist();
-                        expect(item1.value).to.equal('x');
-
-                        db.disable('test', 'get', { value: 'hello' });
-                        db.test.get(1, (err, item2) => {
-
-                            expect(err).to.not.exist();
-                            expect(item2).to.equal('hello');
-
-                            db.disable('test', 'get', { value: null });
-                            db.test.get(1, (err, item3) => {
-
-                                expect(err).to.not.exist();
-                                expect(item3).to.be.null();
-
-                                db.disable('test', 'get', { value: new Error('stuff') });
-                                db.test.get(1, (err, item4) => {
-
-                                    expect(err).to.be.an.error('stuff');
-                                    expect(item4).to.not.exist();
-
-                                    db.enable('test', 'get');
-                                    db.test.get(1, (err, item5) => {
-
-                                        expect(err).to.not.exist();
-                                        expect(item5.value).to.equal('x');
-                                        db.close(done);
-                                    });
-                                });
-                            });
-                        });
-                    });
-                });
-            });
-        });
-
-        it('simulates a changes error', (done) => {
-
-            const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015, test: true });
-
-            db.establish(['test'], (err) => {
-
-                expect(err).to.not.exist();
-                db.disable('test', 'changes');
-
-                db.test.changes({ a: 1 }, Hoek.ignore, (err) => {
-
-                    expect(err).to.exist();
-                    done();
-                });
-            });
-        });
-
-        it('simulates a changes update error', (done) => {
-
-            const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015, test: true });
-
-            db.establish(['test'], (err) => {
-
-                expect(err).to.not.exist();
-                db.disable('test', 'changes', { updates: true });
-
-                const each = (err, update) => {
-
-                    expect(err).to.exist();
-                    expect(err.flags.willReconnect).to.be.true();
-                    done();
-                };
-
-                db.test.changes({ a: 1 }, each, (err) => {
-
-                    expect(err).to.not.exist();
-                });
-            });
-        });
-
-        it('simulates a changes update error (flags)', (done) => {
-
-            const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015, test: true });
-
-            db.establish(['test'], (err) => {
-
-                expect(err).to.not.exist();
-                db.disable('test', 'changes', { updates: true, flags: { willReconnect: false } });
-
-                const each = (err, update) => {
-
-                    expect(err).to.exist();
-                    expect(err.flags.willReconnect).to.be.false();
-                    done();
-                };
-
-                db.test.changes({ a: 1 }, each, (err) => {
-
-                    expect(err).to.not.exist();
-                });
-            });
-        });
-    });
-
     describe('is()', () => {
 
         it('errors on invalid number of arguments (3)', (done) => {
@@ -1258,6 +1109,188 @@ describe('Db', () => {
             }).to.throw('Missing value argument');
 
             done();
+        });
+    });
+
+    describe('test mode', () => {
+
+        it('logs actions', (done) => {
+
+            const test = {};
+            const db = new Penseur.Db('penseurtest', { test });
+            db.establish(['test'], (err) => {
+
+                expect(err).to.not.exist();
+                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+
+                    expect(err).to.not.exist();
+
+                    db.test.get([1, 3], (err, result) => {
+
+                        expect(err).to.not.exist();
+                        expect(result).to.equal([{ id: 3, a: 1 }, { id: 1, a: 1 }]);
+
+                        expect(test).to.equal({
+                            test: [
+                                { action: 'empty' },
+                                { action: 'indexWait' },
+                                { action: 'insert', inputs: { items: [{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], options: {} } },
+                                { action: 'get', inputs: { ids: [1, 3], options: {} } }
+                            ]
+                        });
+                        done();
+                    });
+                });
+            });
+        });
+
+        describe('disable()', () => {
+
+            it('simulates an error', (done) => {
+
+                const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015, test: true });
+
+                db.establish(['test'], (err) => {
+
+                    expect(err).to.not.exist();
+                    db.test.insert({ id: 1, value: 'x' }, (err, result) => {
+
+                        expect(err).to.not.exist();
+
+                        db.test.get(1, (err, item1) => {
+
+                            expect(err).to.not.exist();
+                            expect(item1.value).to.equal('x');
+
+                            db.disable('test', 'get');
+                            db.test.get(1, (err, item2) => {
+
+                                expect(err).to.exist();
+
+                                db.enable('test', 'get');
+                                db.test.get(1, (err, item3) => {
+
+                                    expect(err).to.not.exist();
+                                    expect(item3.value).to.equal('x');
+                                    db.close(done);
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+
+            it('simulates a response', (done) => {
+
+                const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015, test: true });
+
+                db.establish(['test'], (err) => {
+
+                    expect(err).to.not.exist();
+                    db.test.insert({ id: 1, value: 'x' }, (err, result) => {
+
+                        expect(err).to.not.exist();
+
+                        db.test.get(1, (err, item1) => {
+
+                            expect(err).to.not.exist();
+                            expect(item1.value).to.equal('x');
+
+                            db.disable('test', 'get', { value: 'hello' });
+                            db.test.get(1, (err, item2) => {
+
+                                expect(err).to.not.exist();
+                                expect(item2).to.equal('hello');
+
+                                db.disable('test', 'get', { value: null });
+                                db.test.get(1, (err, item3) => {
+
+                                    expect(err).to.not.exist();
+                                    expect(item3).to.be.null();
+
+                                    db.disable('test', 'get', { value: new Error('stuff') });
+                                    db.test.get(1, (err, item4) => {
+
+                                        expect(err).to.be.an.error('stuff');
+                                        expect(item4).to.not.exist();
+
+                                        db.enable('test', 'get');
+                                        db.test.get(1, (err, item5) => {
+
+                                            expect(err).to.not.exist();
+                                            expect(item5.value).to.equal('x');
+                                            db.close(done);
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+
+            it('simulates a changes error', (done) => {
+
+                const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015, test: true });
+
+                db.establish(['test'], (err) => {
+
+                    expect(err).to.not.exist();
+                    db.disable('test', 'changes');
+
+                    db.test.changes({ a: 1 }, Hoek.ignore, (err) => {
+
+                        expect(err).to.exist();
+                        done();
+                    });
+                });
+            });
+
+            it('simulates a changes update error', (done) => {
+
+                const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015, test: true });
+
+                db.establish(['test'], (err) => {
+
+                    expect(err).to.not.exist();
+                    db.disable('test', 'changes', { updates: true });
+
+                    const each = (err, update) => {
+
+                        expect(err).to.exist();
+                        expect(err.flags.willReconnect).to.be.true();
+                        done();
+                    };
+
+                    db.test.changes({ a: 1 }, each, (err) => {
+
+                        expect(err).to.not.exist();
+                    });
+                });
+            });
+
+            it('simulates a changes update error (flags)', (done) => {
+
+                const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015, test: true });
+
+                db.establish(['test'], (err) => {
+
+                    expect(err).to.not.exist();
+                    db.disable('test', 'changes', { updates: true, flags: { willReconnect: false } });
+
+                    const each = (err, update) => {
+
+                        expect(err).to.exist();
+                        expect(err.flags.willReconnect).to.be.false();
+                        done();
+                    };
+
+                    db.test.changes({ a: 1 }, each, (err) => {
+
+                        expect(err).to.not.exist();
+                    });
+                });
+            });
         });
     });
 });
