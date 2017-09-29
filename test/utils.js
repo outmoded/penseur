@@ -55,6 +55,13 @@ describe('Penseur.utils', () => {
             done();
         });
 
+        it('compares to null', (done) => {
+
+            const item = { a: 1, b: { c: 'd' } };
+            expect(Penseur.utils.diff(null, item)).to.equal(item);
+            done();
+        });
+
         it('compares to null with whitelist', (done) => {
 
             const item = { a: 1, b: { c: 'd' } };
@@ -73,6 +80,25 @@ describe('Penseur.utils', () => {
 
             const item = { a: 1, b: { c: 'd' } };
             expect(Penseur.utils.diff(item, item)).to.be.null();
+            done();
+        });
+
+        it('compares arrays', (done) => {
+
+            const item = { a: [1, 2], b: [4, 3], c: 6 };
+            expect(Penseur.utils.diff(item, { a: [0, 2], b: 5, c: [1] })).to.equal({ a: { 0: 0 }, b: 5, c: [1] });
+            expect(Penseur.utils.diff(item, { a: { x: 1 } })).to.equal({ a: { x: 1 } });
+            expect(Penseur.utils.diff({ a: { x: 1 } }, item)).to.equal(item);
+            expect(Penseur.utils.diff(item, { a: [0, 2], b: 5, c: [1] }, { arrays: false })).to.equal({ a: [0, 2], b: 5, c: [1] });
+            expect(Penseur.utils.diff(item, { a: [0, 2], b: [4, 3], c: [1] }, { arrays: false })).to.equal({ a: [0, 2], c: [1] });
+            done();
+        });
+
+        it('compares object to null', (done) => {
+
+            const item = { a: 1, b: { c: 'd' } };
+            expect(Penseur.utils.diff(item, { b: null })).to.equal({ b: null });
+            expect(Penseur.utils.diff({ b: null }, item)).to.equal(item);
             done();
         });
     });
