@@ -17,18 +17,16 @@ const internals = {};
 
 // Test shortcuts
 
-const lab = exports.lab = Lab.script();
-const describe = lab.describe;
-const it = lab.it;
+const { describe, it } = exports.lab = Lab.script();
 const expect = Code.expect;
 
 
-describe('Table', { parallel: false }, () => {
+describe('Table', () => {
 
-    it('exposes table name', (done) => {
+    it('exposes table name', async () => {
 
         const db = new Penseur.Db('penseurtest');
-        db.establish(['test'], (err) => {
+        await db.establish(['test']);
 
             expect(err).to.not.exist();
             expect(db.test.name).to.equal('test');
@@ -38,17 +36,17 @@ describe('Table', { parallel: false }, () => {
 
     describe('get()', () => {
 
-        it('returns the requested objects', (done) => {
+        it('returns the requested objects', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }]);
 
                     expect(err).to.not.exist();
 
-                    db.test.get([1, 3], (err, result) => {
+                    const item = await db.test.get([1, 3]);
 
                         expect(err).to.not.exist();
                         expect(result).to.equal([{ id: 3, a: 1 }, { id: 1, a: 1 }]);
@@ -58,17 +56,17 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('returns the requested object (zero id)', (done) => {
+        it('returns the requested object (zero id)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 0, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 0, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }]);
 
                     expect(err).to.not.exist();
 
-                    db.test.get([0], (err, result) => {
+                    const item = await db.test.get([0]);
 
                         expect(err).to.not.exist();
                         expect(result).to.equal([{ id: 0, a: 1 }]);
@@ -78,14 +76,14 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('fails on database error', (done) => {
+        it('fails on database error', async () => {
 
             const db = new Penseur.Db('penseurtest');
             db.table('invalid');
-            db.connect((err) => {
+            await db.connect();
 
                 expect(err).to.not.exist();
-                db.invalid.get(1, (err, item) => {
+                db.invalid.get(1);
 
                     expect(err).to.exist();
                     done();
@@ -93,17 +91,17 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('returns the requested objects (array of one)', (done) => {
+        it('returns the requested objects (array of one)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }]);
 
                     expect(err).to.not.exist();
 
-                    db.test.get([1], (err, result) => {
+                    const item = await db.test.get([1]);
 
                         expect(err).to.not.exist();
                         expect(result).to.equal([{ id: 1, a: 1 }]);
@@ -113,17 +111,17 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('returns the requested objects found (partial)', (done) => {
+        it('returns the requested objects found (partial)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }]);
 
                     expect(err).to.not.exist();
 
-                    db.test.get([1, 3, 4], (err, result) => {
+                    const item = await db.test.get([1, 3, 4]);
 
                         expect(err).to.not.exist();
                         expect(result).to.have.length(2);
@@ -133,17 +131,17 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('returns the requested objects found (duplicates)', (done) => {
+        it('returns the requested objects found (duplicates)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }]);
 
                     expect(err).to.not.exist();
 
-                    db.test.get([1, 3, 3], (err, result) => {
+                    const item = await db.test.get([1, 3, 3]);
 
                         expect(err).to.not.exist();
                         expect(result).to.have.length(3);
@@ -153,17 +151,17 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('returns the requested objects found (none)', (done) => {
+        it('returns the requested objects found (none)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }]);
 
                     expect(err).to.not.exist();
 
-                    db.test.get([4, 5, 6], (err, result) => {
+                    const item = await db.test.get([4, 5, 6]);
 
                         expect(err).to.not.exist();
                         expect(result).to.equal(null);
@@ -173,17 +171,17 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('returns the requested objects (filter)', (done) => {
+        it('returns the requested objects (filter)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1, b: 1 }, { id: 2, a: 2, b: 2 }, { id: 3, a: 1, b: 3 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1, b: 1 }, { id: 2, a: 2, b: 2 }, { id: 3, a: 1, b: 3 }]);
 
                     expect(err).to.not.exist();
 
-                    db.test.get([1, 3], { filter: ['id', 'b'] }, (err, result) => {
+                    const item = await db.test.get([1, 3], { filter: ['id', 'b'] });
 
                         expect(err).to.not.exist();
                         expect(result).to.equal([{ id: 3, b: 3 }, { id: 1, b: 1 }]);
@@ -193,11 +191,11 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('fails on disconnected database', (done) => {
+        it('fails on disconnected database', async () => {
 
             const db = new Penseur.Db('penseurtest');
             db.table('test');
-            db.test.get('1', (err) => {
+            const item = await db.test.get('1', (err) => {
 
                 expect(err).to.exist();
                 expect(err.message).to.equal('Database disconnected');
@@ -205,13 +203,13 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('errors on invalid id', (done) => {
+        it('errors on invalid id', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.get('0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789', (err, result) => {
+                const item = await db.test.get('0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789');
 
                     expect(err).to.exist();
                     done();
@@ -219,13 +217,13 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('errors on invalid ids', (done) => {
+        it('errors on invalid ids', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.get(['0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789'], (err, result) => {
+                const item = await db.test.get(['0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789']);
 
                     expect(err).to.exist();
                     done();
@@ -236,13 +234,13 @@ describe('Table', { parallel: false }, () => {
 
     describe('all()', () => {
 
-        it('returns the requested objects', (done) => {
+        it('returns the requested objects', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }]);
 
                     expect(err).to.not.exist();
 
@@ -256,13 +254,13 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('returns the requested objects (range)', (done) => {
+        it('returns the requested objects (range)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }]);
 
                     expect(err).to.not.exist();
 
@@ -276,13 +274,13 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('returns the requested objects (from)', (done) => {
+        it('returns the requested objects (from)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }]);
 
                     expect(err).to.not.exist();
 
@@ -296,10 +294,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('returns null when range is out of items', (done) => {
+        it('returns null when range is out of items', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
                 db.test.all((err, items1) => {
@@ -307,7 +305,7 @@ describe('Table', { parallel: false }, () => {
                     expect(err).to.not.exist();
                     expect(items1).to.be.null();
 
-                    db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+                    const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }]);
 
                         expect(err).to.not.exist();
 
@@ -322,13 +320,13 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('breaks query into chunks', (done) => {
+        it('breaks query into chunks', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }, { id: 3, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }, { id: 3, a: 1 }]);
 
                     expect(err).to.not.exist();
 
@@ -348,11 +346,11 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('fails on database error', (done) => {
+        it('fails on database error', async () => {
 
             const db = new Penseur.Db('penseurtest');
             db.table('invalid');
-            db.connect((err) => {
+            await db.connect();
 
                 expect(err).to.not.exist();
                 db.invalid.all((err, items) => {
@@ -366,13 +364,13 @@ describe('Table', { parallel: false }, () => {
 
     describe('exist()', () => {
 
-        it('checks if record exists', (done) => {
+        it('checks if record exists', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: 1, a: 1 }, (err, keys) => {
+                const keys = await db.test.insert({ id: 1, a: 1 });
 
                     expect(err).to.not.exist();
 
@@ -386,10 +384,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('checks if record does not exists', (done) => {
+        it('checks if record does not exists', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -402,13 +400,13 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('errors on invalid id', (done) => {
+        it('errors on invalid id', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.exist('0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789', (err, result) => {
+                db.test.exist('0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789');
 
                     expect(err).to.exist();
                     done();
@@ -419,10 +417,10 @@ describe('Table', { parallel: false }, () => {
 
     describe('distinct()', () => {
 
-        it('return distinct combinations (single field)', (done) => {
+        it('return distinct combinations (single field)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -436,11 +434,11 @@ describe('Table', { parallel: false }, () => {
                     { id: 7, a: 1, b: 2 }
                 ];
 
-                db.test.insert(items, (err, keys) => {
+                const keys = await db.test.insert(items);
 
                     expect(err).to.not.exist();
 
-                    db.test.distinct(['a'], (err, result) => {
+                    db.test.distinct(['a']);
 
                         expect(err).to.not.exist();
                         expect(result).to.equal([1, 2, 3]);
@@ -450,10 +448,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('return distinct combinations (single field with criteria)', (done) => {
+        it('return distinct combinations (single field with criteria)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -467,11 +465,11 @@ describe('Table', { parallel: false }, () => {
                     { id: 7, a: 1, b: 2 }
                 ];
 
-                db.test.insert(items, (err, keys) => {
+                const keys = await db.test.insert(items);
 
                     expect(err).to.not.exist();
 
-                    db.test.distinct({ b: 2 }, 'a', (err, result) => {
+                    db.test.distinct({ b: 2 }, 'a');
 
                         expect(err).to.not.exist();
                         expect(result).to.equal([1, 2]);
@@ -481,10 +479,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('return distinct combinations (combination fields)', (done) => {
+        it('return distinct combinations (combination fields)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -498,11 +496,11 @@ describe('Table', { parallel: false }, () => {
                     { id: 7, a: 1, b: 2 }
                 ];
 
-                db.test.insert(items, (err, keys) => {
+                const keys = await db.test.insert(items);
 
                     expect(err).to.not.exist();
 
-                    db.test.distinct(['a', 'b'], (err, result) => {
+                    db.test.distinct(['a', 'b']);
 
                         expect(err).to.not.exist();
                         expect(result).to.equal([{ a: 1, b: 2 }, { a: 1, b: 3 }, { a: 2, b: 2 }, { a: 3, b: 3 }]);
@@ -512,14 +510,14 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('return null on no combinations', (done) => {
+        it('return null on no combinations', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
-                db.test.distinct(['a'], (err, result) => {
+                db.test.distinct(['a']);
 
                     expect(err).to.not.exist();
                     expect(result).to.null();
@@ -528,14 +526,14 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('fails on database error', (done) => {
+        it('fails on database error', async () => {
 
             const db = new Penseur.Db('penseurtest');
             db.table('invalid');
-            db.connect((err) => {
+            await db.connect();
 
                 expect(err).to.not.exist();
-                db.invalid.distinct(['a'], (err, result) => {
+                db.invalid.distinct(['a']);
 
                     expect(err).to.exist();
                     done();
@@ -546,17 +544,17 @@ describe('Table', { parallel: false }, () => {
 
     describe('query()', () => {
 
-        it('returns the requested objects', (done) => {
+        it('returns the requested objects', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }]);
 
                     expect(err).to.not.exist();
 
-                    db.test.query({ a: 1 }, (err, result) => {
+                    const result = await db.test.query({ a: 1 });
 
                         expect(err).to.not.exist();
                         expect(result).to.equal([{ id: 3, a: 1 }, { id: 1, a: 1 }]);
@@ -566,21 +564,21 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('sorts the requested objects (key)', (done) => {
+        it('sorts the requested objects (key)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 3, a: 3, b: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 3, a: 3, b: 1 }]);
 
                     expect(err).to.not.exist();
-                    db.test.query({ b: 1 }, {}, (err, result1) => {
+                    const result = await db.test.query({ b: 1 }, {}, (err, result1) => {
 
                         expect(err).to.not.exist();
                         expect(result1).to.equal([{ id: 3, a: 3, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 1, a: 1, b: 1 }]);
 
-                        db.test.query({ b: 1 }, { sort: 'a' }, (err, result2) => {
+                        const result = await db.test.query({ b: 1 }, { sort: 'a' }, (err, result2) => {
 
                             expect(err).to.not.exist();
                             expect(result2).to.equal([{ id: 1, a: 1, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 3, a: 3, b: 1 }]);
@@ -596,28 +594,28 @@ describe('Table', { parallel: false }, () => {
                                 each: (item) => results.push(item)
                             });
 
-                            db.test.query({ b: 1 }, { count: 1, sort: { key: 'id', order: 'ascending' }, from: 0 }, cb);
+                            const result = await db.test.query({ b: 1 }, { count: 1, sort: { key: 'id', order: 'ascending' }, from: 0 }, cb);
                         });
                     });
                 });
             });
         });
 
-        it('sorts the requested objects (nested key)', (done) => {
+        it('sorts the requested objects (nested key)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, x: { a: 1 }, b: 1 }, { id: 2, x: { a: 2 }, b: 1 }, { id: 3, x: { a: 3 }, b: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, x: { a: 1 }, b: 1 }, { id: 2, x: { a: 2 }, b: 1 }, { id: 3, x: { a: 3 }, b: 1 }]);
 
                     expect(err).to.not.exist();
-                    db.test.query({ b: 1 }, {}, (err, result1) => {
+                    const result = await db.test.query({ b: 1 }, {}, (err, result1) => {
 
                         expect(err).to.not.exist();
                         expect(result1).to.equal([{ id: 3, x: { a: 3 }, b: 1 }, { id: 2, x: { a: 2 }, b: 1 }, { id: 1, x: { a: 1 }, b: 1 }]);
 
-                        db.test.query({ b: 1 }, { sort: ['x', 'a'] }, (err, result2) => {
+                        const result = await db.test.query({ b: 1 }, { sort: ['x', 'a'] }, (err, result2) => {
 
                             expect(err).to.not.exist();
                             expect(result2).to.equal([{ id: 1, x: { a: 1 }, b: 1 }, { id: 2, x: { a: 2 }, b: 1 }, { id: 3, x: { a: 3 }, b: 1 }]);
@@ -628,21 +626,21 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('sorts the requested objects (object)', (done) => {
+        it('sorts the requested objects (object)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 3, a: 3, b: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 3, a: 3, b: 1 }]);
 
                     expect(err).to.not.exist();
-                    db.test.query({ b: 1 }, {}, (err, result1) => {
+                    const result = await db.test.query({ b: 1 }, {}, (err, result1) => {
 
                         expect(err).to.not.exist();
                         expect(result1).to.equal([{ id: 3, a: 3, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 1, a: 1, b: 1 }]);
 
-                        db.test.query({ b: 1 }, { sort: { key: 'a', order: 'descending' } }, (err, result2) => {
+                        const result = await db.test.query({ b: 1 }, { sort: { key: 'a', order: 'descending' } }, (err, result2) => {
 
                             expect(err).to.not.exist();
                             expect(result2).to.equal([{ id: 3, a: 3, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 1, a: 1, b: 1 }]);
@@ -653,16 +651,16 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('includes results from a given position', (done) => {
+        it('includes results from a given position', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 3, a: 3, b: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 3, a: 3, b: 1 }]);
 
                     expect(err).to.not.exist();
-                    db.test.query({ b: 1 }, { sort: 'a', from: 1 }, (err, result) => {
+                    const result = await db.test.query({ b: 1 }, { sort: 'a', from: 1 });
 
                         expect(err).to.not.exist();
                         expect(result).to.equal([{ id: 2, a: 2, b: 1 }, { id: 3, a: 3, b: 1 }]);
@@ -672,20 +670,20 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('includes n number of results', (done) => {
+        it('includes n number of results', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 3, a: 3, b: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 3, a: 3, b: 1 }]);
 
                     expect(err).to.not.exist();
-                    db.test.query({ b: 1 }, { sort: 'a', count: 2 }, (err, result1) => {
+                    const result = await db.test.query({ b: 1 }, { sort: 'a', count: 2 }, (err, result1) => {
 
                         expect(err).to.not.exist();
                         expect(result1).to.equal([{ id: 1, a: 1, b: 1 }, { id: 2, a: 2, b: 1 }]);
-                        db.test.query({ b: 1 }, { sort: 'a', from: 1, count: 1 }, (err, result2) => {
+                        const result = await db.test.query({ b: 1 }, { sort: 'a', from: 1, count: 1 }, (err, result2) => {
 
                             expect(err).to.not.exist();
                             expect(result2).to.equal([{ id: 2, a: 2, b: 1 }]);
@@ -696,16 +694,16 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('filters fields', (done) => {
+        it('filters fields', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 3, a: 3, b: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1, b: 1 }, { id: 2, a: 2, b: 1 }, { id: 3, a: 3, b: 1 }]);
 
                     expect(err).to.not.exist();
-                    db.test.query({ a: 1 }, { filter: ['b'] }, (err, result) => {
+                    const result = await db.test.query({ a: 1 }, { filter: ['b'] });
 
                         expect(err).to.not.exist();
                         expect(result).to.equal([{ b: 1 }]);
@@ -715,17 +713,17 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('returns all objects', (done) => {
+        it('returns all objects', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }]);
 
                     expect(err).to.not.exist();
 
-                    db.test.query(null, (err, items) => {
+                    const result = await db.test.query(null, (err, items) => {
 
                         expect(err).to.not.exist();
                         expect(items).to.equal([{ id: 3, a: 1 }, { id: 2, a: 2 }, { id: 1, a: 1 }]);
@@ -738,13 +736,13 @@ describe('Table', { parallel: false }, () => {
 
     describe('_chunks()', () => {
 
-        it('breaks query into chunks', (done) => {
+        it('breaks query into chunks', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }, { id: 3, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }, { id: 3, a: 1 }]);
 
                     expect(err).to.not.exist();
 
@@ -759,18 +757,18 @@ describe('Table', { parallel: false }, () => {
                         each: (item) => results.push(item)
                     });
 
-                    db.test.query({ a: 1 }, { chunks: 1 }, cb);
+                    const result = await db.test.query({ a: 1 }, { chunks: 1 }, cb);
                 });
             });
         });
 
-        it('breaks query into chunks (custom sort)', (done) => {
+        it('breaks query into chunks (custom sort)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }]);
 
                     expect(err).to.not.exist();
 
@@ -785,49 +783,49 @@ describe('Table', { parallel: false }, () => {
                         each: (item) => results.push(item)
                     });
 
-                    db.test.query(null, { chunks: 1, sort: { key: 'id', order: 'descending' } }, cb);
+                    const result = await db.test.query(null, { chunks: 1, sort: { key: 'id', order: 'descending' } }, cb);
                 });
             });
         });
 
-        it('errors on chunks with count', (done) => {
+        it('errors on chunks with count', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
                 expect(() => {
 
-                    db.test.query(null, { chunks: 1, count: 1 }, Hoek.ignore);
+                    const result = await db.test.query(null, { chunks: 1, count: 1 }, Hoek.ignore);
                 }).to.throw('Cannot use chunks option with from or count');
 
                 done();
             });
         });
 
-        it('errors on chunks with from', (done) => {
+        it('errors on chunks with from', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
                 expect(() => {
 
-                    db.test.query(null, { chunks: 1, from: 1 }, Hoek.ignore);
+                    const result = await db.test.query(null, { chunks: 1, from: 1 }, Hoek.ignore);
                 }).to.throw('Cannot use chunks option with from or count');
 
                 done();
             });
         });
 
-        it('errors on databse error', (done) => {
+        it('errors on databse error', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
                 db.test._run = (ignore1, ignore2, ignore3, next) => next(new Error());
-                db.test.query(null, { chunks: 1 }, Apiece.wrap((err) => {
+                const result = await db.test.query(null, { chunks: 1 }, Apiece.wrap((err) => {
 
                     expect(err).to.exist();
                     done();
@@ -838,17 +836,17 @@ describe('Table', { parallel: false }, () => {
 
     describe('single()', () => {
 
-        it('returns the requested object', (done) => {
+        it('returns the requested object', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }]);
 
                     expect(err).to.not.exist();
 
-                    db.test.single({ a: 2 }, (err, result) => {
+                    db.test.single({ a: 2 });
 
                         expect(err).to.not.exist();
                         expect(result).to.equal({ id: 2, a: 2 });
@@ -858,17 +856,17 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('returns nothing', (done) => {
+        it('returns nothing', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }]);
 
                     expect(err).to.not.exist();
 
-                    db.test.single({ a: 3 }, (err, result) => {
+                    db.test.single({ a: 3 });
 
                         expect(err).to.not.exist();
                         expect(result).to.equal(null);
@@ -878,17 +876,17 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('errors on multiple matches', (done) => {
+        it('errors on multiple matches', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }]);
 
                     expect(err).to.not.exist();
 
-                    db.test.single({ a: 1 }, (err, result) => {
+                    db.test.single({ a: 1 });
 
                         expect(err).to.exist();
                         expect(err.message).to.equal('Found multiple items');
@@ -898,14 +896,14 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('fails on database error', (done) => {
+        it('fails on database error', async () => {
 
             const db = new Penseur.Db('penseurtest');
             db.table('invalid');
-            db.connect((err) => {
+            await db.connect();
 
                 expect(err).to.not.exist();
-                db.invalid.single({ a: 1 }, (err, item) => {
+                db.invalid.single({ a: 1 });
 
                     expect(err).to.exist();
                     done();
@@ -916,17 +914,17 @@ describe('Table', { parallel: false }, () => {
 
     describe('count()', () => {
 
-        it('returns the number requested object', (done) => {
+        it('returns the number requested object', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }]);
 
                     expect(err).to.not.exist();
 
-                    db.test.count({ a: 1 }, (err, result) => {
+                    db.test.count({ a: 1 });
 
                         expect(err).to.not.exist();
                         expect(result).to.equal(2);
@@ -936,17 +934,17 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('returns the number of object with given field', (done) => {
+        it('returns the number of object with given field', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }]);
 
                     expect(err).to.not.exist();
 
-                    db.test.count(db.contains('a'), (err, result) => {
+                    db.test.count(db.contains('a'));
 
                         expect(err).to.not.exist();
                         expect(result).to.equal(3);
@@ -959,18 +957,18 @@ describe('Table', { parallel: false }, () => {
 
     describe('insert()', () => {
 
-        it('inserts a record', (done) => {
+        it('inserts a record', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: 1, a: 1 }, (err, keys) => {
+                const keys = await db.test.insert({ id: 1, a: 1 });
 
                     expect(err).to.not.exist();
                     expect(keys).to.equal(1);
 
-                    db.test.get(1, (err, item) => {
+                    const item = await db.test.get(1);
 
                         expect(err).to.not.exist();
                         expect(item.a).to.equal(1);
@@ -980,10 +978,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('inserts multiple records', (done) => {
+        it('inserts multiple records', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -1002,7 +1000,7 @@ describe('Table', { parallel: false }, () => {
                     ids.push(i);
                 }
 
-                db.test.insert(records, { chunks: 30 }, (err, keys) => {
+                const keys = await db.test.insert(records, { chunks: 30 });
 
                     expect(err).to.not.exist();
                     expect(keys).to.equal(ids);
@@ -1018,10 +1016,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('inserts a record (ignore batch on non array)', (done) => {
+        it('inserts a record (ignore batch on non array)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -1033,13 +1031,13 @@ describe('Table', { parallel: false }, () => {
                     return orig.call(db.test, items, ...args);
                 };
 
-                db.test.insert({ id: 1, a: 1 }, { chunks: 10 }, (err, keys) => {
+                const keys = await db.test.insert({ id: 1, a: 1 }, { chunks: 10 });
 
                     expect(err).to.not.exist();
                     expect(keys).to.equal(1);
                     expect(batches).to.equal(['single']);
 
-                    db.test.get(1, (err, item) => {
+                    const item = await db.test.get(1);
 
                         expect(err).to.not.exist();
                         expect(item.a).to.equal(1);
@@ -1049,10 +1047,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('inserts a record (ignore batch on solo array)', (done) => {
+        it('inserts a record (ignore batch on solo array)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -1064,13 +1062,13 @@ describe('Table', { parallel: false }, () => {
                     return orig.call(db.test, items, ...args);
                 };
 
-                db.test.insert([{ id: 1, a: 1 }], { chunks: 10 }, (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }], { chunks: 10 });
 
                     expect(err).to.not.exist();
                     expect(keys).to.equal([1]);
                     expect(batches).to.equal([1]);
 
-                    db.test.get(1, (err, item) => {
+                    const item = await db.test.get(1);
 
                         expect(err).to.not.exist();
                         expect(item.a).to.equal(1);
@@ -1080,24 +1078,24 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('updates a record if exists', (done) => {
+        it('updates a record if exists', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: 1, a: 1, b: 1 }, { merge: true }, (err, keys1) => {
+                const keys = await db.test.insert({ id: 1, a: 1, b: 1 }, { merge: true }, (err, keys1) => {
 
                     expect(err).to.not.exist();
-                    db.test.get(1, (err, item1) => {
+                    const item = await db.test.get(1, (err, item1) => {
 
                         expect(err).to.not.exist();
                         expect(item1).to.equal({ id: 1, a: 1, b: 1 });
 
-                        db.test.insert({ id: 1, a: 2 }, { merge: true }, (err, keys2) => {
+                        const keys = await db.test.insert({ id: 1, a: 2 }, { merge: true }, (err, keys2) => {
 
                             expect(err).to.not.exist();
-                            db.test.get(1, (err, item2) => {
+                            const item = await db.test.get(1, (err, item2) => {
 
                                 expect(err).to.not.exist();
                                 expect(item2).to.equal({ id: 1, a: 2, b: 1 });
@@ -1109,13 +1107,13 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('returns the generate key', (done) => {
+        it('returns the generate key', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert({ a: 1 }, (err, keys) => {
+                const keys = await db.test.insert({ a: 1 });
 
                     expect(err).to.not.exist();
                     expect(keys).to.match(/\w+/);
@@ -1124,13 +1122,13 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('returns the generate key (existing)', (done) => {
+        it('returns the generate key (existing)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: 11, a: 1 }, (err, keys) => {
+                const keys = await db.test.insert({ id: 11, a: 1 });
 
                     expect(err).to.not.exist();
                     expect(keys).to.equal(11);
@@ -1139,13 +1137,13 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('generates key locally (uuid)', (done) => {
+        it('generates key locally (uuid)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish({ test: { id: { type: 'uuid' } } }, (err) => {
+            await db.establish({ test: { id: { type: 'uuid' } } }, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ a: 1 }, (err, keys) => {
+                const keys = await db.test.insert({ a: 1 });
 
                     expect(err).to.not.exist();
                     expect(keys).to.match(/^[\da-f]{8}\-[\da-f]{4}\-[\da-f]{4}\-[\da-f]{4}\-[\da-f]{12}$/);
@@ -1154,13 +1152,13 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('returns the generate keys', (done) => {
+        it('returns the generate keys', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ a: 1 }, { a: 2 }], (err, keys) => {
+                const keys = await db.test.insert([{ a: 1 }, { a: 2 }]);
 
                     expect(err).to.not.exist();
                     expect(keys).to.have.length(2);
@@ -1169,13 +1167,13 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('returns the generate keys when keys are present', (done) => {
+        it('returns the generate keys when keys are present', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { a: 2 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { a: 2 }]);
 
                     expect(err).to.not.exist();
                     expect(keys).to.have.length(2);
@@ -1185,13 +1183,13 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('returns the generate keys when keys are present (last)', (done) => {
+        it('returns the generate keys when keys are present (last)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ a: 1 }, { id: 1, a: 2 }], (err, keys) => {
+                const keys = await db.test.insert([{ a: 1 }, { id: 1, a: 2 }]);
 
                     expect(err).to.not.exist();
                     expect(keys).to.have.length(2);
@@ -1201,13 +1199,13 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('returns the generate keys when keys are present (mixed)', (done) => {
+        it('returns the generate keys when keys are present (mixed)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ a: 1 }, { id: 1, a: 2 }, { id: 2, a: 3 }, { a: 4 }, { a: 5 }, { id: 3, a: 6 }, { id: 4, a: 7 }], (err, keys) => {
+                const keys = await db.test.insert([{ a: 1 }, { id: 1, a: 2 }, { id: 2, a: 3 }, { a: 4 }, { a: 5 }, { id: 3, a: 6 }, { id: 4, a: 7 }]);
 
                     expect(err).to.not.exist();
                     expect(keys).to.have.length(7);
@@ -1220,16 +1218,16 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('errors on key conflict', (done) => {
+        it('errors on key conflict', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: 1, a: 1 }, (err, key1) => {
+                const keys = await db.test.insert({ id: 1, a: 1 }, (err, key1) => {
 
                     expect(err).to.not.exist();
-                    db.test.insert({ id: 1, a: 1 }, (err, key2) => {
+                    const keys = await db.test.insert({ id: 1, a: 1 }, (err, key2) => {
 
                         expect(err).to.exist();
                         done();
@@ -1238,7 +1236,7 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('errors on upsert unique cleanup', (done) => {
+        it('errors on upsert unique cleanup', async () => {
 
             const db = new Penseur.Db('penseurtest', { test: true });
             const settings = {
@@ -1254,11 +1252,11 @@ describe('Table', { parallel: false }, () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: '1', a: 1 }, (err, key) => {
+                const keys = await db.test.insert({ id: '1', a: 1 }, (err, key) => {
 
                     expect(err).to.not.exist();
                     db.test._unique.rules[0].table.remove = (ids, next) => next(new Error());
-                    db.test.insert({ id: '1', a: 2 }, { merge: true }, (err) => {
+                    const keys = await db.test.insert({ id: '1', a: 2 }, { merge: true }, (err) => {
 
                         expect(err).to.exist();
                         done();
@@ -1267,10 +1265,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('errors on batch insert with multiple records', (done) => {
+        it('errors on batch insert with multiple records', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -1281,7 +1279,7 @@ describe('Table', { parallel: false }, () => {
                     records.push({ id: i, a: i });
                 }
 
-                db.test.insert(records, { chunks: 30 }, (err, keys) => {
+                const keys = await db.test.insert(records, { chunks: 30 });
 
                     expect(err).to.exist();
                     done();
@@ -1292,13 +1290,13 @@ describe('Table', { parallel: false }, () => {
 
     describe('update()', () => {
 
-        it('updates a record', (done) => {
+        it('updates a record', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: 1, a: 1 }, (err, keys) => {
+                const keys = await db.test.insert({ id: 1, a: 1 });
 
                     expect(err).to.not.exist();
 
@@ -1306,7 +1304,7 @@ describe('Table', { parallel: false }, () => {
 
                         expect(err).to.not.exist();
 
-                        db.test.get(1, (err, item) => {
+                        const item = await db.test.get(1);
 
                             expect(err).to.not.exist();
                             expect(item.a).to.equal(2);
@@ -1317,13 +1315,13 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('updates a record with empty object', (done) => {
+        it('updates a record with empty object', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: 1, a: 1 }, (err, keys) => {
+                const keys = await db.test.insert({ id: 1, a: 1 });
 
                     expect(err).to.not.exist();
 
@@ -1331,7 +1329,7 @@ describe('Table', { parallel: false }, () => {
 
                         expect(err).to.not.exist();
 
-                        db.test.get(1, (err, item) => {
+                        const item = await db.test.get(1);
 
                             expect(err).to.not.exist();
                             expect(item.a).to.equal({});
@@ -1342,13 +1340,13 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('updates a record with nested empty object', (done) => {
+        it('updates a record with nested empty object', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: 1 }, (err, keys) => {
+                const keys = await db.test.insert({ id: 1 });
 
                     expect(err).to.not.exist();
 
@@ -1356,7 +1354,7 @@ describe('Table', { parallel: false }, () => {
 
                         expect(err).to.not.exist();
 
-                        db.test.get(1, (err, item) => {
+                        const item = await db.test.get(1);
 
                             expect(err).to.not.exist();
                             expect(item.a.b).to.equal({});
@@ -1367,10 +1365,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('updates a record (increment modifier)', (done) => {
+        it('updates a record (increment modifier)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -1382,7 +1380,7 @@ describe('Table', { parallel: false }, () => {
                     }
                 };
 
-                db.test.insert(item, (err, keys) => {
+                const keys = await db.test.insert(item);
 
                     expect(err).to.not.exist();
 
@@ -1400,7 +1398,7 @@ describe('Table', { parallel: false }, () => {
                         expect(err).to.not.exist();
                         expect(changes.b.c).to.be.a.function();
 
-                        db.test.get(1, (err, updated) => {
+                        const item = await db.test.get(1, (err, updated) => {
 
                             expect(err).to.not.exist();
                             expect(updated).to.equal({
@@ -1418,10 +1416,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('updates a record (append modifier)', (done) => {
+        it('updates a record (append modifier)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -1433,7 +1431,7 @@ describe('Table', { parallel: false }, () => {
                     }
                 };
 
-                db.test.insert(item, (err, keys) => {
+                const keys = await db.test.insert(item);
 
                     expect(err).to.not.exist();
 
@@ -1451,7 +1449,7 @@ describe('Table', { parallel: false }, () => {
                         expect(err).to.not.exist();
                         expect(changes.b.c).to.be.a.function();
 
-                        db.test.get(1, (err, updated) => {
+                        const item = await db.test.get(1, (err, updated) => {
 
                             expect(err).to.not.exist();
                             expect(updated).to.equal({
@@ -1469,10 +1467,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('updates a record (append array modifier)', (done) => {
+        it('updates a record (append array modifier)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -1484,7 +1482,7 @@ describe('Table', { parallel: false }, () => {
                     }
                 };
 
-                db.test.insert(item, (err, keys) => {
+                const keys = await db.test.insert(item);
 
                     expect(err).to.not.exist();
 
@@ -1502,7 +1500,7 @@ describe('Table', { parallel: false }, () => {
                         expect(err).to.not.exist();
                         expect(changes.b.c).to.be.a.function();
 
-                        db.test.get(1, (err, updated) => {
+                        const item = await db.test.get(1, (err, updated) => {
 
                             expect(err).to.not.exist();
                             expect(updated).to.equal({
@@ -1520,10 +1518,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('updates a record (append array single modifier)', (done) => {
+        it('updates a record (append array single modifier)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -1535,7 +1533,7 @@ describe('Table', { parallel: false }, () => {
                     }
                 };
 
-                db.test.insert(item, (err, keys) => {
+                const keys = await db.test.insert(item);
 
                     expect(err).to.not.exist();
 
@@ -1553,7 +1551,7 @@ describe('Table', { parallel: false }, () => {
                         expect(err).to.not.exist();
                         expect(changes.b.c).to.be.a.function();
 
-                        db.test.get(1, (err, updated) => {
+                        const item = await db.test.get(1, (err, updated) => {
 
                             expect(err).to.not.exist();
                             expect(updated).to.equal({
@@ -1571,10 +1569,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('updates a record (unset modifier)', (done) => {
+        it('updates a record (unset modifier)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -1586,7 +1584,7 @@ describe('Table', { parallel: false }, () => {
                     }
                 };
 
-                db.test.insert(item, (err, keys) => {
+                const keys = await db.test.insert(item);
 
                     expect(err).to.not.exist();
 
@@ -1604,7 +1602,7 @@ describe('Table', { parallel: false }, () => {
                         expect(err).to.not.exist();
                         expect(changes.b.c).to.be.a.function();
 
-                        db.test.get(1, (err, updated) => {
+                        const item = await db.test.get(1, (err, updated) => {
 
                             expect(err).to.not.exist();
                             expect(updated).to.equal({
@@ -1620,10 +1618,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('updates a record (only unset modifier)', (done) => {
+        it('updates a record (only unset modifier)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -1632,7 +1630,7 @@ describe('Table', { parallel: false }, () => {
                     a: 1
                 };
 
-                db.test.insert(item, (err, keys) => {
+                const keys = await db.test.insert(item);
 
                     expect(err).to.not.exist();
 
@@ -1643,7 +1641,7 @@ describe('Table', { parallel: false }, () => {
                     db.test.update(1, changes, (err) => {
 
                         expect(err).to.not.exist();
-                        db.test.get(1, (err, updated) => {
+                        const item = await db.test.get(1, (err, updated) => {
 
                             expect(err).to.not.exist();
                             expect(updated).to.equal({ id: 1 });
@@ -1654,10 +1652,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('updates a record (no changes)', (done) => {
+        it('updates a record (no changes)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -1666,13 +1664,13 @@ describe('Table', { parallel: false }, () => {
                     a: 1
                 };
 
-                db.test.insert(item, (err, keys) => {
+                const keys = await db.test.insert(item);
 
                     expect(err).to.not.exist();
                     db.test.update(1, {}, (err) => {
 
                         expect(err).to.not.exist();
-                        db.test.get(1, (err, updated) => {
+                        const item = await db.test.get(1, (err, updated) => {
 
                             expect(err).to.not.exist();
                             expect(updated).to.equal({ id: 1, a: 1 });
@@ -1683,10 +1681,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('updates a record (unset and append modifiers)', (done) => {
+        it('updates a record (unset and append modifiers)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -1698,7 +1696,7 @@ describe('Table', { parallel: false }, () => {
                     }
                 };
 
-                db.test.insert(item, (err, keys) => {
+                const keys = await db.test.insert(item);
 
                     expect(err).to.not.exist();
 
@@ -1712,7 +1710,7 @@ describe('Table', { parallel: false }, () => {
                     db.test.update(1, changes, (err) => {
 
                         expect(err).to.not.exist();
-                        db.test.get(1, (err, updated) => {
+                        const item = await db.test.get(1, (err, updated) => {
 
                             expect(err).to.not.exist();
                             expect(updated).to.equal({
@@ -1728,19 +1726,19 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('updates a record (override key)', (done) => {
+        it('updates a record (override key)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: 1, a: 1, b: { c: 1, d: 1 }, e: 1 }, (err, keys) => {
+                const keys = await db.test.insert({ id: 1, a: 1, b: { c: 1, d: 1 }, e: 1 });
 
                     expect(err).to.not.exist();
                     db.test.update(1, { a: 2, b: { d: 2 } }, (err) => {
 
                         expect(err).to.not.exist();
-                        db.test.get(1, (err, item1) => {
+                        const item = await db.test.get(1, (err, item1) => {
 
                             expect(err).to.not.exist();
                             expect(item1).to.equal({ id: 1, a: 2, b: { c: 1, d: 2 }, e: 1 });
@@ -1748,7 +1746,7 @@ describe('Table', { parallel: false }, () => {
                             db.test.update(1, { a: 3, b: db.override({ c: 2 }) }, (err) => {
 
                                 expect(err).to.not.exist();
-                                db.test.get(1, (err, item2) => {
+                                const item = await db.test.get(1, (err, item2) => {
 
                                     expect(err).to.not.exist();
                                     expect(item2).to.equal({ id: 1, a: 3, b: { c: 2 }, e: 1 });
@@ -1761,13 +1759,13 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('updates multiple records (same value)', (done) => {
+        it('updates multiple records (same value)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }]);
 
                     expect(err).to.not.exist();
 
@@ -1786,13 +1784,13 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('updates multiple records (different value)', (done) => {
+        it('updates multiple records (different value)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }]);
 
                     expect(err).to.not.exist();
 
@@ -1811,13 +1809,13 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('updates a record (ignore batch)', (done) => {
+        it('updates a record (ignore batch)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }]);
 
                     expect(err).to.not.exist();
 
@@ -1834,7 +1832,7 @@ describe('Table', { parallel: false }, () => {
                         expect(err).to.not.exist();
                         expect(batches).to.equal([1]);
 
-                        db.test.get(1, (err, item) => {
+                        const item = await db.test.get(1);
 
                             expect(err).to.not.exist();
                             expect(item.a).to.equal(2);
@@ -1845,13 +1843,13 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('updates a record (ignore empty options)', (done) => {
+        it('updates a record (ignore empty options)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }]);
 
                     expect(err).to.not.exist();
 
@@ -1868,7 +1866,7 @@ describe('Table', { parallel: false }, () => {
                         expect(err).to.not.exist();
                         expect(batches).to.equal([1]);
 
-                        db.test.get(1, (err, item) => {
+                        const item = await db.test.get(1);
 
                             expect(err).to.not.exist();
                             expect(item.a).to.equal(2);
@@ -1879,10 +1877,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('updates multiple records (chunks)', (done) => {
+        it('updates multiple records (chunks)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -1891,7 +1889,7 @@ describe('Table', { parallel: false }, () => {
                     records.push({ id: i, a: i });
                 }
 
-                db.test.insert(records, (err, keys) => {
+                const keys = await db.test.insert(records);
 
                     expect(err).to.not.exist();
 
@@ -1913,7 +1911,7 @@ describe('Table', { parallel: false }, () => {
                         expect(err).to.not.exist();
                         expect(batches).to.equal([30, 30, 30, 10]);
 
-                        db.test.get(1, (err, item) => {
+                        const item = await db.test.get(1);
 
                             expect(err).to.not.exist();
                             expect(item.a).to.not.exist();
@@ -1924,17 +1922,17 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('updates a record (composite key)', (done) => {
+        it('updates a record (composite key)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: [1, 1], a: 1 }, (err, keys) => {
+                const keys = await db.test.insert({ id: [1, 1], a: 1 });
 
                     expect(err).to.not.exist();
 
-                    db.test.get({ id: [1, 1] }, (err, item1) => {
+                    const item = await db.test.get({ id: [1, 1] }, (err, item1) => {
 
                         expect(err).to.not.exist();
                         expect(item1.a).to.equal(1);
@@ -1943,7 +1941,7 @@ describe('Table', { parallel: false }, () => {
 
                             expect(err).to.not.exist();
 
-                            db.test.get({ id: [1, 1] }, (err, item2) => {
+                            const item = await db.test.get({ id: [1, 1] }, (err, item2) => {
 
                                 expect(err).to.not.exist();
                                 expect(item2.a).to.equal(2);
@@ -1955,10 +1953,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('errors on unknown key', (done) => {
+        it('errors on unknown key', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -1971,10 +1969,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('errors on invalid object key', (done) => {
+        it('errors on invalid object key', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -1990,13 +1988,13 @@ describe('Table', { parallel: false }, () => {
 
     describe('next()', () => {
 
-        it('updates a record', (done) => {
+        it('updates a record', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: 1, a: 1 }, (err, keys) => {
+                const keys = await db.test.insert({ id: 1, a: 1 });
 
                     expect(err).to.not.exist();
 
@@ -2004,7 +2002,7 @@ describe('Table', { parallel: false }, () => {
 
                         expect(err).to.not.exist();
 
-                        db.test.get(1, (err, item) => {
+                        const item = await db.test.get(1);
 
                             expect(err).to.not.exist();
                             expect(item.a).to.equal(6);
@@ -2015,10 +2013,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('errors on unknown key', (done) => {
+        it('errors on unknown key', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -2030,10 +2028,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('errors on invalid key', (done) => {
+        it('errors on invalid key', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -2045,11 +2043,11 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('fails on database error', (done) => {
+        it('fails on database error', async () => {
 
             const db = new Penseur.Db('penseurtest');
             db.table('invalid');
-            db.connect((err) => {
+            await db.connect();
 
                 expect(err).to.not.exist();
                 db.invalid.next(1, 'a', 5, (err) => {
@@ -2063,13 +2061,13 @@ describe('Table', { parallel: false }, () => {
 
     describe('remove()', () => {
 
-        it('removes a record', (done) => {
+        it('removes a record', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: 1, a: 1 }, (err, keys) => {
+                const keys = await db.test.insert({ id: 1, a: 1 });
 
                     expect(err).to.not.exist();
 
@@ -2077,7 +2075,7 @@ describe('Table', { parallel: false }, () => {
 
                         expect(err).to.not.exist();
 
-                        db.test.get(1, (err, item) => {
+                        const item = await db.test.get(1);
 
                             expect(err).to.not.exist();
                             expect(item).to.not.exist();
@@ -2088,13 +2086,13 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('removes a record (composite id)', (done) => {
+        it('removes a record (composite id)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: [1, 1], a: 1 }, (err, keys) => {
+                const keys = await db.test.insert({ id: [1, 1], a: 1 });
 
                     expect(err).to.not.exist();
 
@@ -2102,7 +2100,7 @@ describe('Table', { parallel: false }, () => {
 
                         expect(err).to.not.exist();
 
-                        db.test.get({ id: [1, 1] }, (err, item) => {
+                        const item = await db.test.get({ id: [1, 1] });
 
                             expect(err).to.not.exist();
                             expect(item).to.not.exist();
@@ -2113,13 +2111,13 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('removes multiple records', (done) => {
+        it('removes multiple records', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }]);
 
                     expect(err).to.not.exist();
 
@@ -2138,13 +2136,13 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('removes records using criteria', (done) => {
+        it('removes records using criteria', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }]);
 
                     expect(err).to.not.exist();
 
@@ -2163,10 +2161,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('errors on unknown key', (done) => {
+        it('errors on unknown key', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -2178,10 +2176,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('errors on invalid key', (done) => {
+        it('errors on invalid key', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -2193,10 +2191,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('ignored error on unknown keys', (done) => {
+        it('ignored error on unknown keys', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -2208,14 +2206,14 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('fails on database error', (done) => {
+        it('fails on database error', async () => {
 
             const db = new Penseur.Db('penseurtest');
             db.table('invalid');
-            db.connect((err) => {
+            await db.connect();
 
                 expect(err).to.not.exist();
-                db.invalid.remove(1, (err, item) => {
+                db.invalid.remove(1);
 
                     expect(err).to.exist();
                     done();
@@ -2226,13 +2224,13 @@ describe('Table', { parallel: false }, () => {
 
     describe('empty()', () => {
 
-        it('removes all records', (done) => {
+        it('removes all records', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 1 }]);
 
                     expect(err).to.not.exist();
 
@@ -2252,10 +2250,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('errors on unknown table', (done) => {
+        it('errors on unknown table', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.connect((err) => {
+            await db.connect();
 
                 expect(err).to.not.exist();
 
@@ -2272,13 +2270,13 @@ describe('Table', { parallel: false }, () => {
 
     describe('sync()', () => {
 
-        it('returns when write is complete', (done) => {
+        it('returns when write is complete', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }]);
 
                     expect(err).to.not.exist();
 
@@ -2291,11 +2289,11 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('fails on database error', (done) => {
+        it('fails on database error', async () => {
 
             const db = new Penseur.Db('penseurtest');
             db.table('invalid');
-            db.connect((err) => {
+            await db.connect();
 
                 expect(err).to.not.exist();
 
@@ -2307,7 +2305,7 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('fails on disconnected database', (done) => {
+        it('fails on disconnected database', async () => {
 
             const db = new Penseur.Db('penseurtest');
             db.table('test');
@@ -2322,17 +2320,17 @@ describe('Table', { parallel: false }, () => {
 
     describe('index()', () => {
 
-        it('adds a secondary index', (done) => {
+        it('adds a secondary index', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
                 db.test.index('x', (err) => {
 
                     expect(err).to.not.exist();
 
-                    RethinkDB.db(db.name).table('test').indexStatus().run(db._connection, (err, result) => {
+                    RethinkDB.db(db.name).table('test').indexStatus().run(db._connection);
 
                         expect(err).to.not.exist();
                         expect(result[0]).to.contain({ index: 'x', multi: false, geo: false, ready: true });
@@ -2342,11 +2340,11 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('fails on database error', (done) => {
+        it('fails on database error', async () => {
 
             const db = new Penseur.Db('penseurtest');
             db.table('invalid');
-            db.connect((err) => {
+            await db.connect();
 
                 expect(err).to.not.exist();
 
@@ -2358,7 +2356,7 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('fails on disconnected database', (done) => {
+        it('fails on disconnected database', async () => {
 
             const db = new Penseur.Db('penseurtest');
             db.table('test');
@@ -2370,16 +2368,16 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('creates simple index from a string', (done) => {
+        it('creates simple index from a string', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
                 db.test.index('simple', (err) => {
 
                     expect(err).to.not.exist();
-                    RethinkDB.db(db.name).table('test').indexStatus().run(db._connection, (err, result) => {
+                    RethinkDB.db(db.name).table('test').indexStatus().run(db._connection);
 
                         expect(err).to.not.exist();
                         expect(result[0]).to.contain({ index: 'simple', multi: false, geo: false, ready: true });
@@ -2389,10 +2387,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('creates index from function', (done) => {
+        it('creates index from function', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -2404,7 +2402,7 @@ describe('Table', { parallel: false }, () => {
                 db.test.index(index, (err) => {
 
                     expect(err).to.not.exist();
-                    RethinkDB.db(db.name).table('test').indexStatus().run(db._connection, (err, result) => {
+                    RethinkDB.db(db.name).table('test').indexStatus().run(db._connection);
 
                         expect(err).to.not.exist();
                         expect(result[0]).to.contain({ index: 'name', multi: false, geo: false, ready: true });
@@ -2415,16 +2413,16 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('creates compound index from an array of fields', (done) => {
+        it('creates compound index from an array of fields', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
                 db.test.index({ name: 'compound', source: ['some', 'other'] }, (err) => {
 
                     expect(err).to.not.exist();
-                    RethinkDB.db(db.name).table('test').indexStatus().run(db._connection, (err, result) => {
+                    RethinkDB.db(db.name).table('test').indexStatus().run(db._connection);
 
                         expect(err).to.not.exist();
                         expect(result[0]).to.contain({ index: 'compound', multi: false, geo: false, ready: true });
@@ -2435,16 +2433,16 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('creates index with options', (done) => {
+        it('creates index with options', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
                 db.test.index({ name: 'simple-multi', options: { multi: true } }, (err) => {
 
                     expect(err).to.not.exist();
-                    RethinkDB.db(db.name).table('test').indexStatus().run(db._connection, (err, result) => {
+                    RethinkDB.db(db.name).table('test').indexStatus().run(db._connection);
 
                         expect(err).to.not.exist();
                         expect(result[0]).to.contain({ index: 'simple-multi', multi: true, geo: false, ready: true });
@@ -2454,10 +2452,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('creates multiple indexes from array', (done) => {
+        it('creates multiple indexes from array', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -2469,7 +2467,7 @@ describe('Table', { parallel: false }, () => {
                 db.test.index(indexes, (err) => {
 
                     expect(err).to.not.exist();
-                    RethinkDB.db(db.name).table('test').indexStatus().run(db._connection, (err, result) => {
+                    RethinkDB.db(db.name).table('test').indexStatus().run(db._connection);
 
                         expect(err).to.not.exist();
                         expect(result[0]).to.contain({ geo: true, index: 'location', multi: false, ready: true });
@@ -2480,10 +2478,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('propogates errors from indexCreate', (done) => {
+        it('propogates errors from indexCreate', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -2513,7 +2511,7 @@ describe('Table', { parallel: false }, () => {
 
     describe('changes()', () => {
 
-        it('fails on disconnected database', (done) => {
+        it('fails on disconnected database', async () => {
 
             const db = new Penseur.Db('penseurtest');
             db.table('test');
@@ -2525,10 +2523,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('reports on a record update (*)', (done) => {
+        it('reports on a record update (*)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -2543,7 +2541,7 @@ describe('Table', { parallel: false }, () => {
 
                     expect(err).to.not.exist();
 
-                    db.test.insert({ id: 1, a: 1 }, (err, keys) => {
+                    const keys = await db.test.insert({ id: 1, a: 1 });
 
                         expect(err).to.not.exist();
 
@@ -2552,17 +2550,17 @@ describe('Table', { parallel: false }, () => {
                             expect(err).to.not.exist();
 
                             expect(changes).to.equal([1, 1]);
-                            db.close(done);
+                            await db.close();
                         });
                     });
                 });
             });
         });
 
-        it('manually closes a cursor', (done) => {
+        it('manually closes a cursor', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -2577,7 +2575,7 @@ describe('Table', { parallel: false }, () => {
 
                     expect(err).to.not.exist();
 
-                    db.test.insert({ id: 1, a: 1 }, (err, keys) => {
+                    const keys = await db.test.insert({ id: 1, a: 1 });
 
                         expect(err).to.not.exist();
 
@@ -2587,17 +2585,17 @@ describe('Table', { parallel: false }, () => {
 
                             expect(changes).to.equal([1, 1]);
                             cursor.close();
-                            db.close(done);
+                            await db.close();
                         });
                     });
                 });
             });
         });
 
-        it('reports on a record update (id)', (done) => {
+        it('reports on a record update (id)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -2608,7 +2606,7 @@ describe('Table', { parallel: false }, () => {
                     changes.push(item.after.id);
                 };
 
-                db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
 
                     expect(err).to.not.exist();
 
@@ -2620,12 +2618,12 @@ describe('Table', { parallel: false }, () => {
 
                             expect(err).to.not.exist();
 
-                            db.test.insert({ id: 2, a: 2 }, (err) => {
+                            const keys = await db.test.insert({ id: 2, a: 2 }, (err) => {
 
                                 expect(err).to.not.exist();
 
                                 expect(changes).to.equal([1]);
-                                db.close(done);
+                                await db.close();
                             });
                         });
                     });
@@ -2633,10 +2631,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('reports on a record update (ids)', (done) => {
+        it('reports on a record update (ids)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -2647,7 +2645,7 @@ describe('Table', { parallel: false }, () => {
                     changes.push(item.after.id);
                 };
 
-                db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
 
                     expect(err).to.not.exist();
 
@@ -2659,12 +2657,12 @@ describe('Table', { parallel: false }, () => {
 
                             expect(err).to.not.exist();
 
-                            db.test.insert({ id: 2, a: 2 }, (err) => {
+                            const keys = await db.test.insert({ id: 2, a: 2 }, (err) => {
 
                                 expect(err).to.not.exist();
 
                                 expect(changes).to.equal([1, 2]);
-                                db.close(done);
+                                await db.close();
                             });
                         });
                     });
@@ -2672,10 +2670,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('reports on a record update (query)', (done) => {
+        it('reports on a record update (query)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -2686,7 +2684,7 @@ describe('Table', { parallel: false }, () => {
                     changes.push(item.after.id);
                 };
 
-                db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
 
                     expect(err).to.not.exist();
 
@@ -2698,12 +2696,12 @@ describe('Table', { parallel: false }, () => {
 
                             expect(err).to.not.exist();
 
-                            db.test.insert({ id: 2, a: 2 }, (err) => {
+                            const keys = await db.test.insert({ id: 2, a: 2 }, (err) => {
 
                                 expect(err).to.not.exist();
 
                                 expect(changes).to.equal([1, 2]);
-                                db.close(done);
+                                await db.close();
                             });
                         });
                     });
@@ -2711,10 +2709,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('reports on a record update (delete)', (done) => {
+        it('reports on a record update (delete)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -2725,7 +2723,7 @@ describe('Table', { parallel: false }, () => {
                     changes.push(item.before.id + ':' + (item.after === null));
                 };
 
-                db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
 
                     expect(err).to.not.exist();
 
@@ -2737,17 +2735,17 @@ describe('Table', { parallel: false }, () => {
 
                             expect(err).to.not.exist();
                             expect(changes).to.equal(['1:true']);
-                            db.close(done);
+                            await db.close();
                         });
                     });
                 });
             });
         });
 
-        it('reports on a record update (id missing)', (done) => {
+        it('reports on a record update (id missing)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -2762,20 +2760,20 @@ describe('Table', { parallel: false }, () => {
 
                     expect(err).to.not.exist();
 
-                    db.test.insert({ id: 1, a: 1 }, (err, keys) => {
+                    const keys = await db.test.insert({ id: 1, a: 1 });
 
                         expect(err).to.not.exist();
                         expect(changes).to.equal([1]);
-                        db.close(done);
+                        await db.close();
                     });
                 });
             });
         });
 
-        it('includes initial state', (done) => {
+        it('includes initial state', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -2786,7 +2784,7 @@ describe('Table', { parallel: false }, () => {
                     changes.push(item.id);
                 };
 
-                db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
 
                     expect(err).to.not.exist();
 
@@ -2798,12 +2796,12 @@ describe('Table', { parallel: false }, () => {
 
                             expect(err).to.not.exist();
 
-                            db.test.insert({ id: 2, a: 2 }, (err) => {
+                            const keys = await db.test.insert({ id: 2, a: 2 }, (err) => {
 
                                 expect(err).to.not.exist();
 
                                 expect(changes).to.equal([1, 1]);
-                                db.close(done);
+                                await db.close();
                             });
                         });
                     });
@@ -2811,10 +2809,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('handles initial state on missing initial item', (done) => {
+        it('handles initial state on missing initial item', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -2828,17 +2826,17 @@ describe('Table', { parallel: false }, () => {
                 db.test.changes(1, { handler: each, initial: true }, (err, cursor) => {
 
                     expect(err).to.not.exist();
-                    db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
+                    const keys = await db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
 
                         expect(err).to.not.exist();
                         db.test.update(1, { a: 2 }, (err, keys2) => {
 
                             expect(err).to.not.exist();
-                            db.test.insert({ id: 2, a: 2 }, (err) => {
+                            const keys = await db.test.insert({ id: 2, a: 2 }, (err) => {
 
                                 expect(err).to.not.exist();
                                 expect(changes).to.equal([1, 1]);
-                                db.close(done);
+                                await db.close();
                             });
                         });
                     });
@@ -2846,10 +2844,10 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('handles closed cursor while still processing rows', (done) => {
+        it('handles closed cursor while still processing rows', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -2861,12 +2859,12 @@ describe('Table', { parallel: false }, () => {
                 db.test.changes(1, { handler: each, initial: true }, (err, cursor) => {
 
                     expect(err).to.not.exist();
-                    db.close(done);
+                    await db.close();
                 });
             });
         });
 
-        it('reconnects', (done) => {
+        it('reconnects', async () => {
 
             let step2 = null;
             let count = 0;
@@ -2879,7 +2877,7 @@ describe('Table', { parallel: false }, () => {
             };
 
             const db = new Penseur.Db('penseurtest', { onConnect });
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
                 const changes = [];
@@ -2892,7 +2890,7 @@ describe('Table', { parallel: false }, () => {
 
                             expect(changes).to.equal(['insert', { willReconnect: true, disconnected: true }, 'initial']);
                             expect(count).to.equal(2);
-                            db.close(done);
+                            await db.close();
                         }
                     }
                     else {
@@ -2903,7 +2901,7 @@ describe('Table', { parallel: false }, () => {
                 db.test.changes(1, { handler: each, initial: true }, (err, cursor) => {
 
                     expect(err).to.not.exist();
-                    db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
+                    const keys = await db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
 
                         expect(err).to.not.exist();
                         step2 = () => {
@@ -2918,7 +2916,7 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('does not reconnect on manual cursor close', (done) => {
+        it('does not reconnect on manual cursor close', async () => {
 
             let step2 = null;
             let count = 0;
@@ -2931,7 +2929,7 @@ describe('Table', { parallel: false }, () => {
             };
 
             const db = new Penseur.Db('penseurtest', { onConnect });
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
                 const changes = [];
@@ -2948,7 +2946,7 @@ describe('Table', { parallel: false }, () => {
                 db.test.changes(1, { handler: each, initial: true }, (err, cursor) => {
 
                     expect(err).to.not.exist();
-                    db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
+                    const keys = await db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
 
                         expect(err).to.not.exist();
                         cursor.close();
@@ -2964,7 +2962,7 @@ describe('Table', { parallel: false }, () => {
                                     expect(err).to.not.exist();
                                     expect(changes).to.equal(['insert']);
                                     expect(count).to.equal(2);
-                                    db.close(done);
+                                    await db.close();
                                 });
                             });
                         };
@@ -2975,7 +2973,7 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('does not reconnect (feed reconnect disabled)', (done) => {
+        it('does not reconnect (feed reconnect disabled)', async () => {
 
             let step2 = null;
             let count = 0;
@@ -2988,7 +2986,7 @@ describe('Table', { parallel: false }, () => {
             };
 
             const db = new Penseur.Db('penseurtest', { onConnect });
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
                 const changes = [];
@@ -3005,7 +3003,7 @@ describe('Table', { parallel: false }, () => {
                 db.test.changes(1, { handler: each, initial: true, reconnect: false }, (err, cursor) => {
 
                     expect(err).to.not.exist();
-                    db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
+                    const keys = await db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
 
                         expect(err).to.not.exist();
 
@@ -3020,7 +3018,7 @@ describe('Table', { parallel: false }, () => {
                                     expect(err).to.not.exist();
                                     expect(changes).to.equal(['insert', { willReconnect: false, disconnected: true }]);
                                     expect(count).to.equal(2);
-                                    db.close(done);
+                                    await db.close();
                                 });
                             });
                         };
@@ -3031,7 +3029,7 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('does not reconnect (db reconnect disabled)', (done) => {
+        it('does not reconnect (db reconnect disabled)', async () => {
 
             let count = 0;
             const onConnect = () => {
@@ -3040,7 +3038,7 @@ describe('Table', { parallel: false }, () => {
             };
 
             const db = new Penseur.Db('penseurtest', { onConnect, reconnect: false });
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
                 const changes = [];
@@ -3057,27 +3055,26 @@ describe('Table', { parallel: false }, () => {
                 db.test.changes(1, { handler: each, initial: true }, (err, cursor) => {
 
                     expect(err).to.not.exist();
-                    db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
+                    const keys = await db.test.insert([{ id: 1, a: 1 }], (err, keys1) => {
 
                         db._connection.close(() => {
 
                             expect(err).to.not.exist();
-                            setTimeout(() => {
+                            await Hoek.wait(100);
 
                                 expect(changes).to.equal(['insert', { willReconnect: false, disconnected: true }]);
                                 expect(count).to.equal(1);
-                                db.close(done);
-                            }, 100);
+                                await db.close();
                         });
                     });
                 });
             });
         });
 
-        it('errors on bad cursor', (done) => {
+        it('errors on bad cursor', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -3100,7 +3097,7 @@ describe('Table', { parallel: false }, () => {
                         throw new Error('kaboom');
                     };
 
-                    db.test.insert({ id: 1, a: 1 }, (err, keys) => {
+                    const keys = await db.test.insert({ id: 1, a: 1 });
 
                         expect(err).to.not.exist();
                     });
@@ -3108,14 +3105,14 @@ describe('Table', { parallel: false }, () => {
             });
         });
 
-        it('errors on invalid table', (done) => {
+        it('errors on invalid table', async () => {
 
             const db = new Penseur.Db('penseurtest');
             db.table('invalid');
-            db.connect((err) => {
+            await db.connect();
 
                 expect(err).to.not.exist();
-                db.invalid.changes('*', Hoek.ignore, (err, item) => {
+                db.invalid.changes('*', Hoek.ignore);
 
                     expect(err).to.exist();
                     done();

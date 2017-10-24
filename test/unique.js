@@ -14,9 +14,7 @@ const internals = {};
 
 // Test shortcuts
 
-const lab = exports.lab = Lab.script();
-const describe = lab.describe;
-const it = lab.it;
+const { describe, it } = exports.lab = Lab.script();
 const expect = Code.expect;
 
 
@@ -24,7 +22,7 @@ describe('Unique', () => {
 
     describe('reserve()', () => {
 
-        it('allows setting a unique value', (done) => {
+        it('allows setting a unique value', async () => {
 
             const db = new Penseur.Db('penseurtest');
             const settings = {
@@ -40,7 +38,7 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ a: 1 }, { a: 2 }], (err, keys) => {
+                const keys = await db.test.insert([{ a: 1 }, { a: 2 }]);
 
                     expect(err).to.not.exist();
                     expect(keys.length).to.equal(2);
@@ -49,7 +47,7 @@ describe('Unique', () => {
             });
         });
 
-        it('allows setting a unique value (nested)', (done) => {
+        it('allows setting a unique value (nested)', async () => {
 
             const db = new Penseur.Db('penseurtest');
             const settings = {
@@ -67,7 +65,7 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: { b: 1 } }, { id: 2, a: { c: { d: [2] } } }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: { b: 1 } }, { id: 2, a: { c: { d: [2] } } }]);
 
                     expect(err).to.not.exist();
                     expect(keys.length).to.equal(2);
@@ -86,7 +84,7 @@ describe('Unique', () => {
             });
         });
 
-        it('allows updating a unique value', (done) => {
+        it('allows updating a unique value', async () => {
 
             const db = new Penseur.Db('penseurtest');
             const settings = {
@@ -102,7 +100,7 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: '1', a: 1 }, (err, key) => {
+                const keys = await db.test.insert({ id: '1', a: 1 }, (err, key) => {
 
                     expect(err).to.not.exist();
                     db.test.update('1', { a: 2 }, (err) => {
@@ -118,7 +116,7 @@ describe('Unique', () => {
             });
         });
 
-        it('allows userting a unique value', (done) => {
+        it('allows userting a unique value', async () => {
 
             const db = new Penseur.Db('penseurtest');
             const settings = {
@@ -134,13 +132,13 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: '1', a: 1 }, { merge: true }, (err, key) => {
+                const keys = await db.test.insert({ id: '1', a: 1 }, { merge: true }, (err, key) => {
 
                     expect(err).to.not.exist();
-                    db.test.insert({ id: '1', a: 2 }, { merge: true }, (err) => {
+                    const keys = await db.test.insert({ id: '1', a: 2 }, { merge: true }, (err) => {
 
                         expect(err).to.not.exist();
-                        db.test.insert({ id: '2', a: 1 }, (err) => {
+                        const keys = await db.test.insert({ id: '2', a: 1 }, (err) => {
 
                             expect(err).to.not.exist();
                             done();
@@ -150,7 +148,7 @@ describe('Unique', () => {
             });
         });
 
-        it('allows appending a unique value', (done) => {
+        it('allows appending a unique value', async () => {
 
             const db = new Penseur.Db('penseurtest');
             const settings = {
@@ -166,7 +164,7 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: '1', a: [1] }, (err, key) => {
+                const keys = await db.test.insert({ id: '1', a: [1] }, (err, key) => {
 
                     expect(err).to.not.exist();
                     db.test.update('1', { a: db.append(2) }, (err) => {
@@ -182,7 +180,7 @@ describe('Unique', () => {
             });
         });
 
-        it('releases value on unset', (done) => {
+        it('releases value on unset', async () => {
 
             const db = new Penseur.Db('penseurtest');
             const settings = {
@@ -198,13 +196,13 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: '1', a: 1 }, (err, key) => {
+                const keys = await db.test.insert({ id: '1', a: 1 }, (err, key) => {
 
                     expect(err).to.not.exist();
                     db.test.update('1', { a: db.unset() }, (err) => {
 
                         expect(err).to.not.exist();
-                        db.test.insert({ id: 2, a: 1 }, (err) => {
+                        const keys = await db.test.insert({ id: 2, a: 1 }, (err) => {
 
                             expect(err).to.not.exist();
                             done();
@@ -214,7 +212,7 @@ describe('Unique', () => {
             });
         });
 
-        it.skip('releases value on unset (parent)', (done) => {
+        it.skip('releases value on unset (parent)', async () => {
 
             const db = new Penseur.Db('penseurtest');
             const settings = {
@@ -230,13 +228,13 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: '1', a: { b: 1 } }, (err, key) => {
+                const keys = await db.test.insert({ id: '1', a: { b: 1 } }, (err, key) => {
 
                     expect(err).to.not.exist();
                     db.test.update('1', { a: db.unset() }, (err) => {
 
                         expect(err).to.not.exist();
-                        db.test.insert({ id: 2, a: { b: 1 } }, (err) => {
+                        const keys = await db.test.insert({ id: 2, a: { b: 1 } }, (err) => {
 
                             expect(err).to.not.exist();
                             done();
@@ -246,7 +244,7 @@ describe('Unique', () => {
             });
         });
 
-        it('ignores empty object', (done) => {
+        it('ignores empty object', async () => {
 
             const db = new Penseur.Db('penseurtest');
             const settings = {
@@ -262,7 +260,7 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: '1', a: {} }, (err, key) => {
+                const keys = await db.test.insert({ id: '1', a: {} }, (err, key) => {
 
                     expect(err).to.not.exist();
                     done();
@@ -270,7 +268,7 @@ describe('Unique', () => {
             });
         });
 
-        it('ignores missing path parent (2 segments)', (done) => {
+        it('ignores missing path parent (2 segments)', async () => {
 
             const db = new Penseur.Db('penseurtest');
             const settings = {
@@ -286,7 +284,7 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: '1' }, (err, key) => {
+                const keys = await db.test.insert({ id: '1' }, (err, key) => {
 
                     expect(err).to.not.exist();
                     done();
@@ -294,7 +292,7 @@ describe('Unique', () => {
             });
         });
 
-        it('allows adding a unique value via update', (done) => {
+        it('allows adding a unique value via update', async () => {
 
             const db = new Penseur.Db('penseurtest');
             const settings = {
@@ -310,7 +308,7 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: '1' }, (err, key) => {
+                const keys = await db.test.insert({ id: '1' }, (err, key) => {
 
                     expect(err).to.not.exist();
                     db.test.update('1', { a: 2 }, (err) => {
@@ -322,7 +320,7 @@ describe('Unique', () => {
             });
         });
 
-        it('forbids violating a unique value', (done) => {
+        it('forbids violating a unique value', async () => {
 
             const db = new Penseur.Db('penseurtest');
             const settings = {
@@ -338,7 +336,7 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ a: 1 }, { a: 1 }], (err, keys) => {
+                const keys = await db.test.insert([{ a: 1 }, { a: 1 }]);
 
                     expect(err).to.exist();
                     done();
@@ -346,7 +344,7 @@ describe('Unique', () => {
             });
         });
 
-        it('forbids violating a unique value (keys)', (done) => {
+        it('forbids violating a unique value (keys)', async () => {
 
             const db = new Penseur.Db('penseurtest');
             const settings = {
@@ -362,19 +360,19 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ a: { b: [1] } }, (err, key1) => {
+                const keys = await db.test.insert({ a: { b: [1] } }, (err, key1) => {
 
                     expect(err).to.not.exist();
                     db.test.update(key1, { a: { b: db.append(2) } }, (err) => {
 
                         expect(err).to.not.exist();
-                        db.test.insert({ a: { c: 2, d: 4 } }, (err, key2) => {
+                        const keys = await db.test.insert({ a: { c: 2, d: 4 } }, (err, key2) => {
 
                             expect(err).to.not.exist();
-                            db.test.insert({ a: { b: 3 } }, (err, key3) => {
+                            const keys = await db.test.insert({ a: { b: 3 } }, (err, key3) => {
 
                                 expect(err).to.exist();
-                                db.test.insert({ a: { d: 5 } }, (err, key4) => {
+                                const keys = await db.test.insert({ a: { d: 5 } }, (err, key4) => {
 
                                     expect(err).to.exist();
                                     done();
@@ -386,7 +384,7 @@ describe('Unique', () => {
             });
         });
 
-        it('allows same owner changes', (done) => {
+        it('allows same owner changes', async () => {
 
             const db = new Penseur.Db('penseurtest');
             const settings = {
@@ -402,7 +400,7 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: 1, a: { c: 1 } }, (err, key1) => {
+                const keys = await db.test.insert({ id: 1, a: { c: 1 } }, (err, key1) => {
 
                     expect(err).to.not.exist();
                     db.test.update(1, { a: { c: 5 } }, (err) => {
@@ -414,7 +412,7 @@ describe('Unique', () => {
             });
         });
 
-        it('releases reservations on update (keys)', (done) => {
+        it('releases reservations on update (keys)', async () => {
 
             const db = new Penseur.Db('penseurtest');
             const settings = {
@@ -430,10 +428,10 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: 1, a: { b: 1 } }, (err, key1) => {
+                const keys = await db.test.insert({ id: 1, a: { b: 1 } }, (err, key1) => {
 
                     expect(err).to.not.exist();
-                    db.test.insert({ id: 2, a: { c: 2, d: 4 } }, (err, key2) => {
+                    const keys = await db.test.insert({ id: 2, a: { c: 2, d: 4 } }, (err, key2) => {
 
                         expect(err).to.not.exist();
                         db.test.update(2, { a: { c: db.unset() } }, (err) => {
@@ -450,7 +448,7 @@ describe('Unique', () => {
             });
         });
 
-        it('forbids violating a unique value (array)', (done) => {
+        it('forbids violating a unique value (array)', async () => {
 
             const db = new Penseur.Db('penseurtest');
             const settings = {
@@ -466,22 +464,22 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ a: ['b'] }, (err, key1) => {
+                const keys = await db.test.insert({ a: ['b'] }, (err, key1) => {
 
                     expect(err).to.not.exist();
-                    db.test.insert({ a: ['c', 'a'] }, (err, key2) => {
+                    const keys = await db.test.insert({ a: ['c', 'a'] }, (err, key2) => {
 
                         expect(err).to.not.exist();
-                        db.test.insert({ a: ['b'] }, (err, key3) => {
+                        const keys = await db.test.insert({ a: ['b'] }, (err, key3) => {
 
                             expect(err).to.exist();
-                            db.test.insert({ a: ['a'] }, (err, key4) => {
+                            const keys = await db.test.insert({ a: ['a'] }, (err, key4) => {
 
                                 expect(err).to.exist();
                                 db.test.update(key2, { a: [] }, (err) => {
 
                                     expect(err).to.not.exist();
-                                    db.test.insert({ a: ['a'] }, (err, key5) => {
+                                    const keys = await db.test.insert({ a: ['a'] }, (err, key5) => {
 
                                         expect(err).to.not.exist();
                                         done();
@@ -494,7 +492,7 @@ describe('Unique', () => {
             });
         });
 
-        it('customizes unique table name', (done) => {
+        it('customizes unique table name', async () => {
 
             const db = new Penseur.Db('penseurtest');
             const settings = {
@@ -511,7 +509,7 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }], (err, keys) => {
+                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }]);
 
                     expect(err).to.not.exist();
                     expect(keys.length).to.equal(2);
@@ -526,7 +524,7 @@ describe('Unique', () => {
             });
         });
 
-        it('ignores non unique keys', (done) => {
+        it('ignores non unique keys', async () => {
 
             const db = new Penseur.Db('penseurtest');
             const settings = {
@@ -542,7 +540,7 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert([{ b: 1 }, { b: 2 }], (err, keys) => {
+                const keys = await db.test.insert([{ b: 1 }, { b: 2 }]);
 
                     expect(err).to.not.exist();
                     expect(keys.length).to.equal(2);
@@ -551,7 +549,7 @@ describe('Unique', () => {
             });
         });
 
-        it('ignore further nested values', (done) => {
+        it('ignore further nested values', async () => {
 
             const db = new Penseur.Db('penseurtest');
             const settings = {
@@ -567,7 +565,7 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ a: { b: 1 } }, (err, key) => {
+                const keys = await db.test.insert({ a: { b: 1 } }, (err, key) => {
 
                     expect(err).to.not.exist();
                     done();
@@ -575,7 +573,7 @@ describe('Unique', () => {
             });
         });
 
-        it('ignore further nested values (non existing)', (done) => {
+        it('ignore further nested values (non existing)', async () => {
 
             const db = new Penseur.Db('penseurtest');
             const settings = {
@@ -591,7 +589,7 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ d: { b: 1 } }, (err, key) => {
+                const keys = await db.test.insert({ d: { b: 1 } }, (err, key) => {
 
                     expect(err).to.not.exist();
                     done();
@@ -599,7 +597,7 @@ describe('Unique', () => {
             });
         });
 
-        it('errors on incrementing unique index', (done) => {
+        it('errors on incrementing unique index', async () => {
 
             const db = new Penseur.Db('penseurtest');
             const settings = {
@@ -615,7 +613,7 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ a: 1 }, (err, key) => {
+                const keys = await db.test.insert({ a: 1 }, (err, key) => {
 
                     expect(err).to.not.exist();
                     db.test.update(key, { a: db.increment(1) }, (err) => {
@@ -627,7 +625,7 @@ describe('Unique', () => {
             });
         });
 
-        it('errors on appending a single array to a unique index', (done) => {
+        it('errors on appending a single array to a unique index', async () => {
 
             const db = new Penseur.Db('penseurtest');
             const settings = {
@@ -643,7 +641,7 @@ describe('Unique', () => {
             db.establish(settings, (err) => {
 
                 expect(err).to.not.exist();
-                db.test.insert({ a: [1] }, (err, key) => {
+                const keys = await db.test.insert({ a: [1] }, (err, key) => {
 
                     expect(err).to.not.exist();
                     db.test.update(key, { a: db.append([2], { single: true }) }, (err) => {
@@ -655,7 +653,7 @@ describe('Unique', () => {
             });
         });
 
-        it('errors on database unique table get error', (done) => {
+        it('errors on database unique table get error', async () => {
 
             const db = new Penseur.Db('penseurtest');
             const settings = {
@@ -672,7 +670,7 @@ describe('Unique', () => {
 
                 expect(err).to.not.exist();
                 db.test._unique.rules[0].table.get = (id, callback) => callback(new Error('boom'));
-                db.test.insert([{ a: 1 }, { a: 2 }], (err, keys) => {
+                const keys = await db.test.insert([{ a: 1 }, { a: 2 }]);
 
                     expect(err).to.exist();
                     done();
@@ -683,7 +681,7 @@ describe('Unique', () => {
 
     describe('verify()', () => {
 
-        it('errors on create table error (insert)', (done) => {
+        it('errors on create table error (insert)', async () => {
 
             const prep = new Penseur.Db('penseurtest');
             const settings = {
@@ -702,12 +700,12 @@ describe('Unique', () => {
                 prep.close();
 
                 const db = new Penseur.Db('penseurtest');
-                db.connect((err) => {
+                await db.connect();
 
                     expect(err).to.not.exist();
                     db.table(settings);
                     db.test._db._createTable = (options, callback) => callback(new Error('Failed'));
-                    db.test.insert({ a: 1 }, (err, keys) => {
+                    const keys = await db.test.insert({ a: 1 });
 
                         expect(err).to.exist();
                         expect(err.data.error.message).to.equal('Failed creating unique table: penseur_unique_test_a');
@@ -717,7 +715,7 @@ describe('Unique', () => {
             });
         });
 
-        it('errors on create table error (update)', (done) => {
+        it('errors on create table error (update)', async () => {
 
             const prep = new Penseur.Db('penseurtest');
             const settings = {
@@ -739,7 +737,7 @@ describe('Unique', () => {
                     prep.close();
 
                     const db = new Penseur.Db('penseurtest');
-                    db.connect((err) => {
+                    await db.connect();
 
                         expect(err).to.not.exist();
                         db.table(settings);

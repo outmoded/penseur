@@ -15,9 +15,7 @@ const internals = {};
 
 // Test shortcuts
 
-const lab = exports.lab = Lab.script();
-const describe = lab.describe;
-const it = lab.it;
+const { describe, it } = exports.lab = Lab.script();
 const expect = Code.expect;
 
 
@@ -25,376 +23,202 @@ describe('Id', () => {
 
     describe('normalize()', () => {
 
-        it('errors on empty array of ids', (done) => {
+        it('errors on empty array of ids', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
-
-                expect(err).to.not.exist();
-                db.test.get([], (err, result) => {
-
-                    expect(err).to.be.an.error('Empty array of ids not supported');
-                    done();
-                });
-            });
+            await db.establish(['test']);
+            await expect(db.test.get([])).to.reject('Empty array of ids not supported');
         });
 
-        it('errors on null id', (done) => {
+        it('errors on null id', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
-
-                expect(err).to.not.exist();
-                db.test.get([null], (err, result) => {
-
-                    expect(err).to.be.an.error('Invalid null or undefined id');
-                    done();
-                });
-            });
+            await db.establish(['test']);
+            await expect(db.test.get([null])).to.reject('Invalid null or undefined id');
         });
 
-        it('errors on undefined id', (done) => {
+        it('errors on undefined id', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
-
-                expect(err).to.not.exist();
-                db.test.get([undefined], (err, result) => {
-
-                    expect(err).to.be.an.error('Invalid null or undefined id');
-                    done();
-                });
-            });
+            await db.establish(['test']);
+            await expect(db.test.get([undefined])).to.reject('Invalid null or undefined id');
         });
     });
 
     describe('wrap()', () => {
 
-        it('generates keys locally and server-side', (done) => {
+        it('generates keys locally and server-side', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish({ test: { id: { type: 'uuid' } } }, (err) => {
-
-                expect(err).to.not.exist();
-                db.test.insert([{ id: 'abc', a: 1 }, { a: 2 }], (err, keys) => {
-
-                    expect(err).to.not.exist();
-                    expect(keys[0]).to.equal('abc');
-                    expect(keys[1]).to.match(/^[\da-f]{8}\-[\da-f]{4}\-[\da-f]{4}\-[\da-f]{4}\-[\da-f]{12}$/);
-                    done();
-                });
-            });
+            await db.establish({ test: { id: { type: 'uuid' } } });
+            const keys = await db.test.insert([{ id: 'abc', a: 1 }, { a: 2 }]);
+            expect(keys[0]).to.equal('abc');
+            expect(keys[1]).to.match(/^[\da-f]{8}\-[\da-f]{4}\-[\da-f]{4}\-[\da-f]{4}\-[\da-f]{12}$/);
         });
 
-        it('generates keys server-side', (done) => {
+        it('generates keys server-side', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish({ test: { id: { type: 'uuid' } } }, (err) => {
-
-                expect(err).to.not.exist();
-                db.test.insert([{ id: 'abc', a: 1 }, { id: 'def', a: 2 }], (err, keys) => {
-
-                    expect(err).to.not.exist();
-                    expect(keys).to.equal(['abc', 'def']);
-                    done();
-                });
-            });
+            await db.establish({ test: { id: { type: 'uuid' } } });
+            const keys = await db.test.insert([{ id: 'abc', a: 1 }, { id: 'def', a: 2 }]);
+            expect(keys).to.equal(['abc', 'def']);
         });
     });
 
     describe('uuid()', () => {
 
-        it('generates keys locally', (done) => {
+        it('generates keys locally', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish({ test: { id: { type: 'uuid' } } }, (err) => {
-
-                expect(err).to.not.exist();
-                db.test.insert([{ a: 1 }, { a: 2 }], (err, keys) => {
-
-                    expect(err).to.not.exist();
-                    expect(keys.length).to.equal(2);
-                    done();
-                });
-            });
+            await db.establish({ test: { id: { type: 'uuid' } } });
+            const keys = await db.test.insert([{ a: 1 }, { a: 2 }]);
+            expect(keys.length).to.equal(2);
         });
 
-        it('generates keys locally (implicit config)', (done) => {
+        it('generates keys locally (implicit config)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish({ test: { id: 'uuid' } }, (err) => {
-
-                expect(err).to.not.exist();
-                db.test.insert([{ a: 1 }, { a: 2 }], (err, keys) => {
-
-                    expect(err).to.not.exist();
-                    expect(keys.length).to.equal(2);
-                    done();
-                });
-            });
+            await db.establish({ test: { id: 'uuid' } });
+            const keys = await db.test.insert([{ a: 1 }, { a: 2 }]);
+            expect(keys.length).to.equal(2);
         });
     });
 
     describe('increment()', () => {
 
-        it('generates key', (done) => {
+        it('generates key', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } }, (err) => {
-
-                expect(err).to.not.exist();
-                db.test.insert({ a: 1 }, (err, keys) => {
-
-                    expect(err).to.not.exist();
-                    expect(keys).to.equal('1');
-                    done();
-                });
-            });
+            db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } });
+            const keys = await db.test.insert({ a: 1 });
+            expect(keys).to.equal('1');
         });
 
-        it('generates key (implicit config)', (done) => {
+        it('generates key (implicit config)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish({ penseur_id_allocate: true, test: { id: 'increment' } }, (err) => {
-
-                expect(err).to.not.exist();
-                db.test.insert({ a: 1 }, (err, keys) => {
-
-                    expect(err).to.not.exist();
-                    expect(keys).to.equal('1');
-                    done();
-                });
-            });
+            db.establish({ penseur_id_allocate: true, test: { id: 'increment' } });
+            const keys = await db.test.insert({ a: 1 });
+            expect(keys).to.equal('1');
         });
 
-        it('generates keys (same table)', (done) => {
+        it('generates keys (same table)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } }, (err) => {
-
-                expect(err).to.not.exist();
-                db.test.insert([{ a: 1 }, { a: 2 }], (err, keys) => {
-
-                    expect(err).to.not.exist();
-                    expect(keys).to.equal(['1', '2']);
-                    done();
-                });
-            });
+            db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } });
+            const keys = await db.test.insert([{ a: 1 }, { a: 2 }]);
+            expect(keys).to.equal(['1', '2']);
         });
 
-        it('generates key (different tables)', (done) => {
+        it('generates key (different tables)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.connect((err) => {
-
-                expect(err).to.not.exist();
-
-                RethinkDB.dbDrop(db.name).run(db._connection, (err, dropped) => {
-
-                    expect(err).to.not.exist();
-                    db.establish({ test1: { id: { type: 'increment', table: 'allocate' } }, test2: { id: { type: 'increment', table: 'allocate' } } }, (err) => {
-
-                        expect(err).to.not.exist();
-                        db.test1.insert({ a: 1 }, (err, keys1) => {
-
-                            expect(err).to.not.exist();
-                            expect(keys1).to.equal('1');
-                            db.test2.insert({ a: 1 }, (err, keys2) => {
-
-                                expect(err).to.not.exist();
-                                expect(keys2).to.equal('1');
-                                db.close(done);
-                            });
-                        });
-                    });
-                });
-            });
+            await db.connect();
+            await RethinkDB.dbDrop(db.name).run(db._connection);
+            await db.establish({ test1: { id: { type: 'increment', table: 'allocate' } }, test2: { id: { type: 'increment', table: 'allocate' } } });
+            const keys1 = await db.test1.insert({ a: 1 });
+            expect(keys1).to.equal('1');
+            const keys2 = await db.test2.insert({ a: 1 });
+            expect(keys2).to.equal('1');
+            await db.close();
         });
 
-        it('completes an existing incomplete allocation record', (done) => {
+        it('completes an existing incomplete allocation record', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } }, (err) => {
-
-                expect(err).to.not.exist();
-                db.allocate.update('test', { value: db.unset() }, (err) => {
-
-                    expect(err).to.not.exist();
-                    db.test._id.verified = false;
-                    db.test.insert({ a: 1 }, (err, keys) => {
-
-                        expect(err).to.not.exist();
-                        expect(keys).to.equal('1');
-                        done();
-                    });
-                });
-            });
+            await db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } });
+            await db.allocate.update('test', { value: db.unset() });
+            db.test._id.verified = false;
+            const keys = await db.test.insert({ a: 1 });
+            expect(keys).to.equal('1');
         });
 
-        it('reuses generate record', (done) => {
+        it('reuses generate record', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } }, (err) => {
-
-                expect(err).to.not.exist();
-                db.allocate.update('test', { value: 33 }, (err) => {
-
-                    expect(err).to.not.exist();
-                    db.test.insert({ a: 1 }, (err, keys) => {
-
-                        expect(err).to.not.exist();
-                        expect(keys).to.equal('34');
-                        done();
-                    });
-                });
-            });
+            await db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } });
+            await db.allocate.update('test', { value: 33 });
+            const keys = await db.test.insert({ a: 1 });
+            expect(keys).to.equal('34');
         });
 
-        it('generates base62 id', (done) => {
+        it('generates base62 id', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate', radix: 62 } } }, (err) => {
-
-                expect(err).to.not.exist();
-                db.allocate.update('test', { value: 1324 }, (err) => {
-
-                    expect(err).to.not.exist();
-                    db.test.insert({ a: 1 }, (err, keys) => {
-
-                        expect(err).to.not.exist();
-                        expect(keys).to.equal('ln');
-                        done();
-                    });
-                });
-            });
+            await db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate', radix: 62 } } });
+            await db.allocate.update('test', { value: 1324 });
+            const keys = await db.test.insert({ a: 1 });
+            expect(keys).to.equal('ln');
         });
 
-        it('customizes key generation', (done) => {
+        it('customizes key generation', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate', initial: 1325, radix: 62, record: 'test-id', key: 'v' } } }, (err) => {
-
-                expect(err).to.not.exist();
-                db.test.insert({ a: 1 }, (err, keys) => {
-
-                    expect(err).to.not.exist();
-                    expect(keys).to.equal('ln');
-                    done();
-                });
-            });
+            await db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate', initial: 1325, radix: 62, record: 'test-id', key: 'v' } } });
+            const keys = await db.test.insert({ a: 1 });
+            expect(keys).to.equal('ln');
         });
 
-        it('errors on invalid generate record', (done) => {
+        it('errors on invalid generate record', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } }, (err) => {
-
-                expect(err).to.not.exist();
-                db.allocate.update('test', { value: 'string' }, (err) => {
-
-                    expect(err).to.not.exist();
-                    db.test._id.verified = false;
-                    db.test.insert({ a: 1 }, (err, keys) => {
-
-                        expect(err).to.exist();
-                        expect(err.data.error.message).to.equal('Increment id record contains non-integer value: test');
-                        done();
-                    });
-                });
-            });
+            await db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } });
+            await db.allocate.update('test', { value: 'string' });
+            db.test._id.verified = false;
+            const err = await expect(db.test.insert({ a: 1 })).to.reject();
+            expect(err.data.error.message).to.equal('Increment id record contains non-integer value: test');
         });
 
-        it('errors on create table error', (done) => {
+        it('errors on create table error', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } }, (err) => {
-
-                expect(err).to.not.exist();
-                db.test._db._createTable = (options, callback) => callback(new Error('Failed'));
-                db.test._id.verified = false;
-                db.test.insert({ a: 1 }, (err, keys) => {
-
-                    expect(err).to.exist();
-                    expect(err.data.error.message).to.equal('Failed creating increment id table: test');
-                    done();
-                });
-            });
+            await db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } });
+            db.test._db._createTable = () => Promise.reject(new Error('Failed'));
+            db.test._id.verified = false;
+            const err = await expect(db.test.insert({ a: 1 })).to.reject();
+            expect(err.data.error.message).to.equal('Failed creating increment id table: test');
         });
 
-        it('errors on table get error', (done) => {
+        it('errors on table get error', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } }, (err) => {
-
-                expect(err).to.not.exist();
-                db.test._id.table.get = (id, callback) => callback(new Error('Failed'));
-                db.test._id.verified = false;
-                db.test.insert({ a: 1 }, (err, keys) => {
-
-                    expect(err).to.exist();
-                    expect(err.data.error.message).to.equal('Failed verifying increment id record: test');
-                    done();
-                });
-            });
+            await db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } });
+            db.test._id.table.get = () => Promise.reject(new Error('Failed'));
+            db.test._id.verified = false;
+            const err = await expect(db.test.insert({ a: 1 })).to.reject();
+            expect(err.data.error.message).to.equal('Failed verifying increment id record: test');
         });
 
-        it('errors on table update error', (done) => {
+        it('errors on table update error', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } }, (err) => {
-
-                expect(err).to.not.exist();
-                db.allocate.update('test', { value: db.unset() }, (err, key) => {
-
-                    expect(err).to.not.exist();
-                    db.test._id.table.update = (id, changes, callback) => callback(new Error('Failed'));
-                    db.test._id.verified = false;
-                    db.test.insert({ a: 1 }, (err, keys) => {
-
-                        expect(err).to.exist();
-                        expect(err.data.error.message).to.equal('Failed initializing key-value pair to increment id record: test');
-                        done();
-                    });
-                });
-            });
+            await db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } });
+            await db.allocate.update('test', { value: db.unset() });
+            db.test._id.table.update = () => Promise.reject(new Error('Failed'));
+            db.test._id.verified = false;
+            const err = await expect(db.test.insert({ a: 1 })).to.reject();
+            expect(err.data.error.message).to.equal('Failed initializing key-value pair to increment id record: test');
         });
 
-        it('errors on table insert error', (done) => {
+        it('errors on table insert error', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } }, (err) => {
-
-                expect(err).to.not.exist();
-                db.allocate.remove('test', (err) => {
-
-                    expect(err).to.not.exist();
-                    db.test._id.table.insert = (item, callback) => callback(new Error('Failed'));
-                    db.test._id.verified = false;
-                    db.test.insert({ a: 1 }, (err, keys) => {
-
-                        expect(err).to.exist();
-                        expect(err.data.error.message).to.equal('Failed inserting increment id record: test');
-                        done();
-                    });
-                });
-            });
+            await db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } });
+            await db.allocate.remove('test');
+            db.test._id.table.insert = () => Promise.reject(new Error('Failed'));
+            db.test._id.verified = false;
+            const err = await expect(db.test.insert({ a: 1 })).to.reject();
+            expect(err.data.error.message).to.equal('Failed inserting increment id record: test');
         });
 
-        it('errors on table next error', (done) => {
+        it('errors on table next error', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } }, (err) => {
-
-                expect(err).to.not.exist();
-                db.test._id.table.next = (id, key, inc, callback) => callback(new Error('Failed'));
-                db.test._id.verified = false;
-                db.test.insert([{ a: 1 }, { a: 1 }], (err, keys) => {
-
-                    expect(err).to.exist();
-                    expect(err.data.error.message).to.equal('Failed allocating increment id: test');
-                    done();
-                });
-            });
+            await db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } });
+            db.test._id.table.next = () => Promise.reject(new Error('Failed'));
+            db.test._id.verified = false;
+            const err = await expect(db.test.insert([{ a: 1 }, { a: 1 }]));
+            expect(err.data.error.message).to.equal('Failed allocating increment id: test');
         });
     });
 });

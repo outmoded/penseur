@@ -14,20 +14,18 @@ const internals = {};
 
 // Test shortcuts
 
-const lab = exports.lab = Lab.script();
-const describe = lab.describe;
-const it = lab.it;
+const { describe, it } = exports.lab = Lab.script();
 const expect = Code.expect;
 
 
-describe('Modifier', { parallel: false }, () => {
+describe('Modifier', () => {
 
     describe('update()', () => {
 
-        it('reuses nested fields objects', (done) => {
+        it('reuses nested fields objects', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -39,7 +37,7 @@ describe('Modifier', { parallel: false }, () => {
                     }
                 };
 
-                db.test.insert(item, (err, keys) => {
+                const keys = await db.test.insert(item);
 
                     expect(err).to.not.exist();
 
@@ -62,7 +60,7 @@ describe('Modifier', { parallel: false }, () => {
                         expect(err).to.not.exist();
                         expect(changes.b.c).to.be.a.function();
 
-                        db.test.get(1, (err, updated) => {
+                        const item = await db.test.get(1, (err, updated) => {
 
                             expect(err).to.not.exist();
                             expect(updated).to.equal({
@@ -85,10 +83,10 @@ describe('Modifier', { parallel: false }, () => {
             });
         });
 
-        it('shallow clone once', (done) => {
+        it('shallow clone once', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -101,7 +99,7 @@ describe('Modifier', { parallel: false }, () => {
                     }
                 };
 
-                db.test.insert(item, (err, keys) => {
+                const keys = await db.test.insert(item);
 
                     expect(err).to.not.exist();
 
@@ -120,7 +118,7 @@ describe('Modifier', { parallel: false }, () => {
                         expect(err).to.not.exist();
                         expect(changes.b.c).to.be.a.function();
 
-                        db.test.get(1, (err, updated) => {
+                        const item = await db.test.get(1, (err, updated) => {
 
                             expect(err).to.not.exist();
                             expect(updated).to.equal({
@@ -139,10 +137,10 @@ describe('Modifier', { parallel: false }, () => {
             });
         });
 
-        it('unsets multiple keys', (done) => {
+        it('unsets multiple keys', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
 
@@ -154,7 +152,7 @@ describe('Modifier', { parallel: false }, () => {
                     }
                 };
 
-                db.test.insert(item, (err, keys) => {
+                const keys = await db.test.insert(item);
 
                     expect(err).to.not.exist();
 
@@ -169,7 +167,7 @@ describe('Modifier', { parallel: false }, () => {
 
                         expect(err).to.not.exist();
 
-                        db.test.get(1, (err, updated) => {
+                        const item = await db.test.get(1, (err, updated) => {
 
                             expect(err).to.not.exist();
                             expect(updated).to.equal({
@@ -184,13 +182,13 @@ describe('Modifier', { parallel: false }, () => {
             });
         });
 
-        it('errors on invalid changes (number)', (done) => {
+        it('errors on invalid changes (number)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: 1, a: 1 }, (err, keys) => {
+                const keys = await db.test.insert({ id: 1, a: 1 });
 
                     expect(err).to.not.exist();
 
@@ -203,13 +201,13 @@ describe('Modifier', { parallel: false }, () => {
             });
         });
 
-        it('errors on invalid changes (null)', (done) => {
+        it('errors on invalid changes (null)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish(['test'], (err) => {
+            await db.establish(['test']);
 
                 expect(err).to.not.exist();
-                db.test.insert({ id: 1, a: 1 }, (err, keys) => {
+                const keys = await db.test.insert({ id: 1, a: 1 });
 
                     expect(err).to.not.exist();
 
