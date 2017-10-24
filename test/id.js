@@ -89,7 +89,7 @@ describe('Id', () => {
         it('generates key', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } });
+            await db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } });
             const keys = await db.test.insert({ a: 1 });
             expect(keys).to.equal('1');
         });
@@ -97,7 +97,7 @@ describe('Id', () => {
         it('generates key (implicit config)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish({ penseur_id_allocate: true, test: { id: 'increment' } });
+            await db.establish({ penseur_id_allocate: true, test: { id: 'increment' } });
             const keys = await db.test.insert({ a: 1 });
             expect(keys).to.equal('1');
         });
@@ -105,7 +105,7 @@ describe('Id', () => {
         it('generates keys (same table)', async () => {
 
             const db = new Penseur.Db('penseurtest');
-            db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } });
+            await db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } });
             const keys = await db.test.insert([{ a: 1 }, { a: 2 }]);
             expect(keys).to.equal(['1', '2']);
         });
@@ -217,7 +217,7 @@ describe('Id', () => {
             await db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } });
             db.test._id.table.next = () => Promise.reject(new Error('Failed'));
             db.test._id.verified = false;
-            const err = await expect(db.test.insert([{ a: 1 }, { a: 1 }]));
+            const err = await expect(db.test.insert([{ a: 1 }, { a: 1 }])).to.reject();
             expect(err.data.error.message).to.equal('Failed allocating increment id: test');
         });
     });

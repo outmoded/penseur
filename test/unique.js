@@ -35,16 +35,9 @@ describe('Unique', () => {
                 }
             };
 
-            db.establish(settings, (err) => {
-
-                expect(err).to.not.exist();
-                const keys = await db.test.insert([{ a: 1 }, { a: 2 }]);
-
-                    expect(err).to.not.exist();
-                    expect(keys.length).to.equal(2);
-                    done();
-                });
-            });
+            await db.establish(settings);
+            const keys = await db.test.insert([{ a: 1 }, { a: 2 }]);
+            expect(keys.length).to.equal(2);
         });
 
         it('allows setting a unique value (nested)', async () => {
@@ -62,26 +55,12 @@ describe('Unique', () => {
                 }
             };
 
-            db.establish(settings, (err) => {
+            await db.establish(settings);
+            const keys = await db.test.insert([{ id: 1, a: { b: 1 } }, { id: 2, a: { c: { d: [2] } } }]);
+            expect(keys.length).to.equal(2);
 
-                expect(err).to.not.exist();
-                const keys = await db.test.insert([{ id: 1, a: { b: 1 } }, { id: 2, a: { c: { d: [2] } } }]);
-
-                    expect(err).to.not.exist();
-                    expect(keys.length).to.equal(2);
-
-                    db.test.update(2, { a: { b: 1 } }, (err) => {
-
-                        expect(err).to.exist();
-
-                        db.test.update(2, { a: { c: { d: db.append([1, 2]) } } }, (err) => {
-
-                            expect(err).to.not.exist();
-                            done();
-                        });
-                    });
-                });
-            });
+            await expect(db.test.update(2, { a: { b: 1 } })).to.reject();
+            await db.test.update(2, { a: { c: { d: db.append([1, 2]) } } });
         });
 
         it('allows updating a unique value', async () => {
@@ -97,23 +76,10 @@ describe('Unique', () => {
                 }
             };
 
-            db.establish(settings, (err) => {
-
-                expect(err).to.not.exist();
-                const keys = await db.test.insert({ id: '1', a: 1 }, (err, key) => {
-
-                    expect(err).to.not.exist();
-                    db.test.update('1', { a: 2 }, (err) => {
-
-                        expect(err).to.not.exist();
-                        db.test.update('1', { a: 1 }, (err) => {
-
-                            expect(err).to.not.exist();
-                            done();
-                        });
-                    });
-                });
-            });
+            await db.establish(settings);
+            await db.test.insert({ id: '1', a: 1 });
+            await db.test.update('1', { a: 2 });
+            await db.test.update('1', { a: 1 });
         });
 
         it('allows userting a unique value', async () => {
@@ -129,23 +95,10 @@ describe('Unique', () => {
                 }
             };
 
-            db.establish(settings, (err) => {
-
-                expect(err).to.not.exist();
-                const keys = await db.test.insert({ id: '1', a: 1 }, { merge: true }, (err, key) => {
-
-                    expect(err).to.not.exist();
-                    const keys = await db.test.insert({ id: '1', a: 2 }, { merge: true }, (err) => {
-
-                        expect(err).to.not.exist();
-                        const keys = await db.test.insert({ id: '2', a: 1 }, (err) => {
-
-                            expect(err).to.not.exist();
-                            done();
-                        });
-                    });
-                });
-            });
+            await db.establish(settings);
+            await db.test.insert({ id: '1', a: 1 }, { merge: true });
+            await db.test.insert({ id: '1', a: 2 }, { merge: true });
+            await db.test.insert({ id: '2', a: 1 });
         });
 
         it('allows appending a unique value', async () => {
@@ -161,23 +114,10 @@ describe('Unique', () => {
                 }
             };
 
-            db.establish(settings, (err) => {
-
-                expect(err).to.not.exist();
-                const keys = await db.test.insert({ id: '1', a: [1] }, (err, key) => {
-
-                    expect(err).to.not.exist();
-                    db.test.update('1', { a: db.append(2) }, (err) => {
-
-                        expect(err).to.not.exist();
-                        db.test.update('1', { a: db.append(1) }, (err) => {
-
-                            expect(err).to.not.exist();
-                            done();
-                        });
-                    });
-                });
-            });
+            await db.establish(settings);
+            await db.test.insert({ id: '1', a: [1] });
+            await db.test.update('1', { a: db.append(2) });
+            await db.test.update('1', { a: db.append(1) });
         });
 
         it('releases value on unset', async () => {
@@ -193,23 +133,10 @@ describe('Unique', () => {
                 }
             };
 
-            db.establish(settings, (err) => {
-
-                expect(err).to.not.exist();
-                const keys = await db.test.insert({ id: '1', a: 1 }, (err, key) => {
-
-                    expect(err).to.not.exist();
-                    db.test.update('1', { a: db.unset() }, (err) => {
-
-                        expect(err).to.not.exist();
-                        const keys = await db.test.insert({ id: 2, a: 1 }, (err) => {
-
-                            expect(err).to.not.exist();
-                            done();
-                        });
-                    });
-                });
-            });
+            await db.establish(settings);
+            await db.test.insert({ id: '1', a: 1 });
+            await db.test.update('1', { a: db.unset() });
+            await db.test.insert({ id: 2, a: 1 });
         });
 
         it.skip('releases value on unset (parent)', async () => {
@@ -225,23 +152,10 @@ describe('Unique', () => {
                 }
             };
 
-            db.establish(settings, (err) => {
-
-                expect(err).to.not.exist();
-                const keys = await db.test.insert({ id: '1', a: { b: 1 } }, (err, key) => {
-
-                    expect(err).to.not.exist();
-                    db.test.update('1', { a: db.unset() }, (err) => {
-
-                        expect(err).to.not.exist();
-                        const keys = await db.test.insert({ id: 2, a: { b: 1 } }, (err) => {
-
-                            expect(err).to.not.exist();
-                            done();
-                        });
-                    });
-                });
-            });
+            await db.establish(settings);
+            await db.test.insert({ id: '1', a: { b: 1 } });
+            await db.test.update('1', { a: db.unset() });
+            await db.test.insert({ id: 2, a: { b: 1 } });
         });
 
         it('ignores empty object', async () => {
@@ -257,15 +171,8 @@ describe('Unique', () => {
                 }
             };
 
-            db.establish(settings, (err) => {
-
-                expect(err).to.not.exist();
-                const keys = await db.test.insert({ id: '1', a: {} }, (err, key) => {
-
-                    expect(err).to.not.exist();
-                    done();
-                });
-            });
+            await db.establish(settings);
+            await db.test.insert({ id: '1', a: {} });
         });
 
         it('ignores missing path parent (2 segments)', async () => {
@@ -281,15 +188,8 @@ describe('Unique', () => {
                 }
             };
 
-            db.establish(settings, (err) => {
-
-                expect(err).to.not.exist();
-                const keys = await db.test.insert({ id: '1' }, (err, key) => {
-
-                    expect(err).to.not.exist();
-                    done();
-                });
-            });
+            await db.establish(settings);
+            await db.test.insert({ id: '1' });
         });
 
         it('allows adding a unique value via update', async () => {
@@ -305,19 +205,9 @@ describe('Unique', () => {
                 }
             };
 
-            db.establish(settings, (err) => {
-
-                expect(err).to.not.exist();
-                const keys = await db.test.insert({ id: '1' }, (err, key) => {
-
-                    expect(err).to.not.exist();
-                    db.test.update('1', { a: 2 }, (err) => {
-
-                        expect(err).to.not.exist();
-                        done();
-                    });
-                });
-            });
+            await db.establish(settings);
+            await db.test.insert({ id: '1' });
+            await db.test.update('1', { a: 2 });
         });
 
         it('forbids violating a unique value', async () => {
@@ -333,15 +223,8 @@ describe('Unique', () => {
                 }
             };
 
-            db.establish(settings, (err) => {
-
-                expect(err).to.not.exist();
-                const keys = await db.test.insert([{ a: 1 }, { a: 1 }]);
-
-                    expect(err).to.exist();
-                    done();
-                });
-            });
+            await db.establish(settings);
+            await expect(db.test.insert([{ a: 1 }, { a: 1 }])).to.reject();
         });
 
         it('forbids violating a unique value (keys)', async () => {
@@ -357,31 +240,12 @@ describe('Unique', () => {
                 }
             };
 
-            db.establish(settings, (err) => {
-
-                expect(err).to.not.exist();
-                const keys = await db.test.insert({ a: { b: [1] } }, (err, key1) => {
-
-                    expect(err).to.not.exist();
-                    db.test.update(key1, { a: { b: db.append(2) } }, (err) => {
-
-                        expect(err).to.not.exist();
-                        const keys = await db.test.insert({ a: { c: 2, d: 4 } }, (err, key2) => {
-
-                            expect(err).to.not.exist();
-                            const keys = await db.test.insert({ a: { b: 3 } }, (err, key3) => {
-
-                                expect(err).to.exist();
-                                const keys = await db.test.insert({ a: { d: 5 } }, (err, key4) => {
-
-                                    expect(err).to.exist();
-                                    done();
-                                });
-                            });
-                        });
-                    });
-                });
-            });
+            await db.establish(settings);
+            const key = await db.test.insert({ a: { b: [1] } });
+            await db.test.update(key, { a: { b: db.append(2) } });
+            await db.test.insert({ a: { c: 2, d: 4 } });
+            await expect(db.test.insert({ a: { b: 3 } })).to.reject();
+            await expect(db.test.insert({ a: { d: 5 } })).to.reject();
         });
 
         it('allows same owner changes', async () => {
@@ -397,19 +261,9 @@ describe('Unique', () => {
                 }
             };
 
-            db.establish(settings, (err) => {
-
-                expect(err).to.not.exist();
-                const keys = await db.test.insert({ id: 1, a: { c: 1 } }, (err, key1) => {
-
-                    expect(err).to.not.exist();
-                    db.test.update(1, { a: { c: 5 } }, (err) => {
-
-                        expect(err).to.not.exist();
-                        done();
-                    });
-                });
-            });
+            await db.establish(settings);
+            await db.test.insert({ id: 1, a: { c: 1 } });
+            await db.test.update(1, { a: { c: 5 } });
         });
 
         it('releases reservations on update (keys)', async () => {
@@ -425,27 +279,11 @@ describe('Unique', () => {
                 }
             };
 
-            db.establish(settings, (err) => {
-
-                expect(err).to.not.exist();
-                const keys = await db.test.insert({ id: 1, a: { b: 1 } }, (err, key1) => {
-
-                    expect(err).to.not.exist();
-                    const keys = await db.test.insert({ id: 2, a: { c: 2, d: 4 } }, (err, key2) => {
-
-                        expect(err).to.not.exist();
-                        db.test.update(2, { a: { c: db.unset() } }, (err) => {
-
-                            expect(err).to.not.exist();
-                            db.test.update(1, { a: { c: 5 } }, (err) => {
-
-                                expect(err).to.not.exist();
-                                done();
-                            });
-                        });
-                    });
-                });
-            });
+            await db.establish(settings);
+            await db.test.insert({ id: 1, a: { b: 1 } });
+            await db.test.insert({ id: 2, a: { c: 2, d: 4 } });
+            await db.test.update(2, { a: { c: db.unset() } });
+            await db.test.update(1, { a: { c: 5 } });
         });
 
         it('forbids violating a unique value (array)', async () => {
@@ -461,35 +299,13 @@ describe('Unique', () => {
                 }
             };
 
-            db.establish(settings, (err) => {
-
-                expect(err).to.not.exist();
-                const keys = await db.test.insert({ a: ['b'] }, (err, key1) => {
-
-                    expect(err).to.not.exist();
-                    const keys = await db.test.insert({ a: ['c', 'a'] }, (err, key2) => {
-
-                        expect(err).to.not.exist();
-                        const keys = await db.test.insert({ a: ['b'] }, (err, key3) => {
-
-                            expect(err).to.exist();
-                            const keys = await db.test.insert({ a: ['a'] }, (err, key4) => {
-
-                                expect(err).to.exist();
-                                db.test.update(key2, { a: [] }, (err) => {
-
-                                    expect(err).to.not.exist();
-                                    const keys = await db.test.insert({ a: ['a'] }, (err, key5) => {
-
-                                        expect(err).to.not.exist();
-                                        done();
-                                    });
-                                });
-                            });
-                        });
-                    });
-                });
-            });
+            await db.establish(settings);
+            await db.test.insert({ a: ['b'] });
+            const key = await db.test.insert({ a: ['c', 'a'] });
+            await expect(db.test.insert({ a: ['b'] })).to.reject();
+            await expect(db.test.insert({ a: ['a'] })).to.reject();
+            await db.test.update(key, { a: [] });
+            await db.test.insert({ a: ['a'] });
         });
 
         it('customizes unique table name', async () => {
@@ -506,22 +322,12 @@ describe('Unique', () => {
                 }
             };
 
-            db.establish(settings, (err) => {
+            await db.establish(settings);
+            const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }]);
+            expect(keys.length).to.equal(2);
 
-                expect(err).to.not.exist();
-                const keys = await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }]);
-
-                    expect(err).to.not.exist();
-                    expect(keys.length).to.equal(2);
-
-                    db.unique_a.get([1, 2], (err, items) => {
-
-                        expect(err).to.not.exist();
-                        expect(items.length).to.equal(2);
-                        done();
-                    });
-                });
-            });
+            const items = await db.unique_a.get([1, 2]);
+            expect(items.length).to.equal(2);
         });
 
         it('ignores non unique keys', async () => {
@@ -537,16 +343,9 @@ describe('Unique', () => {
                 }
             };
 
-            db.establish(settings, (err) => {
-
-                expect(err).to.not.exist();
-                const keys = await db.test.insert([{ b: 1 }, { b: 2 }]);
-
-                    expect(err).to.not.exist();
-                    expect(keys.length).to.equal(2);
-                    done();
-                });
-            });
+            await db.establish(settings);
+            const keys = await db.test.insert([{ b: 1 }, { b: 2 }]);
+            expect(keys.length).to.equal(2);
         });
 
         it('ignore further nested values', async () => {
@@ -562,15 +361,8 @@ describe('Unique', () => {
                 }
             };
 
-            db.establish(settings, (err) => {
-
-                expect(err).to.not.exist();
-                const keys = await db.test.insert({ a: { b: 1 } }, (err, key) => {
-
-                    expect(err).to.not.exist();
-                    done();
-                });
-            });
+            await db.establish(settings);
+            await db.test.insert({ a: { b: 1 } });
         });
 
         it('ignore further nested values (non existing)', async () => {
@@ -586,15 +378,8 @@ describe('Unique', () => {
                 }
             };
 
-            db.establish(settings, (err) => {
-
-                expect(err).to.not.exist();
-                const keys = await db.test.insert({ d: { b: 1 } }, (err, key) => {
-
-                    expect(err).to.not.exist();
-                    done();
-                });
-            });
+            await db.establish(settings);
+            await db.test.insert({ d: { b: 1 } });
         });
 
         it('errors on incrementing unique index', async () => {
@@ -610,19 +395,9 @@ describe('Unique', () => {
                 }
             };
 
-            db.establish(settings, (err) => {
-
-                expect(err).to.not.exist();
-                const keys = await db.test.insert({ a: 1 }, (err, key) => {
-
-                    expect(err).to.not.exist();
-                    db.test.update(key, { a: db.increment(1) }, (err) => {
-
-                        expect(err).to.exist();
-                        done();
-                    });
-                });
-            });
+            await db.establish(settings);
+            const key = await db.test.insert({ a: 1 });
+            await expect(db.test.update(key, { a: db.increment(1) })).to.reject();
         });
 
         it('errors on appending a single array to a unique index', async () => {
@@ -638,19 +413,9 @@ describe('Unique', () => {
                 }
             };
 
-            db.establish(settings, (err) => {
-
-                expect(err).to.not.exist();
-                const keys = await db.test.insert({ a: [1] }, (err, key) => {
-
-                    expect(err).to.not.exist();
-                    db.test.update(key, { a: db.append([2], { single: true }) }, (err) => {
-
-                        expect(err).to.exist();
-                        done();
-                    });
-                });
-            });
+            await db.establish(settings);
+            const key = await db.test.insert({ a: [1] });
+            await expect(db.test.update(key, { a: db.append([2], { single: true }) })).to.reject();
         });
 
         it('errors on database unique table get error', async () => {
@@ -666,16 +431,9 @@ describe('Unique', () => {
                 }
             };
 
-            db.establish(settings, (err) => {
-
-                expect(err).to.not.exist();
-                db.test._unique.rules[0].table.get = (id, callback) => callback(new Error('boom'));
-                const keys = await db.test.insert([{ a: 1 }, { a: 2 }]);
-
-                    expect(err).to.exist();
-                    done();
-                });
-            });
+            await db.establish(settings);
+            db.test._unique.rules[0].table.get = () => Promise.reject(new Error('boom'));
+            await expect(db.test.insert([{ a: 1 }, { a: 2 }])).to.reject();
         });
     });
 
@@ -694,25 +452,15 @@ describe('Unique', () => {
                 }
             };
 
-            prep.establish(settings, (err) => {
+            await prep.establish(settings);
+            await prep.close();
 
-                expect(err).to.not.exist();
-                prep.close();
-
-                const db = new Penseur.Db('penseurtest');
-                await db.connect();
-
-                    expect(err).to.not.exist();
-                    db.table(settings);
-                    db.test._db._createTable = (options, callback) => callback(new Error('Failed'));
-                    const keys = await db.test.insert({ a: 1 });
-
-                        expect(err).to.exist();
-                        expect(err.data.error.message).to.equal('Failed creating unique table: penseur_unique_test_a');
-                        done();
-                    });
-                });
-            });
+            const db = new Penseur.Db('penseurtest');
+            await db.connect();
+            db.table(settings);
+            db.test._db._createTable = (options, callback) => callback(new Error('Failed'));
+            const err = await expect(db.test.insert({ a: 1 })).to.reject();
+            expect(err.data.error.message).to.equal('Failed creating unique table: penseur_unique_test_a');
         });
 
         it('errors on create table error (update)', async () => {
@@ -728,29 +476,16 @@ describe('Unique', () => {
                 }
             };
 
-            prep.establish(settings, (err) => {
+            await prep.establish(settings);
+            const key = await prep.test.insert({ a: 1 });
+            await prep.close();
 
-                expect(err).to.not.exist();
-                prep.test.insert({ a: 1 }, (err, key) => {
-
-                    expect(err).to.not.exist();
-                    prep.close();
-
-                    const db = new Penseur.Db('penseurtest');
-                    await db.connect();
-
-                        expect(err).to.not.exist();
-                        db.table(settings);
-                        db.test._db._createTable = (options, callback) => callback(new Error('Failed'));
-                        db.test.update(key, { a: 2 }, (err) => {
-
-                            expect(err).to.exist();
-                            expect(err.data.error.message).to.equal('Failed creating unique table: penseur_unique_test_a');
-                            done();
-                        });
-                    });
-                });
-            });
+            const db = new Penseur.Db('penseurtest');
+            await db.connect();
+            db.table(settings);
+            db.test._db._createTable = () => Promise.reject(new Error('Failed'));
+            const err = await expect(db.test.update(key, { a: 2 })).to.reject();
+            expect(err.data.error.message).to.equal('Failed creating unique table: penseur_unique_test_a');
         });
     });
 });
