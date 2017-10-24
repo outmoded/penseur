@@ -29,24 +29,23 @@ Creates a new `Db` object where:
   - `reconnectTimeout` - number of milliseconds to wait between reconnect attempts, when `false` there is no timeout. Defaults to `100`
 
 
-#### `db.connect(callback)`
+#### `await db.connect()`
 
-Create a connection to the database. `callback` is a function with the signature `function(err)` that is executed when the connection is established or an error occurs establishing the connection.
+Create a connection to the database. Throws connection errors.
 
 
-#### `db.close([next])`
+#### `await db.close()`
 
 Close all database connections.
 
 
-#### `db.establish([tables], callback)`
+#### `await db.establish([tables])`
 
 Note that this can alter data and indexes, not intended of production use.
 
 Establish a connection if one doesn't exist and create the database and tables if they don't already exist. This function also decorates the `db` object with helper properties to for using each of the tables.
 
 - `[tables]` - array of strings with the name of each table to create
-- `callback` - function with signature `function(err)` that is executed when everything succeeds or an error is encountered.
 
 
 #### `db.disable(table, method, [options])`
@@ -76,7 +75,7 @@ Property that contains the [RethinkDB module](https://www.npmjs.com/package/reth
 
 After a database connection exists and tables are established then the `Db` object is decorated with properties for each table name containing various helper function. Below are the available functions for each table.
 
-#### `db[table].get(id, [options, ] callback)`
+#### `await db[table].get(id, [options])`
 
 Retrieve a record in the `table` with the given `id`. `id` itself can be an array of `id` values if you want to retrieve multiple records.
 
@@ -87,49 +86,42 @@ Retrieve a record in the `table` with the given `id`. `id` itself can be an arra
   - `from` - index in result set to select
   - `count` - number of records to return in results
   - `filter` - properties to pluck from the results
-- `callback` - function with `function(err, results)` signature
 
 
-#### `db[table].all(callback)`
+#### `await db[table].all()`
 
 Retrieve all records for a table.
 
-- `callback` - function with `function(err, results)` signature
 
-
-#### `db[table].exist(id, callback)`
+#### `await db[table].exist(id)`
 
 Determine if a record in the `table` exists with the provided ID
 
 - `id` - unique identifier of record to retrieve. Can be an array with values for each ID to retrieve.
-- `callback` - function with `function(err, exists)` signature
 
 
-#### `db[table].query(criteria, callback)`
+#### `await db[table].query(criteria)`
 
 Perform a query on the table using the provided criteria. Criteria is available on the `Db` object and is listed in the criteria section below.
 
 - `criteria` - db [criteria](#criteria) functions chained together
-- `callback` - function with `function(err, results)` signature
 
 
-#### `db[table].single(criteria, callback)`
+#### `await db[table].single(criteria)`
 
 Retrieve a single record from the provided criteria.
 
 - `criteria` - db [criteria](#criteria) functions chained together
-- `callback` - function with `function(err, result)` signature
 
 
-#### `db[table].count(criteria, callback)`
+#### `await db[table].count(criteria)`
 
 Retrieve the number of records in the table that match the given criteria.
 
 - `criteria` - db [criteria](#criteria) functions chained together
-- `callback` - function with `function(err, count)` signature
 
 
-#### `db[table].insert(items, [options, ] callback)`
+#### `await db[table].insert(items, [options])`
 
 Create new record(s) in the table. Each item can specify a unique `id` property or allow rethink to generate one for them.
 
@@ -137,68 +129,58 @@ Create new record(s) in the table. Each item can specify a unique `id` property 
 - `options` - optional object with the following properties
     - `merge` - boolean, when true any conflicts with existing items will result in an update, when false an error is returned
 	- `chunks` - maximum number of updates to send to the database at the same time
-- `callback` - function with `function(err, keys)` signature
 
 
-#### `db[table].update(ids, changes, callback)`
+#### `await db[table].update(ids, changes)`
 
 Update an existing record with the provided changes.
 
 - `ids` - an identifier or array of identifiers of records to update in the table
 - `changes` - the parts of the record to change and the values to change the parts to
-- `callback` - function with `function(err)` signature
 
 
-#### `db[table].update(updates, [options, ] callback)`
+#### `await db[table].update(updates, [options])`
 
 Update an existing record with the provided changes.
 
 - `updates` - an array of records to update (each must include an existing primary key)
 - `options` - optional settings where:
 	- `chunks` - maximum number of updates to send to the database at the same time
-- `callback` - function with `function(err)` signature
 
 
-#### `db[table].remove(criteria, callback)`
+#### `await db[table].remove(criteria)`
 
 Remove the records in the table that match the given criteria.
 
 - `criteria` - db [criteria](#criteria) functions chained together
-- `callback` - function with `function(err)` signature
 
 
-#### `db[table].empty(callback)`
+#### `await db[table].empty()`
 
 Remove all records in the table.
 
-- `callback` - function with `function(err)` signature
 
-
-#### `db[table].sync(callback)`
+#### `await db[table].sync()`
 
 Wait until all operations are complete and all data is persisted on permanent storage. Note that this function shouldn't be necessary for normal conditions.
 
-- `callback` - function with `function(err)` signature
 
+#### `await db[table].index(indexes)`
 
-#### `db[table].index(indexes, callback)`
-
-Create the secondary `indexes` on the table. `callback` is executed when all of the indexes are created.
+Create the secondary `indexes` on the table.
 
 - `indexes` - a string or array of strings for each index to create
-- `callback` - function with `function(err)` signature
 
 
-#### `db[table].changes(criteria, [options,] [callback])`
+#### `await db[table].changes(criteria, [options])`
 
 Subscribe to changes matching the given criteria for the table.
 
 - `criteria` - db [criteria](#criteria) functions chained together
 - `options` - optional object with the following properties
-  - `handler` - handler function to execute when changes occur. When provided the `callback` function can be omitted.
+  - `handler` - handler function to execute when changes occur.
   - `reconnect` - boolean, reconnect if the connection to the feed is interrupted
   - `initial` - boolean, include the initial results in the change feed
-- `callback` - function with `function(err, changes)` signature
 
 
 ### Criteria
