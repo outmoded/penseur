@@ -162,7 +162,7 @@ describe('Table', () => {
             expect(items1).to.be.null();
 
             await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }]);
-            const itemss = await db.test.all({ from: 5 });
+            const items2 = await db.test.all({ from: 5 });
             expect(items2).to.be.null();
         });
 
@@ -365,7 +365,7 @@ describe('Table', () => {
             await db.establish(['test']);
             await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }]);
             const result = await db.test.query(null);
-            expect(items).to.equal([{ id: 3, a: 1 }, { id: 2, a: 2 }, { id: 1, a: 1 }]);
+            expect(result).to.equal([{ id: 3, a: 1 }, { id: 2, a: 2 }, { id: 1, a: 1 }]);
         });
     });
 
@@ -803,14 +803,13 @@ describe('Table', () => {
             await db.test.update(1, changes);
             expect(changes.b.c).to.be.a.function();
 
-            const updated = await db.test.get(1, (err, updated) => {
-                expect(updated).to.equal({
-                    id: 1,
-                    a: 2,
-                    b: {
-                        c: [2, [10, 20]]
-                    }
-                });
+            const updated = await db.test.get(1);
+            expect(updated).to.equal({
+                id: 1,
+                a: 2,
+                b: {
+                    c: [2, [10, 20]]
+                }
             });
         });
 
@@ -1151,14 +1150,14 @@ describe('Table', () => {
 
             const db = new Penseur.Db('penseurtest');
             await db.establish(['test']);
-            await expect(await db.test.remove(1)).to.reject();
+            await expect(db.test.remove(1)).to.reject();
         });
 
         it('errors on invalid key', async () => {
 
             const db = new Penseur.Db('penseurtest');
             await db.establish(['test']);
-            await expect(await db.test.remove([])).to.reject();
+            await expect(db.test.remove([])).to.reject();
         });
 
         it('ignores error on unknown keys', async () => {
@@ -1356,7 +1355,7 @@ describe('Table', () => {
                 changes.push(item.after.id);
             };
 
-            const cursor = await db.test.changes('*', each);
+            await db.test.changes('*', each);
 
             await db.test.insert({ id: 1, a: 1 });
             await db.test.update(1, { a: 2 });
@@ -1398,7 +1397,7 @@ describe('Table', () => {
 
             await db.test.insert([{ id: 1, a: 1 }]);
 
-            const cursor = await db.test.changes(1);
+            await db.test.changes(1, each);
             await db.test.update(1, { a: 2 });
             await db.test.insert({ id: 2, a: 2 });
             expect(changes).to.equal([1]);
@@ -1418,7 +1417,7 @@ describe('Table', () => {
             };
 
             await db.test.insert([{ id: 1, a: 1 }]);
-            const cursor = await db.test.changes([1, 2], each);
+            await db.test.changes([1, 2], each);
             await db.test.update(1, { a: 2 });
             await db.test.insert({ id: 2, a: 2 });
             expect(changes).to.equal([1, 2]);
@@ -1438,7 +1437,7 @@ describe('Table', () => {
             };
 
             await db.test.insert([{ id: 1, a: 1 }]);
-            const cursor = await db.test.changes({ a: 2 }, each);
+            await db.test.changes({ a: 2 }, each);
             await db.test.update(1, { a: 2 });
             await db.test.insert({ id: 2, a: 2 });
             expect(changes).to.equal([1, 2]);
@@ -1458,7 +1457,7 @@ describe('Table', () => {
             };
 
             await db.test.insert([{ id: 1, a: 1 }]);
-            const cursor = await db.test.changes(1, each);
+            await db.test.changes(1, each);
             await db.test.remove(1);
             expect(changes).to.equal(['1:true']);
             await db.close();
@@ -1476,7 +1475,7 @@ describe('Table', () => {
                 changes.push(item.after.id);
             };
 
-            const cursor = await db.test.changes(1, each);
+            await db.test.changes(1, each);
             await db.test.insert({ id: 1, a: 1 });
             expect(changes).to.equal([1]);
             await db.close();
@@ -1495,7 +1494,7 @@ describe('Table', () => {
             };
 
             await db.test.insert([{ id: 1, a: 1 }]);
-            const cursor = await db.test.changes(1, { handler: each, initial: true });
+            await db.test.changes(1, { handler: each, initial: true });
             await db.test.update(1, { a: 2 });
             await db.test.insert({ id: 2, a: 2 });
             expect(changes).to.equal([1, 1]);
@@ -1514,7 +1513,7 @@ describe('Table', () => {
                 changes.push(item.id);
             };
 
-            const cursor = await db.test.changes(1, { handler: each, initial: true });
+            await db.test.changes(1, { handler: each, initial: true });
             await db.test.insert([{ id: 1, a: 1 }]);
             await db.test.update(1, { a: 2 });
             await db.test.insert({ id: 2, a: 2 });
@@ -1532,7 +1531,7 @@ describe('Table', () => {
                 expect(err).to.not.exist();
             };
 
-            const cursor = await db.test.changes(1, { handler: each, initial: true });
+            await db.test.changes(1, { handler: each, initial: true });
             await db.close();
         });
 
@@ -1570,9 +1569,9 @@ describe('Table', () => {
                 }
             };
 
-            const cursor = await db.test.changes(1, { handler: each, initial: true });
+            await db.test.changes(1, { handler: each, initial: true });
             await db.test.insert([{ id: 1, a: 1 }]);
-            step2 = () => {
+            step2 = async () => {
 
                 step2 = null;
                 await db.test.update(1, { a: 2 });
@@ -1615,7 +1614,7 @@ describe('Table', () => {
             await db.test.insert([{ id: 1, a: 1 }]);
             cursor.close();
 
-            step2 = () => {
+            step2 = async () => {
 
                 step2 = null;
                 await db.test.update(1, { a: 2 });
@@ -1658,10 +1657,10 @@ describe('Table', () => {
                 }
             };
 
-            const cursor = await db.test.changes(1, { handler: each, initial: true, reconnect: false });
+            await db.test.changes(1, { handler: each, initial: true, reconnect: false });
             await db.test.insert([{ id: 1, a: 1 }]);
 
-            step2 = () => {
+            step2 = async () => {
 
                 step2 = null;
                 await db.test.update(1, { a: 2 });
@@ -1678,7 +1677,7 @@ describe('Table', () => {
 
         it('does not reconnect (db reconnect disabled)', async () => {
 
-            const team = new Teamwork.Team({ meetings: 1 });
+            new Teamwork.Team({ meetings: 1 });
 
             let count = 0;
             const onConnect = () => {
@@ -1700,7 +1699,7 @@ describe('Table', () => {
                 }
             };
 
-            const cursor = await db.test.changes(1, { handler: each, initial: true });
+            await db.test.changes(1, { handler: each, initial: true });
             await db.test.insert([{ id: 1, a: 1 }]);
 
             await db._connection.close();
@@ -1712,6 +1711,8 @@ describe('Table', () => {
         });
 
         it('errors on bad cursor', async () => {
+
+            const team = new Teamwork.Team({ meetings: 1 });
 
             const db = new Penseur.Db('penseurtest');
             await db.establish(['test']);

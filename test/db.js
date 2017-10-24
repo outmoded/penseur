@@ -100,7 +100,7 @@ describe('Db', () => {
 
                 ++count;
                 team.attend();
-            }
+            };
 
             const onDisconnect = (willReconnect) => {
 
@@ -125,7 +125,7 @@ describe('Db', () => {
 
                 ++count;
                 team.attend();
-            }
+            };
 
             const onDisconnect = (willReconnect) => {
 
@@ -159,7 +159,7 @@ describe('Db', () => {
 
                 ++count;
                 team.attend();
-            }
+            };
 
             const onDisconnect = (willReconnect) => {
 
@@ -199,7 +199,7 @@ describe('Db', () => {
 
                 ++count;
                 team.attend();
-            }
+            };
 
             const onDisconnect = (willReconnect) => {
 
@@ -251,7 +251,7 @@ describe('Db', () => {
             const onError = (err) => {
 
                 expect(err.message).to.equal('boom');
-                team.attend()
+                team.attend();
             };
 
             const db = new Penseur.Db('penseurtest', { onError });
@@ -268,7 +268,7 @@ describe('Db', () => {
             const onError = (err) => {
 
                 expect(err.message).to.equal('Database connection timeout');
-                team.attend()
+                team.attend();
             };
 
             const db = new Penseur.Db('penseurtest', { onError });
@@ -371,7 +371,7 @@ describe('Db', () => {
 
             const db = new Penseur.Db('penseurtest');
             await db.connect();
-            const dropped = await RethinkDB.dbDrop(db.name).run(db._connection);
+            await RethinkDB.dbDrop(db.name).run(db._connection);
 
             await db.establish({ test: { secondary: 'other' } });
             const result = await RethinkDB.db(db.name).table('test').indexList().run(db._connection);
@@ -383,7 +383,7 @@ describe('Db', () => {
 
             const prep = new Penseur.Db('penseurtest');
             await prep.connect();
-            const dropped = await RethinkDB.dbDrop('penseurtest').run(prep._connection);
+            await RethinkDB.dbDrop('penseurtest').run(prep._connection);
             await prep.close();
 
             const db = new Penseur.Db('penseurtest');
@@ -650,7 +650,7 @@ describe('Db', () => {
             db.test._db._createTable = (options) => {
 
                 throw new Error('Failed');
-            }
+            };
 
             await expect(db.connect()).to.reject();
             await db.close();
@@ -755,7 +755,7 @@ describe('Db', () => {
 
             cursor.close();
 
-            const err = await expect(db.test.query({ a: 1 })).to.reject();
+            await expect(db.test.query({ a: 1 })).to.reject();
         });
     });
 
@@ -837,7 +837,7 @@ describe('Db', () => {
                 expect(item3).to.be.null();
 
                 db.disable('test', 'get', { value: new Error('stuff') });
-                const err = await expect(db.test.get(1)).to.reject('stuff');
+                await expect(db.test.get(1)).to.reject('stuff');
 
                 db.enable('test', 'get');
                 const item4 = await db.test.get(1);
