@@ -1048,14 +1048,14 @@ describe('Table', () => {
 
             const db = new Penseur.Db('penseurtest');
             await db.establish(['test']);
-            await expect(await db.test.update(2, { a: 2 })).to.reject('No document found');
+            await expect(db.test.update(2, { a: 2 })).to.reject('No document found');
         });
 
         it('errors on invalid object key', async () => {
 
             const db = new Penseur.Db('penseurtest');
             await db.establish(['test']);
-            await expect(await db.test.update({}, { a: 2 })).to.reject('Invalid object id');
+            await expect(db.test.update({}, { a: 2 })).to.reject('Invalid object id');
         });
     });
 
