@@ -165,8 +165,7 @@ describe('Id', () => {
             await db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } });
             await db.allocate.update('test', { value: 'string' });
             db.test._id.verified = false;
-            const err = await expect(db.test.insert({ a: 1 })).to.reject();
-            expect(err.data.error.message).to.equal('Increment id record contains non-integer value: test');
+            await expect(db.test.insert({ a: 1 })).to.reject('Increment id record contains non-integer value: test');
         });
 
         it('errors on create table error', async () => {
@@ -175,8 +174,7 @@ describe('Id', () => {
             await db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } });
             db.test._db._createTable = () => Promise.reject(new Error('Failed'));
             db.test._id.verified = false;
-            const err = await expect(db.test.insert({ a: 1 })).to.reject();
-            expect(err.data.error.message).to.equal('Failed creating increment id table: test');
+            await expect(db.test.insert({ a: 1 })).to.reject('Failed creating increment id table: test');
         });
 
         it('errors on table get error', async () => {
@@ -185,8 +183,7 @@ describe('Id', () => {
             await db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } });
             db.test._id.table.get = () => Promise.reject(new Error('Failed'));
             db.test._id.verified = false;
-            const err = await expect(db.test.insert({ a: 1 })).to.reject();
-            expect(err.data.error.message).to.equal('Failed verifying increment id record: test');
+            await expect(db.test.insert({ a: 1 })).to.reject('Failed verifying increment id record: test');
         });
 
         it('errors on table update error', async () => {
@@ -196,8 +193,7 @@ describe('Id', () => {
             await db.allocate.update('test', { value: db.unset() });
             db.test._id.table.update = () => Promise.reject(new Error('Failed'));
             db.test._id.verified = false;
-            const err = await expect(db.test.insert({ a: 1 })).to.reject();
-            expect(err.data.error.message).to.equal('Failed initializing key-value pair to increment id record: test');
+            await expect(db.test.insert({ a: 1 })).to.reject('Failed initializing key-value pair to increment id record: test');
         });
 
         it('errors on table insert error', async () => {
@@ -207,8 +203,7 @@ describe('Id', () => {
             await db.allocate.remove('test');
             db.test._id.table.insert = () => Promise.reject(new Error('Failed'));
             db.test._id.verified = false;
-            const err = await expect(db.test.insert({ a: 1 })).to.reject();
-            expect(err.data.error.message).to.equal('Failed inserting increment id record: test');
+            await expect(db.test.insert({ a: 1 })).to.reject('Failed inserting increment id record: test');
         });
 
         it('errors on table next error', async () => {
@@ -217,8 +212,7 @@ describe('Id', () => {
             await db.establish({ allocate: true, test: { id: { type: 'increment', table: 'allocate' } } });
             db.test._id.table.next = () => Promise.reject(new Error('Failed'));
             db.test._id.verified = false;
-            const err = await expect(db.test.insert([{ a: 1 }, { a: 1 }])).to.reject();
-            expect(err.data.error.message).to.equal('Failed allocating increment id: test');
+            await expect(db.test.insert([{ a: 1 }, { a: 1 }])).to.reject('Failed allocating increment id: test');
         });
     });
 });

@@ -791,8 +791,8 @@ describe('Db', () => {
 
             expect(test).to.equal({
                 test: [
-                    { action: 'empty' },
-                    { action: 'indexWait' },
+                    { action: 'empty', inputs: null },
+                    { action: 'index', inputs: null },
                     { action: 'insert', inputs: { items: [{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }], options: {} } },
                     { action: 'get', inputs: { ids: [1, 3], options: {} } }
                 ]

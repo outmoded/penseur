@@ -425,6 +425,14 @@ describe('Table', () => {
             const result = await db.test.count(db.contains('a'));
             expect(result).to.equal(3);
         });
+
+        it('fails on database error', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            db.table('invalid');
+            await db.connect();
+            await expect(db.invalid.count({ a: 1 })).to.reject();
+        });
     });
 
     describe('insert()', () => {
@@ -1326,10 +1334,7 @@ describe('Table', () => {
                 };
             };
 
-            const err = await expect(db.test.index('simple')).to.reject();
-            expect(err).to.be.an.error('simulated error');
-            expect(err.data.error.stack).to.exist();
-            expect(err.data.error.message).to.equal('simulated error');
+            await expect(db.test.index('simple')).to.reject('simulated error');
             db.test.raw.indexCreate = orig;
         });
     });

@@ -459,8 +459,7 @@ describe('Unique', () => {
             await db.connect();
             db.table(settings);
             db.test._db._createTable = (options, callback) => callback(new Error('Failed'));
-            const err = await expect(db.test.insert({ a: 1 })).to.reject();
-            expect(err.data.error.message).to.equal('Failed creating unique table: penseur_unique_test_a');
+            await expect(db.test.insert({ a: 1 })).to.reject('Failed creating unique table: penseur_unique_test_a');
         });
 
         it('errors on create table error (update)', async () => {
@@ -484,8 +483,7 @@ describe('Unique', () => {
             await db.connect();
             db.table(settings);
             db.test._db._createTable = () => Promise.reject(new Error('Failed'));
-            const err = await expect(db.test.update(key, { a: 2 })).to.reject();
-            expect(err.data.error.message).to.equal('Failed creating unique table: penseur_unique_test_a');
+            await expect(db.test.update(key, { a: 2 })).to.reject('Failed creating unique table: penseur_unique_test_a');
         });
     });
 });
