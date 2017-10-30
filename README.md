@@ -189,6 +189,7 @@ Subscribe to changes matching the given criteria for the table.
 #### `Db.contains(values[, options])`
 #### `Db.not(values)`
 #### `Db.unset()`
+#### `Db.isEmpty()`
 #### `Db.increment(value)`
 #### `Db.append(value[, options])`
 #### `Db.override(value)`
