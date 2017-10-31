@@ -246,9 +246,27 @@ describe('Criteria', () => {
 
         const db = new Penseur.Db('penseurtest');
         await db.establish(['test']);
+        await db.test.insert([{ id: 1, a: 1, b: null }, { id: 2, a: 1, b: [2] }, { id: 3, a: 2, b: [] }, { id: 4, a: 1, b: 3 }, { id: 5, a: 1, b: { } }]);
+        const result = await db.test.query({ a: 1, b: db.empty() });
+        expect(result).to.equal([{ id: 5, a: 1, b: { } }]);
+    });
+
+    it('parses nested empty key for arrays', async () => {
+
+        const db = new Penseur.Db('penseurtest');
+        await db.establish(['test']);
         await db.test.insert([{ id: 1, a: 1, b: { c: null } }, { id: 2, a: 1, b: { c: [2] } }, { id: 3, a: 1, b: { c: [] } }, { id: 4, a: 1, b: { c: 3 } }]);
         const result = await db.test.query({ a: 1, b: { c: db.empty() } });
         expect(result).to.equal([{ id: 3, a: 1, b: { c: [] } }]);
+    });
+
+    it('parses nested empty key for objects', async () => {
+
+        const db = new Penseur.Db('penseurtest');
+        await db.establish(['test']);
+        await db.test.insert([{ id: 1, a: 1, b: { c: null } }, { id: 2, a: 1, b: { c: { d: 4 } } }, { id: 3, a: 1, b: { c: {} } }, { id: 4, a: 1, b: { c: 3 } }]);
+        const result = await db.test.query({ a: 1, b: { c: db.empty() } });
+        expect(result).to.equal([{ id: 3, a: 1, b: { c: {} } }]);
     });
 
     it('handles query into nested object where item is not an object', async () => {
