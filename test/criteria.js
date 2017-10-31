@@ -492,14 +492,53 @@ describe('Criteria', { parallel: false }, () => {
 
             expect(err).to.not.exist();
 
+            db.test.insert([{ id: 1, a: 1, b: null }, { id: 2, a: 1, b: [2] }, { id: 3, a: 2, b: [] }, { id: 4, a: 1, b: 3 }, { id: 5, a: 1, b: { } }], (err, keys) => {
+
+                expect(err).to.not.exist();
+                db.test.query({ a: 1, b: db.empty() }, (err, result) => {
+
+                    expect(err).to.not.exist();
+                    expect(result).to.equal([{ id: 5, a: 1, b: { } }]);
+                    done();
+                });
+            });
+        });
+    });
+
+    it('parses nested empty key for arrays', (done) => {
+
+        const db = new Penseur.Db('penseurtest');
+        db.establish(['test'], (err) => {
+
+            expect(err).to.not.exist();
+
             db.test.insert([{ id: 1, a: 1, b: { c: null } }, { id: 2, a: 1, b: { c: [2] } }, { id: 3, a: 1, b: { c: [] } }, { id: 4, a: 1, b: { c: 3 } }], (err, keys) => {
 
                 expect(err).to.not.exist();
-
                 db.test.query({ a: 1, b: { c: db.empty() } }, (err, result) => {
 
                     expect(err).to.not.exist();
                     expect(result).to.equal([{ id: 3, a: 1, b: { c: [] } }]);
+                    done();
+                });
+            });
+        });
+    });
+
+    it('parses nested empty key for objects', (done) => {
+
+        const db = new Penseur.Db('penseurtest');
+        db.establish(['test'], (err) => {
+
+            expect(err).to.not.exist();
+
+            db.test.insert([{ id: 1, a: 1, b: { c: null } }, { id: 2, a: 1, b: { c: { d: 4 } } }, { id: 3, a: 1, b: { c: {} } }, { id: 4, a: 1, b: { c: 3 } }], (err, keys) => {
+
+                expect(err).to.not.exist();
+                db.test.query({ a: 1, b: { c: db.empty() } }, (err, result) => {
+
+                    expect(err).to.not.exist();
+                    expect(result).to.equal([{ id: 3, a: 1, b: { c: {} } }]);
                     done();
                 });
             });
