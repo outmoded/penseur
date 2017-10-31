@@ -179,7 +179,7 @@ describe('Criteria', { parallel: false }, () => {
         });
     });
 
-    it('parses or isEmpty', (done) => {
+    it('parses or empty', (done) => {
 
         const db = new Penseur.Db('penseurtest');
         db.establish(['test'], (err) => {
@@ -189,7 +189,7 @@ describe('Criteria', { parallel: false }, () => {
             db.test.insert([{ id: 1, a: [] }, { id: 2, a: 1 }, { id: 3, a: [2] }], (err, keys) => {
 
                 expect(err).to.not.exist();
-                db.test.query({ a: db.or([1, db.isEmpty()]) }, (err, result) => {
+                db.test.query({ a: db.or([1, db.empty()]) }, (err, result) => {
 
                     expect(err).to.not.exist();
                     expect(result).to.equal([{ id: 2, a: 1 }, { id: 1, a: [] }]);
@@ -199,7 +199,7 @@ describe('Criteria', { parallel: false }, () => {
         });
     });
 
-    it('parses or isEmpty nested', (done) => {
+    it('parses or empty nested', (done) => {
 
         const db = new Penseur.Db('penseurtest');
         db.establish(['test'], (err) => {
@@ -209,7 +209,7 @@ describe('Criteria', { parallel: false }, () => {
             db.test.insert([{ id: 1, a: 1, b: { c: [1] } }, { id: 2, a: 1, b: { c: [] } }, { id: 3, a: 1, b: { c: 66 } }], (err, keys) => {
 
                 expect(err).to.not.exist();
-                db.test.query({ a: 1, b: { c: db.or([66, db.isEmpty()]) } }, (err, result) => {
+                db.test.query({ a: 1, b: { c: db.or([66, db.empty()]) } }, (err, result) => {
 
                     expect(err).to.not.exist();
                     expect(result).to.equal([{ id: 3, a: 1, b: { c: 66 } }, { id: 2, a: 1, b: { c: [] } }]);
@@ -219,7 +219,7 @@ describe('Criteria', { parallel: false }, () => {
         });
     });
 
-    it('parses not isEmpty nested', (done) => {
+    it('parses not empty nested', (done) => {
 
         const db = new Penseur.Db('penseurtest');
         db.establish(['test'], (err) => {
@@ -229,7 +229,7 @@ describe('Criteria', { parallel: false }, () => {
             db.test.insert([{ id: 1, a: 1, b: { c: [1] } }, { id: 2, a: 1, b: { c: [] } }, { id: 3, a: 1, b: { c: 66 } }], (err, keys) => {
 
                 expect(err).to.not.exist();
-                db.test.query({ a: 1, b: { c: db.not([66, db.isEmpty()]) } }, (err, result) => {
+                db.test.query({ a: 1, b: { c: db.not([66, db.empty()]) } }, (err, result) => {
 
                     expect(err).to.not.exist();
                     expect(result).to.equal([{ id: 1, a: 1, b: { c: [1] } }]);
@@ -485,7 +485,7 @@ describe('Criteria', { parallel: false }, () => {
         });
     });
 
-    it('parses isEmpty key', (done) => {
+    it('parses empty key', (done) => {
 
         const db = new Penseur.Db('penseurtest');
         db.establish(['test'], (err) => {
@@ -496,7 +496,7 @@ describe('Criteria', { parallel: false }, () => {
 
                 expect(err).to.not.exist();
 
-                db.test.query({ a: 1, b: { c: db.isEmpty() } }, (err, result) => {
+                db.test.query({ a: 1, b: { c: db.empty() } }, (err, result) => {
 
                     expect(err).to.not.exist();
                     expect(result).to.equal([{ id: 3, a: 1, b: { c: [] } }]);
