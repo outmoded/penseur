@@ -1542,7 +1542,7 @@ describe('Table', () => {
 
         it('reconnects', async () => {
 
-            const team = new Teamwork.Team({ meetings: 1 });
+            const team = new Teamwork({ meetings: 1 });
 
             let step2 = null;
             let count = 0;
@@ -1589,7 +1589,7 @@ describe('Table', () => {
 
         it('does not reconnect on manual cursor close', async () => {
 
-            const team = new Teamwork.Team({ meetings: 1 });
+            const team = new Teamwork({ meetings: 1 });
 
             let step2 = null;
             let count = 0;
@@ -1636,7 +1636,7 @@ describe('Table', () => {
 
         it('does not reconnect (feed reconnect disabled)', async () => {
 
-            const team = new Teamwork.Team({ meetings: 1 });
+            const team = new Teamwork({ meetings: 1 });
 
             let step2 = null;
             let count = 0;
@@ -1682,7 +1682,7 @@ describe('Table', () => {
 
         it('does not reconnect (db reconnect disabled)', async () => {
 
-            new Teamwork.Team({ meetings: 1 });
+            new Teamwork({ meetings: 1 });
 
             let count = 0;
             const onConnect = () => {
@@ -1717,7 +1717,7 @@ describe('Table', () => {
 
         it('errors on bad cursor', async () => {
 
-            const team = new Teamwork.Team({ meetings: 1 });
+            const team = new Teamwork({ meetings: 1 });
 
             const db = new Penseur.Db('penseurtest');
             await db.establish(['test']);

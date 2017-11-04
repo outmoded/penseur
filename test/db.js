@@ -94,7 +94,7 @@ describe('Db', () => {
 
         it('reconnects automatically', async () => {
 
-            const team = new Teamwork.Team({ meetings: 2 });
+            const team = new Teamwork({ meetings: 2 });
             let count = 0;
             const onConnect = () => {
 
@@ -117,7 +117,7 @@ describe('Db', () => {
 
         it('reports reconnect errors and tries again', async () => {
 
-            const team = new Teamwork.Team({ meetings: 2 });
+            const team = new Teamwork({ meetings: 2 });
 
             let orig = null;
             let count = 0;
@@ -142,7 +142,7 @@ describe('Db', () => {
             orig = db.connect;
 
             await db.connect();
-            db.connect = (callback) => callback(new Error('failed to connect'));
+            db.connect = () => Promise.reject(new Error('failed to connect'));
             db._connection.close(Hoek.ignore);
             await team.work;
             await db.close();
@@ -150,7 +150,7 @@ describe('Db', () => {
 
         it('waits between reconnections', async () => {
 
-            const team = new Teamwork.Team({ meetings: 2 });
+            const team = new Teamwork({ meetings: 2 });
             const timer = new Hoek.Bench();
 
             let orig = null;
@@ -180,7 +180,7 @@ describe('Db', () => {
             orig = db.connect;
 
             await db.connect();
-            db.connect = (callback) => callback(new Error('failed to connect'));
+            db.connect = () => Promise.reject(new Error('failed to connect'));
             timer.reset();
             db._connection.close(Hoek.ignore);
             await team.work;
@@ -190,7 +190,7 @@ describe('Db', () => {
 
         it('reconnects immediately', async () => {
 
-            const team = new Teamwork.Team({ meetings: 2 });
+            const team = new Teamwork({ meetings: 2 });
             const timer = new Hoek.Bench();
 
             let orig = null;
@@ -220,7 +220,7 @@ describe('Db', () => {
             orig = db.connect;
 
             await db.connect();
-            db.connect = (callback) => callback(new Error('failed to connect'));
+            db.connect = () => Promise.reject(new Error('failed to connect'));
             timer.reset();
             db._connection.close(Hoek.ignore);
             await team.work;
@@ -230,7 +230,7 @@ describe('Db', () => {
 
         it('does not reconnect automatically', async () => {
 
-            const team = new Teamwork.Team({ meetings: 1 });
+            const team = new Teamwork({ meetings: 1 });
             const onDisconnect = (willReconnect) => {
 
                 expect(willReconnect).to.be.false();
@@ -247,7 +247,7 @@ describe('Db', () => {
 
         it('notifies of errors', async () => {
 
-            const team = new Teamwork.Team({ meetings: 1 });
+            const team = new Teamwork({ meetings: 1 });
             const onError = (err) => {
 
                 expect(err.message).to.equal('boom');
@@ -264,7 +264,7 @@ describe('Db', () => {
 
         it('notifies of timeout', async () => {
 
-            const team = new Teamwork.Team({ meetings: 1 });
+            const team = new Teamwork({ meetings: 1 });
             const onError = (err) => {
 
                 expect(err.message).to.equal('Database connection timeout');
@@ -322,12 +322,6 @@ describe('Db', () => {
     describe('close()', () => {
 
         it('ignores unconnected state', async () => {
-
-            const db = new Penseur.Db('penseurtest');
-            await db.close();
-        });
-
-        it('allows no callback', async () => {
 
             const db = new Penseur.Db('penseurtest');
             await db.close();
@@ -858,7 +852,7 @@ describe('Db', () => {
 
             it('simulates a changes update error', async () => {
 
-                const team = new Teamwork.Team({ meetings: 1 });
+                const team = new Teamwork({ meetings: 1 });
                 const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015, test: true });
 
                 await db.establish(['test']);
@@ -877,7 +871,7 @@ describe('Db', () => {
 
             it('simulates a changes update error (flags)', async () => {
 
-                const team = new Teamwork.Team({ meetings: 1 });
+                const team = new Teamwork({ meetings: 1 });
                 const db = new Penseur.Db('penseurtest', { host: 'localhost', port: 28015, test: true });
 
                 await db.establish(['test']);
