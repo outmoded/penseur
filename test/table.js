@@ -1052,6 +1052,13 @@ describe('Table', () => {
             expect(item2.a).to.equal(2);
         });
 
+        it('ignroes empty array', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish(['test']);
+            await db.test.update([]);
+        });
+
         it('errors on unknown key', async () => {
 
             const db = new Penseur.Db('penseurtest');
@@ -1064,6 +1071,19 @@ describe('Table', () => {
             const db = new Penseur.Db('penseurtest');
             await db.establish(['test']);
             await expect(db.test.update({}, { a: 2 })).to.reject('Invalid object id');
+        });
+    });
+
+    describe('items()', () => {
+
+        it('updates a record', () => {
+
+            const changes = { a: 2 };
+            expect(Penseur.Table.items(1, changes)).to.equal([changes]);
+            expect(Penseur.Table.items([1, 2], changes)).to.equal([changes]);
+            expect(Penseur.Table.items([changes, changes])).to.equal([changes, changes]);
+            expect(Penseur.Table.items([changes, changes], {})).to.equal([changes, changes]);
+            expect(Penseur.Table.items([])).to.equal([]);
         });
     });
 
