@@ -805,7 +805,8 @@ describe('Db', () => {
                 expect(item1.value).to.equal('x');
 
                 db.disable('test', 'get');
-                await expect(db.test.get(1)).to.reject();
+                const err = await expect(db.test.get(1)).to.reject();
+                expect(err.data).to.equal({ table: 'test', action: 'get', inputs: undefined });
 
                 db.enable('test', 'get');
                 const item3 = await db.test.get(1);
@@ -862,6 +863,7 @@ describe('Db', () => {
 
                     expect(err).to.exist();
                     expect(err.flags.willReconnect).to.be.true();
+                    expect(err.data).to.equal({ table: 'test', action: 'changes', inputs: undefined });
                     team.attend();
                 };
 
