@@ -293,6 +293,19 @@ describe('Criteria', () => {
         expect(result).to.equal([{ id: 2, a: 2, b: { c: { d: 4 } } }]);
     });
 
+    it('parses matches', async () => {
+
+        const db = new Penseur.Db('penseurtest');
+        await db.establish(['test']);
+        await db.test.insert([{ id: 1, a: 'abcdef' }, { id: 2, a: 'acdef' }, { id: 3, a: 'bcdef' }, { id: 4, a: 'cdefg' }, { id: 5, a: 'ABC' }]);
+        expect(await db.test.query({ a: db.match('b') })).to.equal([{ id: 3, a: 'bcdef' }, { id: 1, a: 'abcdef' }]);
+        expect(await db.test.query({ a: db.match(['a', 'b']) })).to.equal([{ id: 1, a: 'abcdef' }]);
+        expect(await db.test.query({ a: db.match(['a', 'b'], { condition: 'or' }) })).to.equal([{ id: 3, a: 'bcdef' }, { id: 2, a: 'acdef' }, { id: 1, a: 'abcdef' }]);
+        expect(await db.test.query({ a: db.match('b', { start: true }) })).to.equal([{ id: 3, a: 'bcdef' }]);
+        expect(await db.test.query({ a: db.match('G', { end: true, insensitive: true }) })).to.equal([{ id: 4, a: 'cdefg' }]);
+        expect(await db.test.query({ a: db.match('abc', { exact: true, insensitive: true }) })).to.equal([{ id: 5, a: 'ABC' }]);
+    });
+
     describe('select()', () => {
 
         it('selects by secondary index', async () => {
