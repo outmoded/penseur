@@ -367,6 +367,15 @@ describe('Table', () => {
             const result = await db.test.query(null);
             expect(result).to.equal([{ id: 3, a: 1 }, { id: 2, a: 2 }, { id: 1, a: 1 }]);
         });
+
+        it('performs case insensitive match', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish(['test']);
+            await db.test.insert([{ id: 1, a: 'abcd' }, { id: 2, a: 'AbcD' }, { id: 3, a: 'xabCd' }, { id: 4, a: 'abbb' }]);
+            expect(await db.test.query({ a: 'ABCD' })).to.be.null();
+            expect(await db.test.query({ a: 'ABCD' }, { match: { insensitive: true } })).to.equal([{ id: 3, a: 'xabCd' }, { id: 2, a: 'AbcD' }, { id: 1, a: 'abcd' }]);
+        });
     });
 
     describe('single()', () => {
@@ -1562,7 +1571,7 @@ describe('Table', () => {
 
         it('reconnects', async () => {
 
-            const team = new Teamwork({ meetings: 1 });
+            const team = new Teamwork();
 
             let step2 = null;
             let count = 0;
@@ -1609,7 +1618,7 @@ describe('Table', () => {
 
         it('does not reconnect on manual cursor close', async () => {
 
-            const team = new Teamwork({ meetings: 1 });
+            const team = new Teamwork();
 
             let step2 = null;
             let count = 0;
@@ -1656,7 +1665,7 @@ describe('Table', () => {
 
         it('does not reconnect (feed reconnect disabled)', async () => {
 
-            const team = new Teamwork({ meetings: 1 });
+            const team = new Teamwork();
 
             let step2 = null;
             let count = 0;
@@ -1702,7 +1711,7 @@ describe('Table', () => {
 
         it('does not reconnect (db reconnect disabled)', async () => {
 
-            new Teamwork({ meetings: 1 });
+            new Teamwork();
 
             let count = 0;
             const onConnect = () => {
@@ -1737,7 +1746,7 @@ describe('Table', () => {
 
         it('errors on bad cursor', async () => {
 
-            const team = new Teamwork({ meetings: 1 });
+            const team = new Teamwork();
 
             const db = new Penseur.Db('penseurtest');
             await db.establish(['test']);
