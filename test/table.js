@@ -506,7 +506,13 @@ describe('Table', () => {
             }
 
             const updates = [];
-            const keys = await db.test.insert(records, { chunks: 30, each: (s, is) => updates.push({ i: s, ids: is }) });
+            const each = (s, is, table) => {
+
+                expect(table).to.equal('test');
+                updates.push({ i: s, ids: is });
+            };
+
+            const keys = await db.test.insert(records, { chunks: 30, each });
             expect(keys).to.equal(ids);
             expect(batches).to.equal([30, 30, 30, 10]);
             expect(updates).to.equal([
@@ -1107,9 +1113,20 @@ describe('Table', () => {
             }
 
             const reports = [];
-            await db.test.update(updates, { chunks: 30, each: (s) => reports.push(s) });
+            const each = (s, si, table) => {
+
+                expect(table).to.equal('test');
+                reports.push({ i: s, ids: si });
+            };
+
+            await db.test.update(updates, { chunks: 30, each });
             expect(batches).to.equal([30, 30, 30, 10]);
-            expect(reports).to.equal([0, 1, 2, 3]);
+            expect(reports).to.equal([
+                { i: 0, ids: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30] },
+                { i: 1, ids: [31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60] },
+                { i: 2, ids: [61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90] },
+                { i: 3, ids: [91, 92, 93, 94, 95, 96, 97, 98, 99, 100] }
+            ]);
 
             const item = await db.test.get(1);
             expect(item.a).to.not.exist();
@@ -1130,7 +1147,7 @@ describe('Table', () => {
             expect(item2.a).to.equal(2);
         });
 
-        it('ignroes empty array', async () => {
+        it('ignores empty array', async () => {
 
             const db = new Penseur.Db('penseurtest');
             await db.establish(['test']);
