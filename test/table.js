@@ -125,6 +125,94 @@ describe('Table', () => {
         });
     });
 
+    describe('_read()', () => {
+
+        it('converts geo point to plain value', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish({ test: { geo: true, secondary: [{ name: 'location', options: { geo: true } }] } });
+            await db.test.insert({ id: 1, location: [-121.981434, 37.221310] });
+            const result = await db.test.get(1);
+            expect(result).to.equal({ id: 1, location: [-121.981434, 37.221310] });
+
+            const raw = await RethinkDB.db(db.name).table('test').get(1).run(db._connection);
+            expect(raw).to.equal({
+                id: 1,
+                location: {
+                    '$reql_type$': 'GEOMETRY',
+                    coordinates: [-121.981434, 37.22131],
+                    type: 'Point'
+                }
+            });
+        });
+
+        it('converts geo point to plain value (nested)', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish({ test: { geo: true, secondary: [{ name: 'location', source: ['x', 'pos'], options: { geo: true } }] } });
+            await db.test.insert({ id: 1, x: { pos: [-121.981434, 37.221310] } });
+            const result = await db.test.get(1);
+            expect(result).to.equal({ id: 1, x: { pos: [-121.981434, 37.221310] } });
+
+            const raw = await RethinkDB.db(db.name).table('test').get(1).run(db._connection);
+            expect(raw).to.equal({
+                id: 1,
+                x: {
+                    pos: {
+                        '$reql_type$': 'GEOMETRY',
+                        coordinates: [-121.981434, 37.22131],
+                        type: 'Point'
+                    }
+                }
+            });
+        });
+
+        it('ignores geo conversion when table geo is false', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish({ test: { geo: false, secondary: [{ name: 'location', options: { geo: true } }] } });
+            await db.test.insert({ id: 1, location: [-121.981434, 37.221310] });
+            const result = await db.test.get(1);
+            expect(result).to.equal({ id: 1, location: [-121.981434, 37.221310] });
+
+            const raw = await RethinkDB.db(db.name).table('test').get(1).run(db._connection);
+            expect(raw).to.equal({
+                id: 1,
+                location: [-121.981434, 37.221310]
+            });
+        });
+
+        it('ignores geo conversion when no geo index is configured (options)', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish({ test: { geo: true, secondary: [{ name: 'location', options: {} }] } });
+            await db.test.insert({ id: 1, location: [-121.981434, 37.221310] });
+            const result = await db.test.get(1);
+            expect(result).to.equal({ id: 1, location: [-121.981434, 37.221310] });
+
+            const raw = await RethinkDB.db(db.name).table('test').get(1).run(db._connection);
+            expect(raw).to.equal({
+                id: 1,
+                location: [-121.981434, 37.221310]
+            });
+        });
+
+        it('ignores geo conversion when no geo index is configured (no options)', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish({ test: { geo: true, secondary: ['location'] } });
+            await db.test.insert({ id: 1, location: [-121.981434, 37.221310] });
+            const result = await db.test.get(1);
+            expect(result).to.equal({ id: 1, location: [-121.981434, 37.221310] });
+
+            const raw = await RethinkDB.db(db.name).table('test').get(1).run(db._connection);
+            expect(raw).to.equal({
+                id: 1,
+                location: [-121.981434, 37.221310]
+            });
+        });
+    });
+
     describe('all()', () => {
 
         it('returns the requested objects', async () => {
