@@ -373,6 +373,18 @@ describe('Db', () => {
             await db.close();
         });
 
+        it('creates new database (implicit tables)', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.connect();
+            db.table({ test: { secondary: 'other' } });
+
+            await db.establish();
+            const result = await RethinkDB.db(db.name).table('test').indexList().run(db._connection);
+            expect(result).to.equal(['other']);
+            await db.close();
+        });
+
         it('creates new database (complex tables pre-loaded)', async () => {
 
             const prep = new Penseur.Db('penseurtest');
