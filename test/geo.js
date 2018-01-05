@@ -25,11 +25,16 @@ describe('Geo', () => {
 
         const db = new Penseur.Db('penseurtest');
         await db.establish({ test: { geo: true, secondary: [{ name: 'location', options: { geo: true } }] } });
-        await db.test.insert([
+
+        const items = [
             { id: 'shop', location: [-121.981434, 37.221310], a: 1 },
             { id: 'school', location: [-121.9643744, 37.2158098], a: 2 },
             { id: 'hospital', location: [-121.9570936, 37.2520443], a: 3 }
-        ]);
+        ];
+
+        await db.test.insert(items);
+
+        expect(items[0].location).to.equal([-121.981434, 37.221310]);
 
         const result1 = await db.test.query({ location: db.near([-121.956064, 37.255768], 500) });
         expect(result1).to.equal([{ id: 'hospital', location: [-121.9570936, 37.2520443], a: 3 }]);
