@@ -523,6 +523,24 @@ describe('Table', () => {
             expect(result).to.equal(3);
         });
 
+        it('returns the total count if criteria is null', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish(['test']);
+            await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }]);
+            const result = await db.test.count(null);
+            expect(result).to.equal(3);
+        });
+
+        it('returns the total count if no criteria is passed in', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish(['test']);
+            await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }, { id: 3, a: 1 }]);
+            const result = await db.test.count();
+            expect(result).to.equal(3);
+        });
+
         it('fails on database error', async () => {
 
             const db = new Penseur.Db('penseurtest');
