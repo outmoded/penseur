@@ -82,6 +82,14 @@ describe('Penseur.utils', () => {
             expect(Penseur.utils.diff(item, { a: [0, 2], b: [4, 3], c: [1] }, { arrays: false })).to.equal({ a: [0, 2], c: [1] });
         });
 
+        it('compares nested arrays', () => {
+
+            const item = { a: { b: [1] } };
+            expect(Penseur.utils.diff({ a: {} }, { a: { b: [1,2] } })).to.equal({ a: { b: [1,2] } });
+            expect(Penseur.utils.diff(item, { a: { b: [1,2] } })).to.equal({ a: { b: { 1: 2 } } });
+            expect(Penseur.utils.diff(item, { a: { b: [1,2] } }, { arrays: false })).to.equal({ a: { b: [1,2] } }); // will fail
+        });
+
         it('compares object to null', () => {
 
             const item = { a: 1, b: { c: 'd' } };
