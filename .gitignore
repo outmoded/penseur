@@ -15,4 +15,4 @@ config.json
 coverage.*
 .settings
 package-lock.json
-
+.vscode
