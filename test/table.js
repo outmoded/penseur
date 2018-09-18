@@ -1273,6 +1273,50 @@ describe('Table', () => {
             await db.establish(['test']);
             await expect(db.test.update({}, { a: 2 })).to.reject('Invalid object id');
         });
+
+        it('updates a record [id, update] (non standard id field name)', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish({ test: { primary: 'xyz' } });
+            await db.test.insert({ xyz: 99, a: 1 });
+            await db.test.update(99, { a: 2 });
+
+            const item = await db.test.get(99);
+            expect(item.a).to.equal(2);
+        });
+
+        it('updates a record [changes] (non standard id field name)', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish({ test: { primary: 'xyz' } });
+            await db.test.insert({ xyz: 99, a: 1 });
+            await db.test.update([{ xyz: 99, a: 2 }]);
+
+            const item = await db.test.get(99);
+            expect(item.a).to.equal(2);
+        });
+
+        it('updates a record [changes, options] (non standard id field name)', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish({ test: { primary: 'xyz' } });
+            await db.test.insert({ xyz: 99, a: 1 });
+            await db.test.update([{ xyz: 99, a: 2 }], {});
+
+            const item = await db.test.get(99);
+            expect(item.a).to.equal(2);
+        });
+
+        it('updates records in batches (non standard id field name)', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish({ test: { primary: 'xyz' } });
+            await db.test.insert([{ xyz: 99, a: 1 }, { xyz: 98, a: 1 }]);
+            await db.test.update([{ xyz: 99, a: 2 }, { xyz: 98, a: 2 }], { chunks: 1 });
+
+            const item = await db.test.get(99);
+            expect(item.a).to.equal(2);
+        });
     });
 
     describe('items()', () => {
