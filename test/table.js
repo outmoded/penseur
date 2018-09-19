@@ -1119,6 +1119,18 @@ describe('Table', () => {
             expect(items).to.equal([{ id: 2 }, { id: 1, a: 3 }]);
         });
 
+        it.skip('updates same record multiple times', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish(['test']);
+            await db.test.insert({ id: 1, a: 1 });
+
+            await db.test.update([{ id: 1, a: db.unset() }, { id: 1, b: 2 }]);
+
+            const item = await db.test.get(1);
+            expect(item).to.equal({ id: 1, b: 2 });
+        });
+
         it('updates a record (ignore batch)', async () => {
 
             const db = new Penseur.Db('penseurtest');
