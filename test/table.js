@@ -1119,6 +1119,18 @@ describe('Table', () => {
             expect(items).to.equal([{ id: 2 }, { id: 1, a: 3 }]);
         });
 
+        it('updates multiple records (string key)', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish(['test']);
+            await db.test.insert([{ id: '1', a: 1 }, { id: '2', a: 1 }]);
+
+            await db.test.update([{ id: '1', a: 3 }, { id: '2', a: db.unset() }]);
+
+            const items = await db.test.all();
+            expect(items).to.equal([{ id: '1', a: 3 }, { id: '2' }]);
+        });
+
         it('updates same record multiple times', async () => {
 
             const db = new Penseur.Db('penseurtest');
