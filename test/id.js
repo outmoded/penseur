@@ -7,6 +7,8 @@ const Lab = require('lab');
 const Penseur = require('..');
 const RethinkDB = require('rethinkdb');
 
+const Id = require('../lib/id');
+
 
 // Declare internals
 
@@ -20,6 +22,15 @@ const expect = Code.expect;
 
 
 describe('Id', () => {
+
+    describe('is()', () => {
+
+        it('considers null as non-id', () => {
+
+            expect(Id.is(null)).to.be.false();
+            expect(Id.is(undefined)).to.be.false();
+        });
+    });
 
     describe('normalize()', () => {
 
