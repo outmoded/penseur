@@ -6,4 +6,7 @@ node_js:
   - "11"
   - "node"
 
+addons:
+  rethinkdb: "2.3"
+
 sudo: false
