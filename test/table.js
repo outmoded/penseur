@@ -903,6 +903,41 @@ describe('Table', () => {
             });
         });
 
+        it('updates a record (append modifier to missing key)', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish(['test']);
+
+            const item = {
+                id: 1,
+                a: 1,
+                b: {}
+            };
+
+            await db.test.insert(item);
+
+            const changes = {
+                a: 2,
+                b: {
+                    c: db.append(10, { create: true })
+                }
+            };
+
+            expect(changes.b.c).to.be.a.function();
+
+            await db.test.update(1, changes);
+            expect(changes.b.c).to.be.a.function();
+
+            const updated = await db.test.get(1);
+            expect(updated).to.equal({
+                id: 1,
+                a: 2,
+                b: {
+                    c: [10]
+                }
+            });
+        });
+
         it('updates a record (append array modifier)', async () => {
 
             const db = new Penseur.Db('penseurtest');
