@@ -226,4 +226,15 @@ describe('Id', () => {
             await expect(db.test.insert([{ a: 1 }, { a: 1 }])).to.reject('Failed allocating increment id: test');
         });
     });
+
+    describe('validate()', () => {
+
+        it('errors on invalid key structure', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish(['test']);
+
+            await expect(db.test.get({ id: [1, 1], other: true })).to.reject('Invalid object id');
+        });
+    });
 });

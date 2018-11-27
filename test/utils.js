@@ -48,6 +48,11 @@ describe('Penseur.utils', () => {
             expect(Penseur.utils.diff({ a: 2, b: { x: 1, y: 3 } }, { b: { y: 3 } }, { deleted: true })).to.equal({ a: null, b: { x: null } });
         });
 
+        it('excludes deleted items (whitelist)', () => {
+
+            expect(Penseur.utils.diff({ a: 2, b: 5 }, { b: 5 }, { whitelist: ['a', 'b'] })).to.be.null();
+        });
+
         it('compares to null', () => {
 
             const item = { a: 1, b: { c: 'd' } };
@@ -85,7 +90,7 @@ describe('Penseur.utils', () => {
         it('compares nested arrays', () => {
 
             const item = { a: { b: [1] } };
-            expect(Penseur.utils.diff({ a: {} }, { a: { b: [1, 2] } })).to.equal({ a: { b: [1,2] } });
+            expect(Penseur.utils.diff({ a: {} }, { a: { b: [1, 2] } })).to.equal({ a: { b: [1, 2] } });
             expect(Penseur.utils.diff(item, { a: { b: [1, 2] } })).to.equal({ a: { b: { 1: 2 } } });
             expect(Penseur.utils.diff(item, { a: { b: [1, 2] } }, { arrays: false })).to.equal({ a: { b: [1, 2] } });
         });

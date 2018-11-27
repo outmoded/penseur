@@ -339,6 +339,15 @@ describe('Db', () => {
             await db.close();
         });
 
+        it('skips decorating object when table name begins with _', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish(['_testx']);
+            expect(db._testx).to.not.exist();
+            expect(db.tables._testx).to.exist();
+            await db.close();
+        });
+
         it('skips decorating object when table already set up', async () => {
 
             const db = new Penseur.Db('penseurtest');

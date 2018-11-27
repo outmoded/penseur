@@ -829,6 +829,17 @@ describe('Table', () => {
             expect(item.a.b).to.equal({});
         });
 
+        it('updates a record (null)', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish(['test']);
+            await db.test.insert({ id: 1, a: 1 });
+            await db.test.update(1, { a: null });
+
+            const item = await db.test.get(1);
+            expect(item.a).to.be.null();
+        });
+
         it('updates a record (increment modifier)', async () => {
 
             const db = new Penseur.Db('penseurtest');

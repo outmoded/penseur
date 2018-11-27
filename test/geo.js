@@ -155,6 +155,56 @@ describe('Geo', () => {
         });
     });
 
+    it('ignores geo conversion location has more than 2 items', async () => {
+
+        const db = new Penseur.Db('penseurtest');
+        await db.establish({ test: { geo: true, secondary: [{ name: 'location', options: { geo: true } }] } });
+        await db.test.insert({ id: 1, location: [-121.981434, 37.221310, 0] });
+        const result = await db.test.get(1);
+        expect(result).to.equal({ id: 1, location: [-121.981434, 37.221310, 0] });
+
+        const raw = await RethinkDB.db(db.name).table('test').get(1).run(db._connection);
+        expect(raw).to.equal({
+            id: 1,
+            location: [-121.981434, 37.221310, 0]
+        });
+    });
+
+    it('ignores geo conversion location that is not a point', async () => {
+
+        const db = new Penseur.Db('penseurtest');
+        await db.establish({ test: { geo: true, secondary: [{ name: 'location', source: ['x', 'pos'], options: { geo: true } }] } });
+        await db.test.insert({
+            id: 1, x: {
+                pos: {
+                    '$reql_type$': 'GEOMETRY',
+                    coordinates: [-121.981434, 37.22131],
+                    type: 'Other'
+                }
+            }
+        });
+
+        const result = await db.test.get(1);
+        expect(result).to.equal({
+            id: 1, x: {
+                pos: {
+                    '$reql_type$': 'GEOMETRY',
+                    coordinates: [-121.981434, 37.22131],
+                    type: 'Other'
+                }
+            }
+        });
+    });
+
+    it('ignores geo conversion on invalid nested index', async () => {
+
+        const db = new Penseur.Db('penseurtest');
+        await db.establish({ test: { geo: true, secondary: [{ name: 'location', source: ['x', 'y', 'z', 'a'], options: { geo: true } }] } });
+        await db.test.insert({ id: 1, x: { y: 2 } });
+        const result = await db.test.get(1);
+        expect(result).to.equal({ id: 1, x: { y: 2 } });
+    });
+
     it('ignores nested key on missing parent', async () => {
 
         const db = new Penseur.Db('penseurtest');
@@ -164,13 +214,22 @@ describe('Geo', () => {
         expect(result).to.equal({ id: 1, x: {} });
     });
 
-    it('ignores invalid location value', async () => {
+    it('ignores invalid location value (non function)', async () => {
 
         const db = new Penseur.Db('penseurtest');
         await db.establish({ test: { geo: true, secondary: [{ name: 'location', options: { geo: true } }] } });
         await db.test.insert({ id: 1, location: 'x' });
         expect(await db.test.get(1)).to.equal({ id: 1, location: 'x' });
         expect(await db.test.query({ location: 'x' })).to.equal([{ id: 1, location: 'x' }]);
+    });
+
+    it('ignores invalid location value (non near)', async () => {
+
+        const db = new Penseur.Db('penseurtest');
+        await db.establish({ test: { geo: true, secondary: [{ name: 'location', options: { geo: true } }] } });
+        await db.test.insert({ id: 1, location: 'x' });
+        expect(await db.test.get(1)).to.equal({ id: 1, location: 'x' });
+        expect(await db.test.query({ location: db.or(['x', 'y']) })).to.equal([{ id: 1, location: 'x' }]);
     });
 
     it('errors on multiple near criteria', async () => {
