@@ -1160,6 +1160,42 @@ describe('Table', () => {
             });
         });
 
+        it('updates a record (append if last unique - complex value)', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish(['test']);
+
+            const item = {
+                id: 1,
+                a: 1,
+                b: {
+                    c: [{ x: [10] }, { x: [0] }]
+                }
+            };
+
+            await db.test.insert(item);
+
+            const changes = {
+                a: 2,
+                b: {
+                    c: db.append({ x: [10] }, { unique: { match: 'last' } })
+                }
+            };
+
+            await db.test.update(1, changes);
+            await db.test.update(1, changes);
+            await db.test.update(1, changes);
+
+            const updated = await db.test.get(1);
+            expect(updated).to.equal({
+                id: 1,
+                a: 2,
+                b: {
+                    c: [{ x: [10] }, { x: [0] }, { x: [10] }]
+                }
+            });
+        });
+
         it('updates a record (append array modifier)', async () => {
 
             const db = new Penseur.Db('penseurtest');
