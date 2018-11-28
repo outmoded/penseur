@@ -934,10 +934,221 @@ describe('Table', () => {
                 }
             };
 
-            expect(changes.b.c).to.be.a.function();
+            await db.test.update(1, changes);
+
+            const updated = await db.test.get(1);
+            expect(updated).to.equal({
+                id: 1,
+                a: 2,
+                b: {
+                    c: [10]
+                }
+            });
+        });
+
+        it('updates a record (append if any unique - true)', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish(['test']);
+
+            const item = {
+                id: 1,
+                a: 1,
+                b: {
+                    c: [0]
+                }
+            };
+
+            await db.test.insert(item);
+
+            const changes = {
+                a: 2,
+                b: {
+                    c: db.append(10, { unique: true })
+                }
+            };
 
             await db.test.update(1, changes);
-            expect(changes.b.c).to.be.a.function();
+            await db.test.update(1, changes);
+            await db.test.update(1, changes);
+
+            const updated = await db.test.get(1);
+            expect(updated).to.equal({
+                id: 1,
+                a: 2,
+                b: {
+                    c: [0, 10]
+                }
+            });
+        });
+
+        it('updates a record (append if any unique - verbose)', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish(['test']);
+
+            const item = {
+                id: 1,
+                a: 1,
+                b: {
+                    c: [0]
+                }
+            };
+
+            await db.test.insert(item);
+
+            const changes = {
+                a: 2,
+                b: {
+                    c: db.append(10, { unique: { match: 'any' } })
+                }
+            };
+
+            await db.test.update(1, changes);
+            await db.test.update(1, changes);
+            await db.test.update(1, changes);
+
+            const updated = await db.test.get(1);
+            expect(updated).to.equal({
+                id: 1,
+                a: 2,
+                b: {
+                    c: [0, 10]
+                }
+            });
+        });
+
+        it('updates a record (append if any unique - path)', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish(['test']);
+
+            const item = {
+                id: 1,
+                a: 1,
+                b: {
+                    c: [{ x: 0 }]
+                }
+            };
+
+            await db.test.insert(item);
+
+            const changes = {
+                a: 2,
+                b: {
+                    c: db.append({ x: 10 }, { unique: { path: ['x'] } })
+                }
+            };
+
+            await db.test.update(1, changes);
+            await db.test.update(1, changes);
+            await db.test.update(1, changes);
+
+            const updated = await db.test.get(1);
+            expect(updated).to.equal({
+                id: 1,
+                a: 2,
+                b: {
+                    c: [{ x: 0 }, { x: 10 }]
+                }
+            });
+        });
+
+        it('updates a record (append if last unique)', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish(['test']);
+
+            const item = {
+                id: 1,
+                a: 1,
+                b: {
+                    c: [10, 0]
+                }
+            };
+
+            await db.test.insert(item);
+
+            const changes = {
+                a: 2,
+                b: {
+                    c: db.append(10, { unique: 'last' })
+                }
+            };
+
+            await db.test.update(1, changes);
+            await db.test.update(1, changes);
+            await db.test.update(1, changes);
+
+            const updated = await db.test.get(1);
+            expect(updated).to.equal({
+                id: 1,
+                a: 2,
+                b: {
+                    c: [10, 0, 10]
+                }
+            });
+        });
+
+        it('updates a record (append if last unique - path)', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish(['test']);
+
+            const item = {
+                id: 1,
+                a: 1,
+                b: {
+                    c: [{ x: 10 }, { x: 0 }]
+                }
+            };
+
+            await db.test.insert(item);
+
+            const changes = {
+                a: 2,
+                b: {
+                    c: db.append({ x: 10 }, { unique: { match: 'last', path: ['x'] } })
+                }
+            };
+
+            await db.test.update(1, changes);
+            await db.test.update(1, changes);
+            await db.test.update(1, changes);
+
+            const updated = await db.test.get(1);
+            expect(updated).to.equal({
+                id: 1,
+                a: 2,
+                b: {
+                    c: [{ x: 10 }, { x: 0 }, { x: 10 }]
+                }
+            });
+        });
+
+        it('updates a record (append if unique with create)', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish(['test']);
+
+            const item = {
+                id: 1,
+                a: 1,
+                b: {}
+            };
+
+            await db.test.insert(item);
+
+            const changes = {
+                a: 2,
+                b: {
+                    c: db.append(10, { create: true, unique: true })
+                }
+            };
+
+            await db.test.update(1, changes);
+            await db.test.update(1, changes);
+            await db.test.update(1, changes);
 
             const updated = await db.test.get(1);
             expect(updated).to.equal({

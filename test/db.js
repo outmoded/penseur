@@ -912,4 +912,15 @@ describe('Db', () => {
             });
         });
     });
+
+    describe('append()', () => {
+
+        it('errors on unique with multiple values', () => {
+
+            const db = new Penseur.Db('penseurtest');
+
+            expect(() => db.append([10, 11], { single: true, unique: true })).to.not.throw();
+            expect(() => db.append([10, 11], { unique: true })).to.throw('Cannot append multiple values with unique requirements');
+        });
+    });
 });
