@@ -1,7 +1,5 @@
 'use strict';
 
-// Load modules
-
 const Code = require('code');
 const Hoek = require('hoek');
 const Lab = require('lab');
@@ -9,13 +7,11 @@ const Penseur = require('..');
 const RethinkDB = require('rethinkdb');
 const Teamwork = require('teamwork');
 
+const Special = require('../lib/special');
 
-// Declare internals
 
 const internals = {};
 
-
-// Test shortcuts
 
 const { describe, it } = exports.lab = Lab.script();
 const expect = Code.expect;
@@ -862,10 +858,10 @@ describe('Table', () => {
                 }
             };
 
-            expect(changes.b.c).to.be.a.function();
+            expect(changes.b.c).to.be.an.instanceof(Special);
 
             await db.test.update(1, changes);
-            expect(changes.b.c).to.be.a.function();
+            expect(changes.b.c).to.be.an.instanceof(Special);
 
             const updated = await db.test.get(1);
             expect(updated).to.equal({
@@ -899,10 +895,10 @@ describe('Table', () => {
                 }
             };
 
-            expect(changes.b.c).to.be.a.function();
+            expect(changes.b.c).to.be.an.instanceof(Special);
 
             await db.test.update(1, changes);
-            expect(changes.b.c).to.be.a.function();
+            expect(changes.b.c).to.be.an.instanceof(Special);
 
             const updated = await db.test.get(1);
             expect(updated).to.equal({
@@ -1218,10 +1214,10 @@ describe('Table', () => {
                 }
             };
 
-            expect(changes.b.c).to.be.a.function();
+            expect(changes.b.c).to.be.an.instanceof(Special);
 
             await db.test.update(1, changes);
-            expect(changes.b.c).to.be.a.function();
+            expect(changes.b.c).to.be.an.instanceof(Special);
 
             const updated = await db.test.get(1);
             expect(updated).to.equal({
@@ -1255,10 +1251,10 @@ describe('Table', () => {
                 }
             };
 
-            expect(changes.b.c).to.be.a.function();
+            expect(changes.b.c).to.be.an.instanceof(Special);
 
             await db.test.update(1, changes);
-            expect(changes.b.c).to.be.a.function();
+            expect(changes.b.c).to.be.an.instanceof(Special);
 
             const updated = await db.test.get(1);
             expect(updated).to.equal({
@@ -1292,10 +1288,10 @@ describe('Table', () => {
                 }
             };
 
-            expect(changes.b.c).to.be.a.function();
+            expect(changes.b.c).to.be.an.instanceof(Special);
 
             await db.test.update(1, changes);
-            expect(changes.b.c).to.be.a.function();
+            expect(changes.b.c).to.be.an.instanceof(Special);
 
             const updated = await db.test.get(1);
             expect(updated).to.equal({

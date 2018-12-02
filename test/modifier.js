@@ -1,18 +1,14 @@
 'use strict';
 
-// Load modules
-
 const Code = require('code');
 const Lab = require('lab');
 const Penseur = require('..');
 
+const Special = require('../lib/special');
 
-// Declare internals
 
 const internals = {};
 
-
-// Test shortcuts
 
 const { describe, it } = exports.lab = Lab.script();
 const expect = Code.expect;
@@ -49,10 +45,10 @@ describe('Modifier', () => {
                 }
             };
 
-            expect(changes.b.c).to.be.a.function();
+            expect(changes.b.c).to.be.an.instanceof(Special);
 
             await db.test.update(1, changes);
-            expect(changes.b.c).to.be.a.function();
+            expect(changes.b.c).to.be.an.instanceof(Special);
 
             const updated = await db.test.get(1);
             expect(updated).to.equal({
@@ -93,10 +89,10 @@ describe('Modifier', () => {
                 }
             };
 
-            expect(changes.b.c).to.be.a.function();
+            expect(changes.b.c).to.be.an.instanceof(Special);
 
             await db.test.update(1, changes);
-            expect(changes.b.c).to.be.a.function();
+            expect(changes.b.c).to.be.an.instanceof(Special);
 
             const updated = await db.test.get(1);
             expect(updated).to.equal({
