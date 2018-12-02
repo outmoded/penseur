@@ -1,7 +1,5 @@
 'use strict';
 
-// Load modules
-
 const Code = require('code');
 const Hoek = require('hoek');
 const Lab = require('lab');
@@ -10,12 +8,8 @@ const RethinkDB = require('rethinkdb');
 const Teamwork = require('teamwork');
 
 
-// Declare internals
-
 const internals = {};
 
-
-// Test shortcuts
 
 const { describe, it } = exports.lab = Lab.script();
 const expect = Code.expect;
