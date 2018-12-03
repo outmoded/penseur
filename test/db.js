@@ -917,4 +917,18 @@ describe('Db', () => {
             expect(() => db.append([10, 11], { unique: true })).to.throw('Cannot append multiple values with unique requirements');
         });
     });
+
+    describe('isSpecial()', () => {
+
+        it('identifies special values', () => {
+
+            const db = new Penseur.Db('penseurtest');
+
+            expect(db.isSpecial({ type: 'append' })).to.equal(null);
+            expect(db.isSpecial(db.append('x'))).to.equal('append');
+
+            expect(Penseur.Db.isSpecial({ type: 'append' })).to.equal(null);
+            expect(Penseur.Db.isSpecial(db.append('x'))).to.equal('append');
+        });
+    });
 });
