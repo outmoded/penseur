@@ -2076,6 +2076,43 @@ describe('Table', () => {
             await db.close();
         });
 
+        it('reports on a record update (squash)', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish(['test']);
+
+            const changes1 = [];
+            const each1 = (err, item) => {
+
+                expect(err).to.not.exist();
+                changes1.push(item.after.a);
+            };
+
+            const changes2 = [];
+            const each2 = (err, item) => {
+
+                expect(err).to.not.exist();
+                changes2.push(item.after.a);
+            };
+
+            await db.test.insert([{ id: 1, a: 1 }]);
+
+            await db.test.changes(1, each1);
+            await db.test.changes(1, { handler: each2, squash: 1 });
+
+            await db.test.update(1, { a: 2 });
+            await db.test.update(1, { a: 3 });
+            await db.test.update(1, { a: 4 });
+            await db.test.update(1, { a: 5 });
+
+            await Hoek.wait(1050);
+
+            expect(changes1).to.equal([2, 3, 4, 5]);
+            expect(changes2).to.equal([5]);
+
+            await db.close();
+        });
+
         it('includes initial state', async () => {
 
             const db = new Penseur.Db('penseurtest');
