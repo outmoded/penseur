@@ -683,6 +683,19 @@ describe('Table', () => {
             expect(item2).to.equal({ id: 1, a: 2, b: 1 });
         });
 
+        it('replaces a record if exists', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish(['test']);
+            await db.test.insert({ id: 1, a: 1, b: 1 }, { merge: 'replace' });
+            const item1 = await db.test.get(1);
+            expect(item1).to.equal({ id: 1, a: 1, b: 1 });
+
+            await db.test.insert({ id: 1, a: 2 }, { merge: 'replace' });
+            const item2 = await db.test.get(1);
+            expect(item2).to.equal({ id: 1, a: 2 });
+        });
+
         it('returns the generate key', async () => {
 
             const db = new Penseur.Db('penseurtest');
