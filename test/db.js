@@ -882,7 +882,7 @@ describe('Db', () => {
                     team.attend();
                 };
 
-                await db.test.changes({ a: 1 }, each);
+                await db.test.changes({ a: 1 }, { handler: each });
                 await team.work;
             });
 
