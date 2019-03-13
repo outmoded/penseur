@@ -1,7 +1,7 @@
 {
   "name": "penseur",
   "description": "Lightweight RethinkDB wrapper",
-  "version": "8.12.1",
+  "version": "8.12.2",
   "repository": "git://github.com/hueniverse/penseur",
   "main": "lib/index.js",
   "keywords": [
