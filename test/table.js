@@ -1757,6 +1757,18 @@ describe('Table', () => {
             expect(count).to.equal(0);
         });
 
+        it('removes records using dynamic criteria', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish(['test']);
+            await db.test.insert([{ id: 1, a: 1 }, { id: 2, a: 2 }]);
+
+            await db.test.remove({ a: db.is('==', 1) });
+
+            const count = await db.test.count();
+            expect(count).to.equal(1);
+        });
+
         it('errors on unknown key', async () => {
 
             const db = new Penseur.Db('penseurtest');
