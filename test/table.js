@@ -2089,7 +2089,7 @@ describe('Table', () => {
             await db.close();
         });
 
-        it('reports on a record update (squash)', async () => {
+        it('reports on a record update (squash time)', async () => {
 
             const db = new Penseur.Db('penseurtest');
             await db.establish(['test']);
@@ -2122,6 +2122,35 @@ describe('Table', () => {
 
             expect(changes1).to.equal([2, 3, 4, 5]);
             expect(changes2).to.equal([5]);
+
+            await db.close();
+        });
+
+        it('reports on a record update (no squash)', async () => {
+
+            const db = new Penseur.Db('penseurtest');
+            await db.establish(['test']);
+
+            const changes = [];
+            const each = (err, item) => {
+
+                expect(err).to.not.exist();
+                changes.push(item.after.a);
+            };
+
+            await db.test.insert([{ id: 1, a: 1 }]);
+
+            await db.test.changes(1, { handler: each, squash: false });
+
+            const pending = [];
+            for (let i = 2; i < 1000; ++i) {
+                pending.push(db.test.update(1, { a: i }));
+            }
+
+            await Promise.all(pending);
+            await Hoek.wait(500);
+
+            expect(changes.length).to.equal(998);
 
             await db.close();
         });
